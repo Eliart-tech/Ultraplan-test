@@ -1,0 +1,180 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Design tokens
+   The site is dark-first: one palette, no theme switcher, tuned so that every
+   text/background pair below clears WCAG AA at its intended size.
+--------------------------------------------------------------------------- */
+@theme {
+  --color-ink-950: #06060a;
+  --color-ink-900: #0a0a11;
+  --color-ink-850: #0f0f18;
+  --color-ink-800: #14141f;
+  --color-ink-700: #1d1d2b;
+  --color-ink-600: #2a2a3d;
+
+  --color-mist-50: #f7f7fb;
+  --color-mist-200: #d7d7e4;
+  --color-mist-400: #9c9cb4;
+  --color-mist-500: #7c7c96;
+
+  --color-brand-300: #b7a6ff;
+  --color-brand-400: #9b83ff;
+  --color-brand-500: #7c5cff;
+  --color-brand-600: #6438f5;
+  --color-brand-700: #4f27cc;
+
+  --color-aqua-300: #7ee7f8;
+  --color-aqua-400: #38d3ee;
+  --color-aqua-500: #14b8d4;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  --radius-4xl: 2rem;
+
+  --animate-marquee: marquee 40s linear infinite;
+  --animate-float: float 9s ease-in-out infinite;
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translate3d(0, 0, 0) scale(1);
+    }
+    50% {
+      transform: translate3d(0, -18px, 0) scale(1.04);
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Offset anchor targets so the sticky header never covers a section title. */
+    scroll-padding-top: 6rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--color-ink-950);
+    color: var(--color-mist-50);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: color-mix(in oklab, var(--color-brand-500) 45%, transparent);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand-400);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  /* Headings carry the visual weight of the page; keep them tight and optical. */
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.028em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Utilities
+--------------------------------------------------------------------------- */
+@utility text-gradient {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-mist-50) 0%,
+    var(--color-brand-300) 45%,
+    var(--color-aqua-300) 100%
+  );
+  background-clip: text;
+  color: transparent;
+}
+
+/* A 1px gradient border drawn with a mask, so the card keeps a transparent fill. */
+@utility border-gradient {
+  position: relative;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      140deg,
+      color-mix(in oklab, var(--color-brand-400) 60%, transparent),
+      transparent 40%,
+      transparent 60%,
+      color-mix(in oklab, var(--color-aqua-400) 45%, transparent)
+    );
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+}
+
+@utility grid-backdrop {
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+}
+
+/* Reveal-on-scroll: the element is hidden only when JS has marked it pending,
+   so the content stays visible with JavaScript disabled or before hydration. */
+@utility reveal-pending {
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+@utility reveal-visible {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
