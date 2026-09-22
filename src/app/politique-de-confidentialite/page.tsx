@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function ConfidentialitePage() {
   return (
     <LegalPage title="Politique de confidentialité" updatedAt="1er septembre 2026">
-      <p className="rounded-xl border border-brand-400/30 bg-brand-500/8 px-4 py-3 text-brand-100">
+      <p className="rounded-2xl border border-blush-300 bg-blush-100 px-4 py-3 text-ink-800">
         <strong>À faire valider :</strong> ce document est un modèle de départ
         conforme à la structure attendue par le RGPD. Faites-le relire par votre
         conseil juridique et complétez les champs entre crochets avant la mise en

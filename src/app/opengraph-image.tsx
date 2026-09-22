@@ -15,65 +15,46 @@ export default function OpengraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: "#06060a",
+          background: "#f0f6ff",
           padding: 72,
-          position: "relative",
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            top: -220,
-            left: 260,
-            width: 700,
-            height: 700,
-            borderRadius: 9999,
-            background: "#6438f5",
-            opacity: 0.35,
-            filter: "blur(130px)",
-            display: "flex",
-          }}
-        />
-
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 18 }}>
           <div
             style={{
-              width: 64,
-              height: 64,
-              borderRadius: 18,
-              background: "linear-gradient(135deg, #9b83ff 0%, #38d3ee 100%)",
+              width: 58,
+              height: 58,
+              borderRadius: 999,
+              background: "#f6d6cf",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#07070a",
-              fontSize: 40,
-              fontWeight: 700,
+              color: "#253066",
+              fontSize: 34,
+              fontWeight: 500,
             }}
           >
             M
           </div>
-          <div style={{ color: "#f7f7fb", fontSize: 38, fontWeight: 600 }}>
-            {site.name}
-          </div>
+          <div style={{ color: "#253066", fontSize: 36 }}>{site.name}</div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: 26 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
           <div
             style={{
-              color: "#ffffff",
-              fontSize: 72,
-              fontWeight: 700,
-              lineHeight: 1.08,
-              letterSpacing: -2,
+              color: "#253066",
+              fontSize: 68,
+              lineHeight: 1.1,
+              letterSpacing: -1.5,
               maxWidth: 940,
               display: "flex",
             }}
           >
-            Vos opérations tournent seules. Vous vous concentrez sur la
-            croissance.
+            Agents IA autonomes au service de votre entreprise
           </div>
-          <div style={{ color: "#9c9cb4", fontSize: 30, display: "flex" }}>
-            Agents IA & automatisation sur mesure pour PME
+          <div style={{ color: "#6b6b6b", fontSize: 28, display: "flex" }}>
+            Nous déployons des agents IA et des automatisations qui orchestrent
+            vos opérations.
           </div>
         </div>
 
@@ -82,14 +63,14 @@ export default function OpengraphImage() {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            borderTop: "1px solid rgba(255,255,255,0.12)",
-            paddingTop: 28,
-            color: "#7c7c96",
-            fontSize: 26,
+            borderTop: "1px solid rgba(37,48,102,0.14)",
+            paddingTop: 26,
+            color: "#6b6b6b",
+            fontSize: 25,
           }}
         >
           <span>{site.domain}</span>
-          <span style={{ color: "#b7a6ff" }}>Audit offert · Sans engagement</span>
+          <span style={{ color: "#253066" }}>Réserver un appel</span>
         </div>
       </div>
     ),

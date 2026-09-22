@@ -9,8 +9,8 @@ export const site = {
   url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.maivenagency.com",
   locale: "fr_FR",
   description:
-    "Maiven déploie des agents IA clé en main et des automatisations sur mesure pour les PME. Vos opérations répétitives tournent seules, 24/7.",
-  tagline: "L'agence IA qui met vos opérations en pilote automatique",
+    "Maiven aide les PME à automatiser leurs opérations grâce à des agents IA clé en main et des automatisations sur mesure. Pour scaler plus vite, réduire vos coûts et devenir une entreprise AI-first.",
+  tagline: "Agence IA pour l'automatisation et la croissance",
   email: "contact@maivenagency.com",
   phone: "+33 1 84 80 00 00",
   phoneHref: "+33184800000",
@@ -33,29 +33,28 @@ export type NavItem = { label: string; href: string };
 
 export const mainNav: NavItem[] = [
   { label: "Services", href: "/#services" },
-  { label: "Méthode", href: "/#methode" },
-  { label: "Cas d'usage", href: "/#cas-usage" },
-  { label: "Tarifs", href: "/#tarifs" },
-  { label: "FAQ", href: "/#faq" },
+  { label: "Agents IA", href: "/#agents" },
+  { label: "Témoignages", href: "/#temoignages" },
+  { label: "Processus", href: "/#processus" },
 ];
 
 export const footerNav: { title: string; items: NavItem[] }[] = [
   {
-    title: "Agence",
+    title: "Liens rapides",
     items: [
+      { label: "À propos", href: "/#a-propos" },
       { label: "Services", href: "/#services" },
-      { label: "Méthode", href: "/#methode" },
-      { label: "Cas d'usage", href: "/#cas-usage" },
-      { label: "Résultats", href: "/#resultats" },
+      { label: "Témoignages", href: "/#temoignages" },
+      { label: "Mentions légales", href: "/mentions-legales" },
     ],
   },
   {
-    title: "Ressources",
+    title: "Services",
     items: [
-      { label: "Tarifs", href: "/#tarifs" },
-      { label: "FAQ", href: "/#faq" },
-      { label: "Nous contacter", href: "/contact" },
-      { label: "Réserver un audit", href: "/contact#formulaire" },
+      { label: "Agent IA plug & play", href: "/#services" },
+      { label: "Automatisation sur mesure", href: "/#services" },
+      { label: "Conseil et audit IA", href: "/#services" },
+      { label: "Formation IA générative", href: "/#services" },
     ],
   },
   {
@@ -64,6 +63,7 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
       { label: "Mentions légales", href: "/mentions-legales" },
       { label: "Confidentialité", href: "/politique-de-confidentialite" },
       { label: "CGV", href: "/cgv" },
+      { label: "Contact", href: "/contact" },
     ],
   },
 ];

@@ -1,74 +1,69 @@
 import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { Icon } from "@/components/ui/icon";
+import { Stars } from "@/components/ui/card";
+import { LogoMark } from "@/components/layout/logo";
 import { Reveal } from "@/components/ui/reveal";
 import { hero } from "@/lib/content";
 
+/** Three overlapping avatar discs. Swap for real photographs when you have them. */
+function AvatarStack() {
+  const tones = ["#dbe7ff", "#f9e2dc", "#d8f0e6"];
+  return (
+    <span aria-hidden className="flex -space-x-3">
+      {tones.map((tone, i) => (
+        <span
+          key={tone}
+          className="grid h-10 w-10 place-items-center rounded-full ring-2 ring-white"
+          style={{ backgroundColor: tone }}
+        >
+          <svg viewBox="0 0 24 24" className="h-6 w-6 text-ink-800/45" fill="currentColor">
+            <circle cx="12" cy="9" r="3.6" />
+            <path d="M4.6 20a7.4 7.4 0 0 1 14.8 0z" />
+          </svg>
+          <span className="sr-only">Membre {i + 1}</span>
+        </span>
+      ))}
+    </span>
+  );
+}
+
 export function Hero() {
   return (
-    <section className="relative overflow-hidden pt-36 pb-20 sm:pt-44 sm:pb-28">
-      {/* Decorative backdrop: grid + two drifting glows. */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <div className="grid-backdrop absolute inset-0" />
-        <div className="animate-float absolute -top-40 left-1/2 h-[34rem] w-[34rem] -translate-x-1/2 rounded-full bg-brand-600/22 blur-[130px]" />
-        <div className="animate-float absolute -right-32 top-24 h-[26rem] w-[26rem] rounded-full bg-aqua-500/12 blur-[120px] [animation-delay:-4s]" />
-        <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-ink-950" />
-      </div>
-
+    <section className="wash-sky relative overflow-hidden pt-32 pb-14 sm:pt-40 sm:pb-16">
       <Container>
         <Reveal className="flex flex-col items-center text-center">
-          <p className="border-gradient inline-flex items-center gap-2 rounded-full bg-white/[0.04] px-4 py-1.5 text-xs font-medium text-brand-200 sm:text-sm">
-            <Icon name="Sparkles" className="h-3.5 w-3.5 text-aqua-300" />
-            {hero.badge}
-          </p>
+          <div className="flex items-center gap-4">
+            <AvatarStack />
+            <div className="text-left">
+              <p className="flex items-center gap-2">
+                <Stars />
+                <span className="text-[0.95rem] text-ink-800">
+                  {hero.rating}
+                  <span className="text-ink-400"> {hero.ratingOutOf}</span>
+                </span>
+              </p>
+              <p className="mt-0.5 text-[0.9rem] text-ink-400">
+                {hero.ratingCaption}
+              </p>
+            </div>
+          </div>
 
-          <h1 className="mt-7 max-w-4xl text-4xl font-semibold leading-[1.06] sm:text-6xl md:text-7xl">
-            {hero.title}
-            <br className="hidden sm:block" />{" "}
-            <span className="text-gradient">{hero.titleAccent}</span>
+          {/* The mark sits inline in the headline, exactly as in the reference. */}
+          <h1 className="mt-9 max-w-4xl text-[2.4rem] leading-[1.1] sm:text-[3.1rem] md:text-[3.6rem]">
+            {hero.titleBefore}{" "}
+            <LogoMark className="mx-1 inline-flex h-[0.9em] w-[0.9em] translate-y-[0.1em]" />{" "}
+            {hero.titleAfter}
           </h1>
 
-          <p className="mt-7 max-w-2xl text-base leading-relaxed text-mist-400 sm:text-lg">
+          <p className="mt-7 max-w-xl text-base leading-relaxed text-ink-400 sm:text-lg">
             {hero.subtitle}
           </p>
 
-          <div className="mt-10 flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+          <div className="mt-9">
             <ButtonLink href="/contact#formulaire" size="lg">
-              {hero.primaryCta}
-              <Icon name="ArrowRight" className="h-4 w-4" />
-            </ButtonLink>
-            <ButtonLink href="/#cas-usage" variant="secondary" size="lg">
-              {hero.secondaryCta}
+              {hero.cta}
             </ButtonLink>
           </div>
-
-          <p className="mt-5 flex items-center justify-center gap-2 text-sm text-mist-500">
-            <Icon
-              name="ShieldCheck"
-              className="h-4 w-4 shrink-0 text-brand-300"
-            />
-            <span className="text-balance">
-              Audit offert · Sans engagement · Réponse sous 24 h ouvrées
-            </span>
-          </p>
-        </Reveal>
-
-        <Reveal delay={120}>
-          <dl className="mx-auto mt-20 grid max-w-3xl grid-cols-1 gap-px overflow-hidden rounded-3xl border border-white/8 bg-white/8 sm:grid-cols-3">
-            {hero.proof.map((item) => (
-              <div
-                key={item.label}
-                className="flex flex-col items-center gap-1.5 bg-ink-900 px-6 py-8 text-center"
-              >
-                {/* Visual order is value-then-label; the DOM keeps dt before dd
-                    so the definition list stays valid. */}
-                <dt className="order-2 text-sm text-mist-400">{item.label}</dt>
-                <dd className="order-1 text-3xl font-semibold text-white sm:text-4xl">
-                  {item.value}
-                </dd>
-              </div>
-            ))}
-          </dl>
         </Reveal>
       </Container>
     </section>

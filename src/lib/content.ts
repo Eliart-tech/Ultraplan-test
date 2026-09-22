@@ -1,24 +1,20 @@
 /**
- * All editorial content lives here so the page components stay purely presentational.
- * Icon names refer to lucide-react exports, resolved in `src/components/ui/icon.tsx`.
+ * All editorial content for the home page, in the order the sections appear.
+ * Page components stay presentational and read everything from here.
  */
-import type { IconName } from "@/components/ui/icon";
 
 export const hero = {
-  badge: "Agents IA & automatisation pour PME",
-  title: "Vos opérations tournent seules.",
-  titleAccent: "Vous vous concentrez sur la croissance.",
+  rating: "4,9",
+  ratingOutOf: "/5",
+  ratingCaption: "+100 solutions IA déployées",
+  titleBefore: "Agents IA",
+  titleAfter: "autonomes au service de votre entreprise",
   subtitle:
-    "Maiven conçoit, déploie et opère des agents IA et des automatisations sur mesure qui prennent en charge votre support, votre prospection et votre back-office — 24 h/24, sans embaucher.",
-  primaryCta: "Réserver un audit gratuit",
-  secondaryCta: "Voir nos cas d'usage",
-  proof: [
-    { value: "+120", label: "automatisations déployées" },
-    { value: "18 h", label: "économisées par semaine et par équipe" },
-    { value: "21 j", label: "pour un premier agent en production" },
-  ],
+    "Nous déployons des agents IA et des automatisations qui orchestrent vos opérations.",
+  cta: "Réserver un appel",
 };
 
+/** Replace with your own client list before publishing. */
 export const clients = [
   "Novalis",
   "Groupe Ardec",
@@ -30,295 +26,287 @@ export const clients = [
   "Lumen Conseil",
 ];
 
-export const problem = {
-  eyebrow: "Le constat",
-  title: "Le problème n'est pas le manque d'IA. C'est le manque d'exécution.",
-  body: "Les outils existent, les démos impressionnent, et pourtant rien ne tourne en production. Entre un POC qui prend la poussière et un process qui encaisse réellement votre volume, il y a un travail d'ingénierie que la plupart des équipes n'ont pas le temps de mener.",
-  pains: [
-    {
-      icon: "Clock" as IconName,
-      title: "Des heures perdues en tâches répétitives",
-      body: "Ressaisie, relances, qualification de leads, reporting : vos meilleurs profils passent leurs journées sur ce qu'une machine ferait mieux.",
-    },
-    {
-      icon: "Puzzle" as IconName,
-      title: "Des outils qui ne se parlent pas",
-      body: "CRM, facturation, support, tableur maison. Chaque intégration manquante devient un copier-coller quotidien et une source d'erreurs.",
-    },
-    {
-      icon: "TrendingDown" as IconName,
-      title: "Des POC qui ne passent jamais en production",
-      body: "Un prototype convaincant ne survit pas au premier cas limite. Sans garde-fous, supervision et reprise sur erreur, il finit abandonné.",
-    },
-  ],
-};
-
 export const services = {
-  eyebrow: "Nos services",
-  title: "Quatre façons de mettre l'IA au travail chez vous",
-  subtitle:
-    "Du agent prêt à brancher au système sur mesure intégré à votre SI. On commence toujours par le cas d'usage qui rapporte le plus vite.",
+  eyebrow: "Services",
+  title: "Des solutions IA sur mesure pour votre entreprise",
   items: [
     {
-      icon: "Bot" as IconName,
-      name: "Agents IA clé en main",
-      pitch: "Opérationnels en 48 h",
-      body: "Support client, qualification de leads, prise de rendez-vous, FAQ interne. Des agents pré-entraînés que nous connectons à vos données et à vos outils, puis que nous supervisons.",
-      bullets: [
-        "Branchés sur votre base de connaissances",
-        "Escalade vers un humain sur les cas sensibles",
-        "Disponibles par chat, e-mail, WhatsApp ou téléphone",
-      ],
-    },
-    {
-      icon: "Workflow" as IconName,
-      name: "Automatisations sur mesure",
-      pitch: "Le cœur de notre métier",
-      body: "Nous cartographions vos process, identifions les goulots d'étranglement et construisons les workflows qui les suppriment — avec journalisation, alertes et reprise sur erreur.",
-      bullets: [
-        "Intégration CRM, ERP, facturation, e-mail",
-        "Tests de non-régression sur chaque flux",
-        "Documentation et transfert de compétences",
-      ],
-    },
-    {
-      icon: "PhoneCall" as IconName,
-      name: "Assistants vocaux IA",
-      pitch: "Ne ratez plus un appel",
-      body: "Un standard qui répond en moins d'une seconde, qualifie l'appel, prend le rendez-vous et renseigne votre CRM. En français naturel, avec votre ton de voix.",
-      bullets: [
-        "Prise de rendez-vous en direct dans l'agenda",
-        "Transcription et résumé de chaque appel",
-        "Transfert vers un conseiller quand il le faut",
-      ],
-    },
-    {
-      icon: "GraduationCap" as IconName,
-      name: "Acculturation & IA interne",
-      pitch: "Pour que ça tienne sans nous",
-      body: "Formation des équipes, mise en place d'un assistant interne sur vos documents, cadrage de la gouvernance et des règles d'usage. L'autonomie plutôt que la dépendance.",
-      bullets: [
-        "Ateliers par métier, pas des slides génériques",
-        "Assistant interne sur vos documents privés",
-        "Charte d'usage et cadrage RGPD",
-      ],
-    },
-  ],
-};
-
-export const method = {
-  eyebrow: "Notre méthode",
-  title: "Du premier appel à la production, en quatre étapes",
-  subtitle:
-    "Pas de tunnel de six mois. Chaque étape produit quelque chose d'utilisable, et vous décidez si on passe à la suivante.",
-  steps: [
-    {
       number: "01",
-      title: "Audit des opérations",
-      duration: "Semaine 1",
-      body: "Deux demi-journées avec vos équipes pour cartographier les process, mesurer le temps réellement passé et chiffrer le gain possible. Vous repartez avec la cartographie, que vous travailliez avec nous ou non.",
+      name: "Agent IA — Plug & Play",
+      body: "Nous créons des agents IA spécialisés pour vos fonctions clés : contenu, vente, RH, support… Prêts à déployer, personnalisés et intégrés à vos outils.",
+      bullets: [
+        "Agents pré-entraînés pour vos fonctions essentielles",
+        "Plus rapides et moins chers qu'un salarié",
+        "Plug & play sur tous vos outils",
+        "Sans code, sans complexité",
+        "Évolutifs avec votre croissance",
+      ],
+      cta: "Obtenir mon agent IA",
+      visual: "connect" as const,
+      visualTitle: "Se connecte à",
+      visualItems: ["Salesforce", "LinkedIn", "HubSpot", "Slack"],
     },
     {
       number: "02",
-      title: "Cadrage et priorisation",
-      duration: "Semaine 2",
-      body: "On classe les cas d'usage par rapport impact / effort, on choisit le premier chantier et on fixe les critères de réussite chiffrés. Périmètre figé, budget figé.",
+      name: "Automatisations",
+      body: "Des automatisations sur mesure pour gagner du temps, réduire les erreurs et booster vos conversions. Du lead à la livraison, votre activité en pilote automatique.",
+      bullets: [
+        "Workflows 100 % sur mesure",
+        "Processus automatisés de bout en bout",
+        "Intégration à vos outils existants",
+        "Mise en place et maintenance complètes",
+        "Interfaces simples et intuitives",
+      ],
+      cta: "Automatiser mon activité",
+      visual: "flow" as const,
+      visualTitle: "Workflow actif",
+      visualItems: ["Lead entrant", "Qualification", "CRM", "Relance"],
     },
     {
       number: "03",
-      title: "Construction et mise en production",
-      duration: "Semaines 3 à 5",
-      body: "Développement, intégration à vos outils, tests sur données réelles, garde-fous et supervision. Vous voyez le système tourner chaque semaine, pas à la livraison finale.",
+      name: "Conseil et audit IA",
+      body: "Nous auditons vos opérations, vos outils et votre organisation pour révéler les opportunités IA à fort impact. Objectif : vous aider à optimiser et scaler avec clarté.",
+      bullets: [
+        "Analyse approfondie de vos workflows",
+        "Cartographie des processus de l'entreprise",
+        "Diagnostic de vos outils et systèmes",
+        "Rapport d'audit stratégique complet",
+        "Feuille de route IA sur mesure",
+      ],
+      cta: "Demander mon audit",
+      visual: "report" as const,
+      visualTitle: "Rapport d'analyse IA",
+      visualCaption: "+30 % de ROI sur les tâches répétitives",
     },
     {
       number: "04",
-      title: "Exploitation et amélioration",
-      duration: "En continu",
-      body: "Monitoring, correction des cas limites, extension à de nouveaux process. Un point mensuel avec les chiffres réels : volume traité, taux de reprise, heures économisées.",
+      name: "Formation IA générative",
+      body: "Nous formons vos équipes à maîtriser l'IA générative et à en exploiter tout le potentiel. Objectif : leur permettre de travailler plus intelligemment et plus vite.",
+      bullets: [
+        "Formation pratique aux outils d'IA générative",
+        "Cas d'usage sur mesure pour votre activité",
+        "Bonnes pratiques d'efficacité et de créativité",
+        "Ateliers pour intégrer l'IA au quotidien",
+        "Playbooks et ressources pour une adoption durable",
+      ],
+      cta: "Réserver ma formation",
+      visual: "training" as const,
+      visualTitle: "Parcours de formation",
+      visualCaption: "+50 h de formation IA",
     },
   ],
 };
 
-export const useCases = {
-  eyebrow: "Cas d'usage",
-  title: "Ce que nos clients ont mis en pilote automatique",
-  subtitle:
-    "Des chantiers concrets, livrés en quelques semaines, qui se remboursent en général sur le premier trimestre.",
+export const statement = {
+  lead: "Maiven déploie des solutions IA",
+  rest: "de l'agent plug & play à l'automatisation sur mesure.",
+  lead2: "Nous sommes spécialisés",
+  rest2:
+    "dans les intégrations concrètes, l'automatisation des PME et les systèmes évolutifs",
+  tail: "pour devenir AI-first.",
+};
+
+export const agents = {
+  eyebrow: "Agents IA",
+  title: "Des agents IA prêts à travailler",
+  cta: "Réserver une démo",
   items: [
     {
-      icon: "Headset" as IconName,
-      sector: "Support client",
-      title: "Réponse de niveau 1 automatisée",
-      body: "Un agent traite les demandes récurrentes à partir de votre base de connaissances et n'escalade que ce qui le mérite.",
-      metric: "68 % des tickets clos sans intervention humaine",
+      name: "David",
+      role: "Commercial IA",
+      accent: "#dbe7ff",
+      body: "David est votre commercial infatigable. Il contacte, qualifie, gère les objections et garde votre pipeline chaud, 24 h/24.",
+      bullets: [
+        "Qualifie vos leads par e-mail, LinkedIn ou WhatsApp",
+        "Réserve les rendez-vous dans votre agenda",
+        "Relance et closing autonome sur les petits deals",
+        "Personnalise selon le profil du lead",
+        "Met à jour le CRM à chaque échange",
+      ],
     },
     {
-      icon: "Target" as IconName,
-      sector: "Commercial",
-      title: "Qualification et relance des leads",
-      body: "Chaque formulaire entrant est enrichi, scoré, routé vers le bon commercial et relancé automatiquement s'il reste sans réponse.",
-      metric: "Délai de premier contact ramené à 4 minutes",
+      name: "Lina",
+      role: "Créatrice de contenu IA",
+      accent: "#f9e2dc",
+      body: "Lina écrit comme une pro et ne rate jamais une échéance. Elle génère du contenu percutant, calé sur votre stratégie et votre ton.",
+      bullets: [
+        "Rédige posts LinkedIn, légendes Instagram et newsletters",
+        "Planifie et tient votre calendrier éditorial",
+        "Adapte le message selon le ton et l'audience",
+        "Génère des articles à partir de mots-clés ou de briefs",
+        "Suggère des accroches et des angles par sujet",
+      ],
     },
     {
-      icon: "ReceiptText" as IconName,
-      sector: "Administratif",
-      title: "Traitement des factures fournisseurs",
-      body: "Extraction des données depuis les PDF, rapprochement avec les bons de commande, préparation du règlement et signalement des écarts.",
-      metric: "12 h de saisie supprimées par mois",
+      name: "Alex",
+      role: "Support client IA",
+      accent: "#d8f0e6",
+      body: "Alex répond à vos clients instantanément, à toute heure. Il résout les problèmes, suit les commandes et rend le support fluide.",
+      bullets: [
+        "Répond aux questions courantes par chat, WhatsApp ou e-mail",
+        "Escalade les cas complexes aux équipes humaines",
+        "Suit les commandes et informe les clients en temps réel",
+        "Collecte les retours après chaque interaction",
+        "Guide les clients avec des instructions claires",
+      ],
     },
     {
-      icon: "Users" as IconName,
-      sector: "Ressources humaines",
-      title: "Tri et pré-entretien des candidatures",
-      body: "Analyse des CV sur vos critères, pré-entretien asynchrone, synthèse structurée pour le manager, réponse envoyée à chaque candidat.",
-      metric: "3 semaines gagnées par recrutement",
+      name: "Maya",
+      role: "Coordinatrice RH IA",
+      accent: "#ece1fb",
+      body: "Maya fluidifie votre recrutement, votre intégration et vos process RH internes. Candidats comme salariés se sentent toujours accompagnés.",
+      bullets: [
+        "Trie les CV et classe les candidats par pertinence",
+        "Envoie invitations d'entretien et relances",
+        "Intègre les nouveaux avec checklists et documents",
+        "Répond aux questions RH internes par chat",
+        "Collecte les retours salariés via des sondages automatisés",
+      ],
     },
     {
-      icon: "FileBarChart" as IconName,
-      sector: "Direction",
-      title: "Reporting consolidé automatique",
-      body: "Vos données commerciales, financières et opérationnelles agrégées chaque lundi matin, avec les écarts commentés en langage clair.",
-      metric: "Comité hebdo préparé en 0 minute",
+      name: "Leo",
+      role: "Setter & closer IA",
+      accent: "#ffe6cc",
+      body: "Leo est votre machine de vente, focalisée sur le début et la fin du tunnel. Il qualifie, réserve, relance et conclut même les deals moyens en autonomie.",
+      bullets: [
+        "Engage la conversation via LinkedIn, e-mail ou WhatsApp",
+        "Qualifie les leads avec des questions pertinentes",
+        "Réserve les appels avec votre équipe ou lui-même",
+        "Relance au bon moment, avec le bon ton",
+        "Gère les objections et conclut sous un seuil défini",
+      ],
     },
     {
-      icon: "PenLine" as IconName,
-      sector: "Marketing",
-      title: "Production de contenu à la chaîne",
-      body: "Veille sectorielle, rédaction d'un premier jet à votre ligne éditoriale, déclinaison par réseau, validation humaine avant publication.",
-      metric: "4× plus de publications, à effectif constant",
+      name: "Sophia",
+      role: "Assistante de direction IA",
+      accent: "#cfe9f7",
+      body: "Sophia est votre assistante intelligente, discrète et infatigable. Elle synthétise, organise et vous alerte sur l'essentiel.",
+      bullets: [
+        "Synthétise vos réunions, e-mails et rapports",
+        "Prépare vos reportings et points d'équipe",
+        "Gère vos tâches et envoie des rappels intelligents",
+        "Met en forme vos documents et présentations internes",
+        "Fait ressortir les enseignements clés de vos données",
+      ],
     },
   ],
 };
 
-export const results = {
-  eyebrow: "Résultats",
-  title: "Ce que ça change, en chiffres",
-  subtitle:
-    "Moyennes constatées sur nos douze derniers déploiements, mesurées avant/après sur les mêmes process.",
-  stats: [
-    { value: "18 h", label: "économisées par semaine", detail: "par équipe équipée" },
-    { value: "-41 %", label: "de coût de traitement", detail: "sur les process automatisés" },
-    { value: "4 min", label: "de délai de réponse", detail: "contre 9 h en moyenne avant" },
-    { value: "21 j", label: "avant la mise en production", detail: "du premier agent" },
-  ],
-};
-
+/**
+ * PLACEHOLDERS. These are illustrative, not real clients. Replace every name,
+ * handle and quote with genuine, authorised testimonials before publishing:
+ * attributing an invented quote to a named person is a legal exposure, not a
+ * copywriting shortcut.
+ */
 export const testimonials = {
   eyebrow: "Témoignages",
-  title: "Ils ne reviendraient pas en arrière",
+  title: "La parole à nos clients",
   items: [
     {
       quote:
-        "On avait déjà testé trois outils d'IA en interne, sans rien mettre en production. Maiven a cadré un seul cas d'usage, l'a livré en trois semaines, et c'est le seul truc qui tourne encore un an après.",
-      author: "Claire Vasseur",
-      role: "Directrice des opérations, Novalis",
+        "Lina nous aide à produire du contenu quotidien sur trois plateformes sans équipe dédiée. C'est comme avoir un rédacteur à plein temps qui ne manque jamais d'idées.",
+      author: "Nom du client",
+      handle: "@entreprise",
     },
     {
       quote:
-        "Notre standard décroche maintenant en moins d'une seconde, y compris le samedi. On a arrêté de perdre des demandes de devis parce que personne n'était disponible pour répondre.",
-      author: "Mehdi Laroussi",
-      role: "Gérant, Groupe Ardec",
+        "Maiven simplifie l'automatisation IA comme aucune autre approche : plus de scalabilité, moins de coûts, et des opérations quotidiennes optimisées sans effort.",
+      author: "Nom du client",
+      handle: "@entreprise",
     },
     {
       quote:
-        "Ce qui m'a convaincu, c'est l'audit. Ils sont arrivés avec des chiffres sur notre propre process, pas avec un discours sur l'intelligence artificielle. La décision a été facile à prendre.",
-      author: "Sophie Berthier",
-      role: "Cofondatrice, Belveo",
+        "De l'automatisation des tâches à l'optimisation des workflows, Maiven a rendu notre activité plus efficace que jamais en éliminant le travail manuel.",
+      author: "Nom du client",
+      handle: "@entreprise",
+    },
+    {
+      quote:
+        "Alex gère désormais plus de 70 % de nos demandes clients, plus vite et mieux qu'avant. Notre équipe support ne traite plus que les cas complexes.",
+      author: "Nom du client",
+      handle: "@entreprise",
+    },
+    {
+      quote:
+        "David a transformé notre prospection. Nous sommes passés de relances irrégulières à une machine de vente entièrement automatisée.",
+      author: "Nom du client",
+      handle: "@entreprise",
+    },
+    {
+      quote:
+        "Maiven a transformé notre workflow grâce à l'automatisation IA, nous faisant gagner un temps précieux chaque semaine et améliorant l'efficacité de l'équipe.",
+      author: "Nom du client",
+      handle: "@entreprise",
+    },
+  ],
+  featured: {
+    quote:
+      "L'automatisation a transformé notre workflow. C'est intuitif, efficace et hautement personnalisable.",
+    author: "Nom du client",
+    role: "Fondateur, Entreprise",
+  },
+};
+
+export const process = {
+  eyebrow: "Comment ça marche",
+  title: "Comment fonctionnent nos solutions IA",
+  steps: [
+    {
+      title: "Choisir et auditer",
+      body: "Vous nous parlez de votre activité. Nous vous associons aux agents IA plug & play les plus pertinents et identifions où l'automatisation sur mesure crée une vraie valeur.",
+    },
+    {
+      title: "Déployer et ajuster",
+      body: "Nos agents préconçus s'adaptent rapidement à vos outils, vos workflows et votre ton de voix. Pour vos besoins d'automatisation, nous concevons des workflows sur mesure qui tournent en arrière-plan.",
+    },
+    {
+      title: "Accompagner et scaler",
+      body: "Nous veillons à ce que vos agents soient toujours performants et vous aidons à scaler en ajoutant de nouvelles automatisations ou des capacités IA plus avancées au fil du temps.",
     },
   ],
 };
 
-export const pricing = {
-  eyebrow: "Tarifs",
-  title: "Des formules lisibles, sans surprise",
-  subtitle:
-    "Pas de licence cachée ni de facturation à l'usage opaque. Vous savez ce que vous payez et ce que ça vous rapporte.",
-  plans: [
-    {
-      name: "Démarrage",
-      price: "2 400 €",
-      period: "puis 490 €/mois",
-      description: "Un premier agent en production, supervisé par nos soins.",
-      features: [
-        "Audit des opérations (2 demi-journées)",
-        "1 agent IA déployé et intégré",
-        "Connexion à 3 outils existants",
-        "Supervision et corrections incluses",
-        "Support par e-mail sous 24 h ouvrées",
-      ],
-      cta: "Réserver un audit",
-      highlighted: false,
-    },
-    {
-      name: "Croissance",
-      price: "6 900 €",
-      period: "puis 1 290 €/mois",
-      description: "Le choix de la majorité de nos clients PME.",
-      features: [
-        "Tout le contenu de Démarrage",
-        "Jusqu'à 4 process automatisés",
-        "Assistant vocal IA inclus",
-        "Intégrations illimitées",
-        "Tableau de bord des gains mesurés",
-        "Point mensuel avec votre référent",
-      ],
-      cta: "Réserver un audit",
-      highlighted: true,
-    },
-    {
-      name: "Sur mesure",
-      price: "Sur devis",
-      period: "engagement annuel",
-      description: "Pour les organisations multi-sites ou à forte contrainte.",
-      features: [
-        "Architecture dédiée et hébergement souverain",
-        "Traitement de données sensibles (DPA, RGPD)",
-        "Environnement de test et de recette",
-        "Formation des équipes internes",
-        "Astreinte et SLA contractuel",
-      ],
-      cta: "Parler à un expert",
-      highlighted: false,
-    },
+export const about = {
+  eyebrow: "À propos",
+  title: "Découvrez notre parcours d'expertise IA",
+  body: "Chez Maiven, nous sommes convaincus que l'IA doit être un moteur de croissance, pas un mot à la mode. Notre mission est simple : aider les entreprises à automatiser, à scaler et à devenir AI-first. Nous bâtissons un écosystème complet alliant implémentation, automatisation et formation, pour que toute entreprise, quelle que soit sa taille, puisse exploiter la puissance de l'IA.",
+  cta: "Réserver un appel",
+  stats: [
+    { value: 50, label: "Agents IA actifs" },
+    { value: 100, label: "Automatisations déployées" },
+    { value: 33, label: "Clients satisfaits" },
+    { value: 47, label: "Décisions pilotées par l'IA" },
   ],
-  note: "Tarifs hors taxes. L'audit initial est déduit de la prestation si vous nous confiez le chantier.",
 };
 
 export const faq = {
-  eyebrow: "Questions fréquentes",
-  title: "Ce qu'on nous demande avant de signer",
+  eyebrow: "FAQ",
+  title: "Les réponses à vos questions fréquentes",
   items: [
     {
-      q: "Combien de temps avant de voir un résultat concret ?",
-      a: "Comptez trois semaines entre le lancement et le premier agent en production sur un périmètre cadré. L'audit, lui, vous donne une cartographie chiffrée dès la première semaine — vous savez donc très vite si le jeu en vaut la chandelle.",
+      q: "Quels types d'agents IA proposez-vous ?",
+      a: "Nous proposons des agents IA prêts à l'emploi pour des fonctions précises de votre entreprise : vente, RH, service client, création de contenu et assistance de direction. Chaque agent est personnalisable et s'intègre à vos outils et workflows existants.",
     },
     {
-      q: "Faut-il changer nos outils actuels ?",
-      a: "Non, et c'est volontaire. Nous nous branchons sur ce que vous utilisez déjà : CRM, ERP, messagerie, facturation, tableurs. Remplacer un outil qui fonctionne est rarement le meilleur investissement, et ça ralentit tout le projet.",
+      q: "Faut-il des compétences techniques pour utiliser vos solutions ?",
+      a: "Non. Nous prenons en charge l'intégration, la configuration et la maintenance. Vos équipes utilisent des interfaces simples, et nous les formons à l'exploitation courante. Aucune ligne de code n'est requise de votre côté.",
+    },
+    {
+      q: "Puis-je revendre vos agents IA et systèmes d'automatisation ?",
+      a: "Oui, sous conditions. Nous proposons un cadre de partenariat pour les agences et les intégrateurs qui souhaitent déployer nos agents chez leurs propres clients. Contactez-nous pour en discuter.",
+    },
+    {
+      q: "Combien de temps faut-il pour déployer un agent IA ou une automatisation ?",
+      a: "Un agent plug & play est opérationnel en 48 à 72 heures. Une automatisation sur mesure demande généralement deux à quatre semaines entre le cadrage et la mise en production, selon le nombre d'outils à connecter.",
     },
     {
       q: "Que deviennent nos données ?",
-      a: "Elles restent les vôtres. Nous travaillons avec des hébergements situés dans l'Union européenne, nous signons un accord de traitement (DPA), et nous ne les utilisons jamais pour entraîner un modèle. Sur les projets sensibles, nous pouvons déployer sur votre propre infrastructure.",
-    },
-    {
-      q: "Que se passe-t-il si l'agent se trompe ?",
-      a: "Chaque système est livré avec des garde-fous : périmètre de réponse limité, seuil de confiance, escalade automatique vers un humain et journalisation complète. Les cas limites remontent dans un tableau de bord et sont corrigés dans le cadre de l'abonnement.",
-    },
-    {
-      q: "Sommes-nous trop petits pour ce type de projet ?",
-      a: "Nos clients vont de 5 à 250 personnes. En dessous d'une dizaine de salariés, un seul agent bien choisi suffit souvent — et c'est précisément ce que couvre la formule Démarrage. Si nous estimons que le retour sur investissement n'est pas là, nous vous le disons à l'issue de l'audit.",
-    },
-    {
-      q: "Restons-nous dépendants de votre agence ?",
-      a: "Non. Tout ce que nous construisons est documenté et vous appartient. Nous formons vos équipes à l'exploitation courante, et un certain nombre de nos clients finissent par gérer eux-mêmes leurs automatisations. Nous restons alors en appui ponctuel.",
+      a: "Elles restent les vôtres. Nous travaillons avec des hébergements situés dans l'Union européenne, nous signons un accord de traitement (DPA) et nous ne les utilisons jamais pour entraîner un modèle. Sur les projets sensibles, nous pouvons déployer sur votre propre infrastructure.",
     },
   ],
 };
 
 export const finalCta = {
-  title: "Et si on regardait ce qui peut tourner sans vous ?",
-  subtitle:
-    "30 minutes d'échange, sans engagement. Vous repartez avec au moins deux automatisations activables dans le mois, même si nous ne travaillons pas ensemble.",
-  primary: "Réserver un audit gratuit",
-  secondary: "Écrire à l'équipe",
+  title: "Devenez une entreprise AI-first avec Maiven",
+  cta: "Réserver un appel",
 };

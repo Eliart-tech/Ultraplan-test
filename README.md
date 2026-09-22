@@ -3,6 +3,11 @@
 Site vitrine de **Maiven**, agence d'agents IA et d'automatisation pour PME.
 Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4.
 
+La mise en page reprend la structure et le langage visuel du site de référence
+demandé : thème clair, fond blanc et bleu pâle, texte bleu marine `#253066`,
+accent pêche `#f6d6cf`, typographie Inter avec des titres en graisse 400 et des
+coins très arrondis.
+
 ---
 
 ## Démarrer
@@ -52,6 +57,12 @@ src/
     json-ld.ts         Données structurées schema.org
 ```
 
+### Sections de la page d'accueil
+
+Dans l'ordre : hero, bandeau clients, services (4 offres numérotées), phrase
+d'accroche, agents IA (6 profils), témoignages, processus (3 étapes), à propos
+avec compteurs animés, FAQ, appel à l'action final.
+
 ### Modifier le contenu
 
 - **Textes de la page d'accueil** → `src/lib/content.ts`
@@ -59,7 +70,8 @@ src/
 - **Couleurs, typographie, animations** → tokens `@theme` dans `src/app/globals.css`
 
 Aucun texte n'est codé en dur dans les composants de section : ils lisent tous
-`content.ts`.
+`content.ts`. Les visuels illustrant les cartes de services et les portraits
+d'agents sont dessinés en CSS et SVG — aucun fichier image à héberger.
 
 ## Ce qui est déjà en place
 
@@ -86,12 +98,18 @@ Aucun texte n'est codé en dur dans les composants de section : ils lisent tous
    politique de confidentialité par un conseil juridique.
 2. **Coordonnées réelles** dans `src/lib/site.ts` — l'adresse, le téléphone, les
    liens sociaux et l'URL de prise de rendez-vous sont des valeurs de départ.
-3. **Contenu de preuve** — les noms de clients, témoignages et chiffres de
-   `src/lib/content.ts` sont des exemples. Remplacez-les par vos données réelles :
-   publier des témoignages inventés vous expose commercialement et juridiquement.
-4. **Envoi d'e-mails** — créez une clé Resend (ou branchez un autre fournisseur
+3. **Contenu de preuve** — les noms de clients, les chiffres et les six
+   témoignages de `src/lib/content.ts` sont des exemples. Les témoignages portent
+   volontairement des auteurs génériques (« Nom du client / @entreprise ») :
+   attribuer une citation inventée à une personne nommée est une exposition
+   juridique, pas un raccourci de rédaction. Remplacez-les par des témoignages
+   réels et autorisés.
+4. **Photographies** — trois emplacements attendent une image : la photo
+   d'équipe de la section « À propos », le visuel du témoignage mis en avant, et
+   les trois avatars du hero. Ils affichent aujourd'hui un repère explicite.
+5. **Envoi d'e-mails** — créez une clé Resend (ou branchez un autre fournisseur
    dans `src/app/api/contact/route.ts`) et vérifiez votre domaine d'envoi.
-5. **Domaine** — renseignez `NEXT_PUBLIC_SITE_URL` avec l'URL finale.
+6. **Domaine** — renseignez `NEXT_PUBLIC_SITE_URL` avec l'URL finale.
 
 ## Déploiement
 

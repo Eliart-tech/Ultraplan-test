@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default function MentionsLegalesPage() {
   return (
     <LegalPage title="Mentions légales" updatedAt="1er septembre 2026">
-      <p className="rounded-xl border border-brand-400/30 bg-brand-500/8 px-4 py-3 text-brand-100">
+      <p className="rounded-2xl border border-blush-300 bg-blush-100 px-4 py-3 text-ink-800">
         <strong>À compléter avant la mise en ligne :</strong> les champs entre
         crochets doivent être renseignés avec les informations réelles de la
         société (forme juridique, capital, RCS, SIRET, TVA, directeur de la

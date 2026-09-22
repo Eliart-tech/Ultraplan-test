@@ -1,79 +1,128 @@
 import Link from "next/link";
 import { cn } from "@/lib/cn";
 
-type Variant = "primary" | "secondary" | "ghost";
+/**
+ * The site's signature button: a pill with the label on the left and the arrow
+ * in its own circle on the right.
+ */
+
+type Variant = "blush" | "white" | "navy" | "plain";
 type Size = "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-full font-medium transition duration-200 " +
-  "disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-3";
+  "group/btn inline-flex items-center gap-2 rounded-full font-normal transition duration-200 " +
+  "disabled:cursor-not-allowed disabled:opacity-60";
 
 const variants: Record<Variant, string> = {
-  // brand-600 keeps white text at 6.1:1 — brand-500 only reached 4.35:1.
-  primary:
-    "bg-brand-600 text-white shadow-[0_10px_40px_-12px] shadow-brand-600/70 " +
-    "hover:bg-brand-500 hover:shadow-brand-500/60 active:bg-brand-700",
-  secondary:
-    "border border-white/12 bg-white/[0.04] text-mist-50 backdrop-blur-sm " +
-    "hover:border-white/25 hover:bg-white/[0.08]",
-  ghost: "text-mist-200 hover:text-white",
+  blush: "bg-blush-300 text-ink-800 hover:bg-blush-400",
+  white: "bg-white text-ink-800 shadow-[0_2px_14px_rgba(37,48,102,0.10)] hover:bg-sky-50",
+  navy: "bg-ink-800 text-white hover:bg-ink-900",
+  plain: "text-ink-800 hover:text-sky-600",
 };
 
 const sizes: Record<Size, string> = {
-  md: "h-11 px-5 text-sm",
-  lg: "h-13 px-7 text-[0.95rem]",
+  md: "h-11 pl-5 pr-1.5 text-[0.95rem]",
+  lg: "h-13 pl-7 pr-2 text-base",
 };
 
-function classes(variant: Variant, size: Size, className?: string) {
-  return cn(base, variants[variant], sizes[size], className);
+const dotSizes: Record<Size, string> = {
+  md: "h-8 w-8",
+  lg: "h-9 w-9",
+};
+
+const dotVariants: Record<Variant, string> = {
+  blush: "bg-white text-ink-800",
+  white: "bg-blush-300 text-ink-800",
+  navy: "bg-white/15 text-white",
+  plain: "bg-blush-300 text-ink-800",
+};
+
+function Arrow({ variant, size }: { variant: Variant; size: Size }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "flex shrink-0 items-center justify-center rounded-full transition-transform duration-200 group-hover/btn:translate-x-0.5",
+        dotSizes[size],
+        dotVariants[variant],
+      )}
+    >
+      <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none">
+        <path
+          d="M2.5 8h11m0 0L9 3.5M13.5 8 9 12.5"
+          stroke="currentColor"
+          strokeWidth="1.4"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </span>
+  );
 }
 
 export function ButtonLink({
   href,
-  variant = "primary",
+  variant = "blush",
   size = "md",
+  arrow = true,
   className,
   children,
-  external,
   ...rest
 }: {
   href: string;
   variant?: Variant;
   size?: Size;
+  arrow?: boolean;
   className?: string;
   children: React.ReactNode;
-  external?: boolean;
 } & Omit<React.ComponentProps<typeof Link>, "href" | "className" | "children">) {
-  const isExternal = external ?? /^(https?:)?\/\//.test(href);
+  const classes = cn(base, variants[variant], sizes[size], !arrow && "pr-5", className);
+  const content = (
+    <>
+      <span>{children}</span>
+      {arrow ? <Arrow variant={variant} size={size} /> : null}
+    </>
+  );
 
-  if (isExternal) {
+  if (/^(https?:)?\/\/|^mailto:|^tel:/.test(href)) {
+    const external = href.startsWith("http");
     return (
       <a
         href={href}
-        className={classes(variant, size, className)}
-        target="_blank"
-        rel="noopener noreferrer"
+        className={classes}
+        {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       >
-        {children}
+        {content}
       </a>
     );
   }
 
   return (
-    <Link href={href} className={classes(variant, size, className)} {...rest}>
-      {children}
+    <Link href={href} className={classes} {...rest}>
+      {content}
     </Link>
   );
 }
 
 export function Button({
-  variant = "primary",
+  variant = "blush",
   size = "md",
+  arrow = true,
   className,
+  children,
   ...rest
 }: {
   variant?: Variant;
   size?: Size;
+  arrow?: boolean;
 } & React.ButtonHTMLAttributes<HTMLButtonElement>) {
-  return <button className={classes(variant, size, className)} {...rest} />;
+  return (
+    <button
+      className={cn(base, variants[variant], sizes[size], !arrow && "pr-5", className)}
+      {...rest}
+    >
+      <span>{children}</span>
+      {arrow ? <Arrow variant={variant} size={size} /> : null}
+    </button>
+  );
 }

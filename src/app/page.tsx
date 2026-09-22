@@ -1,14 +1,13 @@
+import { About } from "@/components/sections/about";
+import { Agents } from "@/components/sections/agents";
 import { Clients } from "@/components/sections/clients";
 import { Faq } from "@/components/sections/faq";
 import { FinalCta } from "@/components/sections/final-cta";
 import { Hero } from "@/components/sections/hero";
-import { Method } from "@/components/sections/method";
-import { Pricing } from "@/components/sections/pricing";
-import { Problem } from "@/components/sections/problem";
-import { Results } from "@/components/sections/results";
+import { Process } from "@/components/sections/process";
 import { Services } from "@/components/sections/services";
+import { Statement } from "@/components/sections/statement";
 import { Testimonials } from "@/components/sections/testimonials";
-import { UseCases } from "@/components/sections/use-cases";
 import { faqJsonLd } from "@/lib/json-ld";
 
 export default function HomePage() {
@@ -16,13 +15,12 @@ export default function HomePage() {
     <>
       <Hero />
       <Clients />
-      <Problem />
       <Services />
-      <Method />
-      <UseCases />
-      <Results />
+      <Statement />
+      <Agents />
       <Testimonials />
-      <Pricing />
+      <Process />
+      <About />
       <Faq />
       <FinalCta />
 

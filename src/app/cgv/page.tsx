@@ -15,7 +15,7 @@ export default function CgvPage() {
       title="Conditions générales de vente"
       updatedAt="1er septembre 2026"
     >
-      <p className="rounded-xl border border-brand-400/30 bg-brand-500/8 px-4 py-3 text-brand-100">
+      <p className="rounded-2xl border border-blush-300 bg-blush-100 px-4 py-3 text-ink-800">
         <strong>À faire valider :</strong> modèle de départ destiné à des
         prestations de services entre professionnels. Faites-le adapter par votre
         conseil juridique avant toute utilisation commerciale.

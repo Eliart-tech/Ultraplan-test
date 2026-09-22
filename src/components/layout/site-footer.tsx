@@ -1,61 +1,37 @@
 import Link from "next/link";
+import { ButtonLink } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { Icon } from "@/components/ui/icon";
 import { footerNav, site } from "@/lib/site";
 import { Logo } from "./logo";
 
 const socials = [
-  { label: "LinkedIn", href: site.socials.linkedin },
   { label: "Instagram", href: site.socials.instagram },
+  { label: "LinkedIn", href: site.socials.linkedin },
   { label: "YouTube", href: site.socials.youtube },
-  { label: "X", href: site.socials.x },
 ];
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-white/8 bg-ink-900">
+    <footer className="border-t border-line bg-white">
       <Container className="py-16">
-        <div className="grid gap-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">
-          <div className="flex flex-col gap-5">
-            <Logo className="w-fit rounded-lg" />
-            <p className="max-w-xs text-sm leading-relaxed text-mist-400">
-              {site.description}
+        <div className="grid gap-12 md:grid-cols-[1.5fr_repeat(3,1fr)]">
+          <div className="flex flex-col items-start gap-5">
+            <Logo className="rounded-lg" />
+            <p className="max-w-[15rem] text-lg leading-snug text-ink-800">
+              {site.tagline}
             </p>
-            <ul className="flex flex-col gap-2 text-sm">
-              <li>
-                <a
-                  href={`mailto:${site.email}`}
-                  className="inline-flex items-center gap-2 text-mist-200 transition hover:text-white"
-                >
-                  <Icon name="Mail" className="h-4 w-4 text-brand-300" />
-                  {site.email}
-                </a>
-              </li>
-              <li>
-                <a
-                  href={`tel:${site.phoneHref}`}
-                  className="inline-flex items-center gap-2 text-mist-200 transition hover:text-white"
-                >
-                  <Icon name="Phone" className="h-4 w-4 text-brand-300" />
-                  {site.phone}
-                </a>
-              </li>
-              <li className="inline-flex items-center gap-2 text-mist-400">
-                <Icon name="MapPin" className="h-4 w-4 text-brand-300" />
-                {site.address.postalCode} {site.address.city}, France
-              </li>
-            </ul>
+            <ButtonLink href="/contact#formulaire">Commencer</ButtonLink>
           </div>
 
           {footerNav.map((group) => (
             <nav key={group.title} aria-label={group.title}>
-              <h2 className="text-sm font-semibold text-white">{group.title}</h2>
-              <ul className="mt-4 flex flex-col gap-2.5">
+              <h2 className="text-base text-ink-800">{group.title}</h2>
+              <ul className="mt-5 flex flex-col gap-3">
                 {group.items.map((item) => (
-                  <li key={item.href}>
+                  <li key={`${group.title}-${item.label}`}>
                     <Link
                       href={item.href}
-                      className="text-sm text-mist-400 transition hover:text-white"
+                      className="text-[0.95rem] text-ink-400 transition hover:text-ink-800"
                     >
                       {item.label}
                     </Link>
@@ -66,18 +42,18 @@ export function SiteFooter() {
           ))}
         </div>
 
-        <div className="mt-14 flex flex-col gap-5 border-t border-white/8 pt-7 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-mist-500">
-            © {new Date().getFullYear()} {site.legalName}. Tous droits réservés.
+        <div className="mt-14 flex flex-col gap-5 border-t border-line pt-7 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-ink-400">
+            © {new Date().getFullYear()} {site.legalName} · Tous droits réservés
           </p>
-          <ul className="flex flex-wrap items-center gap-5">
+          <ul className="flex flex-wrap items-center gap-6">
             {socials.map((social) => (
               <li key={social.label}>
                 <a
                   href={social.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-mist-400 transition hover:text-white"
+                  className="text-sm text-ink-400 transition hover:text-ink-800"
                 >
                   {social.label}
                 </a>
@@ -86,6 +62,16 @@ export function SiteFooter() {
           </ul>
         </div>
       </Container>
+
+      <div className="border-t border-line">
+        <Container>
+          <div className="flex flex-wrap items-center justify-between gap-3 py-5 text-xs tracking-[0.16em] text-ink-400 uppercase">
+            <span>@{site.name} Agency</span>
+            <span>IA &amp; automatisation</span>
+          </div>
+        </Container>
+      </div>
+
     </footer>
   );
 }

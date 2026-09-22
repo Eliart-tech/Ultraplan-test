@@ -1,55 +1,61 @@
-import { Card } from "@/components/ui/card";
-import { Icon } from "@/components/ui/icon";
+import { ButtonLink } from "@/components/ui/button";
+import { Card, CheckMark } from "@/components/ui/card";
 import { Reveal } from "@/components/ui/reveal";
 import { Section, SectionHeading } from "@/components/ui/section";
 import { services } from "@/lib/content";
+import { ServiceVisual } from "./service-visual";
 
 export function Services() {
   return (
-    <Section id="services" className="bg-ink-900/40">
+    <Section id="services" className="pt-16 sm:pt-20">
       <Reveal>
         <SectionHeading
           id="services"
           eyebrow={services.eyebrow}
           title={services.title}
-          subtitle={services.subtitle}
         />
       </Reveal>
 
-      <ul className="mt-14 grid gap-5 md:grid-cols-2">
+      <ul className="mt-16 grid gap-6 lg:grid-cols-2">
         {services.items.map((service, index) => (
-          <Reveal as="li" key={service.name} delay={(index % 2) * 90}>
-            <Card interactive className="flex h-full flex-col">
-              <div className="flex items-start justify-between gap-4">
-                <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500/25 to-aqua-500/15 text-brand-200">
-                  <Icon name={service.icon} className="h-6 w-6" />
-                </span>
-                <span className="rounded-full border border-white/10 px-3 py-1 text-xs text-mist-400">
-                  {service.pitch}
+          <Reveal as="li" key={service.number} delay={(index % 2) * 80}>
+            <Card
+              tone={index % 2 === 0 ? "sky" : "white"}
+              className="flex h-full flex-col p-5 sm:p-7"
+            >
+              <ServiceVisual
+                variant={service.visual}
+                title={service.visualTitle}
+                items={"visualItems" in service ? service.visualItems : undefined}
+                caption={"visualCaption" in service ? service.visualCaption : undefined}
+              />
+
+              <div className="mt-7 flex items-start justify-between gap-5">
+                <h3 className="text-2xl sm:text-[1.7rem]">{service.name}</h3>
+                <span
+                  aria-hidden
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-blush-300 text-sm text-ink-800"
+                >
+                  {service.number}
                 </span>
               </div>
 
-              <h3 className="mt-6 text-xl font-semibold text-white">
-                {service.name}
-              </h3>
-              <p className="mt-3 text-sm leading-relaxed text-mist-400">
+              <p className="mt-3.5 text-[0.95rem] leading-relaxed text-ink-400">
                 {service.body}
               </p>
 
-              <ul className="mt-6 flex flex-col gap-2.5 border-t border-white/8 pt-6">
+              <ul className="mt-6 flex flex-1 flex-col gap-3">
                 {service.bullets.map((bullet) => (
-                  <li
-                    key={bullet}
-                    className="flex items-start gap-2.5 text-sm text-mist-200"
-                  >
-                    <Icon
-                      name="Check"
-                      className="mt-0.5 h-4 w-4 shrink-0 text-aqua-300"
-                    />
-                    {bullet}
+                  <li key={bullet} className="flex items-start gap-3">
+                    <CheckMark />
+                    <span className="text-[0.95rem] text-ink-500">{bullet}</span>
                   </li>
                 ))}
               </ul>
+
+              <div className="mt-8">
+                <ButtonLink href="/contact#formulaire">{service.cta}</ButtonLink>
+              </div>
             </Card>
           </Reveal>
         ))}

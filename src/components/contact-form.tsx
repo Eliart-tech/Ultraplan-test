@@ -5,14 +5,13 @@ import { cn } from "@/lib/cn";
 import { contactSchema, subjectLabels } from "@/lib/contact-schema";
 import { site } from "@/lib/site";
 import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
 const fieldClass =
-  "w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-sm text-mist-50 " +
-  "placeholder:text-mist-500 transition focus:border-brand-400 focus:outline-none " +
-  "focus:ring-2 focus:ring-brand-500/35";
+  "w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm text-ink-800 " +
+  "placeholder:text-ink-400/70 transition focus:border-ink-800 focus:outline-none " +
+  "focus:ring-2 focus:ring-sky-300";
 
 function Field({
   label,
@@ -31,24 +30,24 @@ function Field({
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={htmlFor} className="text-sm font-medium text-mist-100">
+      <label htmlFor={htmlFor} className="text-sm text-ink-800">
         {label}
         {required ? (
-          <span aria-hidden className="ml-1 text-brand-300">
+          <span aria-hidden className="ml-1 text-blush-400">
             *
           </span>
         ) : (
-          <span className="ml-2 text-xs font-normal text-mist-500">
+          <span className="ml-2 text-xs text-ink-400">
             (facultatif)
           </span>
         )}
       </label>
       {children}
       {hint && !error ? (
-        <p className="text-xs text-mist-500">{hint}</p>
+        <p className="text-xs text-ink-400">{hint}</p>
       ) : null}
       {error ? (
-        <p id={`${htmlFor}-error`} className="text-xs text-red-400">
+        <p id={`${htmlFor}-error`} className="text-xs text-red-600">
           {error}
         </p>
       ) : null}
@@ -132,22 +131,33 @@ export function ContactForm() {
     return (
       <div
         role="status"
-        className="rounded-3xl border border-aqua-400/25 bg-aqua-500/8 p-10 text-center"
+        className="rounded-4xl border border-line bg-sky-100 p-10 text-center"
       >
-        <span className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-aqua-400/18 text-aqua-300">
-          <Icon name="Check" className="h-6 w-6" />
+        <span
+          aria-hidden
+          className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-ink-800"
+        >
+          <svg viewBox="0 0 16 16" className="h-6 w-6" fill="none">
+            <path
+              d="M3.5 8.5 6.5 11.5 12.5 5"
+              stroke="#fff"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </span>
-        <h3 className="mt-5 text-xl font-semibold text-white">
+        <h3 className="mt-5 text-xl">
           Message bien reçu.
         </h3>
-        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-mist-300">
+        <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-400">
           Nous revenons vers vous sous 24 h ouvrées avec un créneau d&apos;audit
           et deux premières pistes d&apos;automatisation adaptées à votre
           activité.
         </p>
         <Button
           type="button"
-          variant="secondary"
+          variant="white"
           className="mt-7"
           onClick={() => setStatus("idle")}
         >
@@ -161,7 +171,7 @@ export function ContactForm() {
     <form
       onSubmit={onSubmit}
       noValidate
-      className="rounded-3xl border border-white/8 bg-ink-850/70 p-6 sm:p-8"
+      className="rounded-4xl border border-line bg-sky-50 p-6 sm:p-8"
     >
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Nom et prénom" htmlFor={id("name")} error={errors.name} required>
@@ -172,7 +182,7 @@ export function ContactForm() {
             autoComplete="name"
             required
             placeholder="Camille Dubois"
-            className={cn(fieldClass, errors.name && "border-red-400/60")}
+            className={cn(fieldClass, errors.name && "border-red-500")}
             aria-invalid={Boolean(errors.name)}
             aria-describedby={describedBy("name")}
           />
@@ -191,7 +201,7 @@ export function ContactForm() {
             autoComplete="email"
             required
             placeholder="camille@entreprise.fr"
-            className={cn(fieldClass, errors.email && "border-red-400/60")}
+            className={cn(fieldClass, errors.email && "border-red-500")}
             aria-invalid={Boolean(errors.email)}
             aria-describedby={describedBy("email")}
           />
@@ -204,7 +214,7 @@ export function ContactForm() {
             type="text"
             autoComplete="organization"
             placeholder="Nom de votre société"
-            className={cn(fieldClass, errors.company && "border-red-400/60")}
+            className={cn(fieldClass, errors.company && "border-red-500")}
             aria-invalid={Boolean(errors.company)}
             aria-describedby={describedBy("company")}
           />
@@ -217,7 +227,7 @@ export function ContactForm() {
             type="tel"
             autoComplete="tel"
             placeholder="06 12 34 56 78"
-            className={cn(fieldClass, errors.phone && "border-red-400/60")}
+            className={cn(fieldClass, errors.phone && "border-red-500")}
             aria-invalid={Boolean(errors.phone)}
             aria-describedby={describedBy("phone")}
           />
@@ -230,12 +240,12 @@ export function ContactForm() {
               name="subject"
               defaultValue="audit"
               required
-              className={cn(fieldClass, errors.subject && "border-red-400/60")}
+              className={cn(fieldClass, errors.subject && "border-red-500")}
               aria-invalid={Boolean(errors.subject)}
               aria-describedby={describedBy("subject")}
             >
               {Object.entries(subjectLabels).map(([value, label]) => (
-                <option key={value} value={value} className="bg-ink-900">
+                <option key={value} value={value} className="bg-white">
                   {label}
                 </option>
               ))}
@@ -258,7 +268,7 @@ export function ContactForm() {
               required
               minLength={20}
               placeholder="Nous traitons environ 200 demandes de devis par mois, toutes saisies à la main dans notre CRM…"
-              className={cn(fieldClass, "resize-y", errors.message && "border-red-400/60")}
+              className={cn(fieldClass, "resize-y", errors.message && "border-red-500")}
               aria-invalid={Boolean(errors.message)}
               aria-describedby={describedBy("message")}
             />
@@ -278,22 +288,22 @@ export function ContactForm() {
           name="consent"
           type="checkbox"
           required
-          className="mt-0.5 h-4 w-4 shrink-0 rounded border-white/20 bg-ink-900 accent-brand-500"
+          className="mt-0.5 h-4 w-4 shrink-0 rounded border-ink-400 bg-white accent-ink-800"
           aria-invalid={Boolean(errors.consent)}
           aria-describedby={describedBy("consent")}
         />
-        <label htmlFor={id("consent")} className="text-sm leading-relaxed text-mist-400">
+        <label htmlFor={id("consent")} className="text-sm leading-relaxed text-ink-400">
           J&apos;accepte que mes données soient utilisées pour répondre à ma
           demande, conformément à la{" "}
           <a
             href="/politique-de-confidentialite"
-            className="text-brand-300 underline underline-offset-4 hover:text-brand-200"
+            className="text-ink-800 underline underline-offset-4 hover:text-sky-600"
           >
             politique de confidentialité
           </a>
           .
           {errors.consent ? (
-            <span id={`${id("consent")}-error`} className="mt-1 block text-xs text-red-400">
+            <span id={`${id("consent")}-error`} className="mt-1 block text-xs text-red-600">
               {errors.consent}
             </span>
           ) : null}
@@ -313,13 +323,13 @@ export function ContactForm() {
         type="submit"
         size="lg"
         disabled={status === "sending"}
-        className="mt-5 w-full sm:w-auto"
+        arrow={status !== "sending"}
+        className="mt-5"
       >
         {status === "sending" ? "Envoi en cours…" : "Envoyer ma demande"}
-        {status === "sending" ? null : <Icon name="ArrowRight" className="h-4 w-4" />}
       </Button>
 
-      <p className="mt-4 text-xs text-mist-500">
+      <p className="mt-4 text-xs text-ink-400">
         Réponse sous 24 h ouvrées. Vos données ne sont ni revendues ni utilisées
         pour entraîner un modèle.
       </p>

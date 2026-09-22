@@ -2,39 +2,41 @@
 
 /* ---------------------------------------------------------------------------
    Design tokens
-   The site is dark-first: one palette, no theme switcher, tuned so that every
-   text/background pair below clears WCAG AA at its intended size.
+
+   Light, airy theme: white and pale blue surfaces, deep navy type, a blush
+   accent for calls to action. Headings sit at weight 400 — the restraint is
+   deliberate and is what gives the page its editorial feel.
 --------------------------------------------------------------------------- */
 @theme {
-  --color-ink-950: #06060a;
-  --color-ink-900: #0a0a11;
-  --color-ink-850: #0f0f18;
-  --color-ink-800: #14141f;
-  --color-ink-700: #1d1d2b;
-  --color-ink-600: #2a2a3d;
+  /* Ink — navy, used for every heading and for solid marks. */
+  --color-ink-900: #1b2450;
+  --color-ink-800: #253066;
+  --color-ink-700: #3a4680;
+  --color-ink-500: #5b5b5b;
+  --color-ink-400: #6b6b6b;
 
-  --color-mist-50: #f7f7fb;
-  --color-mist-200: #d7d7e4;
-  --color-mist-400: #9c9cb4;
-  --color-mist-500: #7c7c96;
+  /* Sky — the pale blue that carries the page. */
+  --color-sky-50: #fafcff;
+  --color-sky-100: #f0f6ff;
+  --color-sky-200: #e6efff;
+  --color-sky-300: #d1e3ff;
+  --color-sky-500: #578cff;
+  --color-sky-600: #0d7fd4;
 
-  --color-brand-300: #b7a6ff;
-  --color-brand-400: #9b83ff;
-  --color-brand-500: #7c5cff;
-  --color-brand-600: #6438f5;
-  --color-brand-700: #4f27cc;
+  /* Blush — the accent on buttons, eyebrows and number badges. */
+  --color-blush-100: #fdf1ee;
+  --color-blush-200: #f9e2dc;
+  --color-blush-300: #f6d6cf;
+  --color-blush-400: #eeb9ad;
 
-  --color-aqua-300: #7ee7f8;
-  --color-aqua-400: #38d3ee;
-  --color-aqua-500: #14b8d4;
+  --color-line: #e9edf5;
 
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
-  --radius-4xl: 2rem;
+  --radius-4xl: 1.75rem;
+  --radius-5xl: 2.25rem;
 
-  --animate-marquee: marquee 40s linear infinite;
-  --animate-float: float 9s ease-in-out infinite;
+  --animate-marquee: marquee 38s linear infinite;
 
   @keyframes marquee {
     from {
@@ -42,16 +44,6 @@
     }
     to {
       transform: translateX(-50%);
-    }
-  }
-
-  @keyframes float {
-    0%,
-    100% {
-      transform: translate3d(0, 0, 0) scale(1);
-    }
-    50% {
-      transform: translate3d(0, -18px, 0) scale(1.04);
     }
   }
 }
@@ -62,35 +54,40 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    /* Offset anchor targets so the sticky header never covers a section title. */
-    scroll-padding-top: 6rem;
+    /* Keep anchored section titles clear of the sticky header. */
+    scroll-padding-top: 7rem;
     -webkit-tap-highlight-color: transparent;
   }
 
   body {
-    background-color: var(--color-ink-950);
-    color: var(--color-mist-50);
+    background-color: #ffffff;
+    color: var(--color-ink-500);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   ::selection {
-    background-color: color-mix(in oklab, var(--color-brand-500) 45%, transparent);
-    color: #fff;
+    background-color: var(--color-blush-300);
+    color: var(--color-ink-800);
   }
 
   :focus-visible {
-    outline: 2px solid var(--color-brand-400);
+    outline: 2px solid var(--color-ink-800);
     outline-offset: 3px;
-    border-radius: 4px;
+    border-radius: 6px;
   }
 
-  /* Headings carry the visual weight of the page; keep them tight and optical. */
+  /* Headings are navy and deliberately light: weight 400, tight tracking. */
   h1,
   h2,
-  h3 {
-    letter-spacing: -0.028em;
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: var(--color-ink-800);
+    font-weight: 400;
+    letter-spacing: -0.022em;
     text-wrap: balance;
   }
 
@@ -116,65 +113,45 @@
 /* ---------------------------------------------------------------------------
    Utilities
 --------------------------------------------------------------------------- */
-@utility text-gradient {
+
+/* The pale blue wash behind the hero and the closing block. */
+@utility wash-sky {
   background-image: linear-gradient(
-    100deg,
-    var(--color-mist-50) 0%,
-    var(--color-brand-300) 45%,
-    var(--color-aqua-300) 100%
+    to bottom,
+    var(--color-sky-100) 0%,
+    var(--color-sky-50) 55%,
+    #ffffff 100%
   );
-  background-clip: text;
-  color: transparent;
 }
 
-/* A 1px gradient border drawn with a mask, so the card keeps a transparent fill. */
-@utility border-gradient {
-  position: relative;
-
-  &::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    padding: 1px;
-    background: linear-gradient(
-      140deg,
-      color-mix(in oklab, var(--color-brand-400) 60%, transparent),
-      transparent 40%,
-      transparent 60%,
-      color-mix(in oklab, var(--color-aqua-400) 45%, transparent)
-    );
-    -webkit-mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask:
-      linear-gradient(#fff 0 0) content-box,
-      linear-gradient(#fff 0 0);
-    mask-composite: exclude;
-    pointer-events: none;
-  }
+@utility wash-blush {
+  background-image: linear-gradient(
+    to bottom,
+    #ffffff 0%,
+    var(--color-blush-100) 45%,
+    var(--color-blush-300) 100%
+  );
 }
 
-@utility grid-backdrop {
+/* Faint grid used behind the illustrated cards. */
+@utility grid-faint {
   background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 40%, transparent 100%);
+    linear-gradient(to right, rgba(37, 48, 102, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 48, 102, 0.05) 1px, transparent 1px);
+  background-size: 22px 22px;
 }
 
-/* Reveal-on-scroll: the element is hidden only when JS has marked it pending,
-   so the content stays visible with JavaScript disabled or before hydration. */
+/* Reveal-on-scroll. Content renders visible and is only hidden once the
+   script has taken responsibility for showing it again. */
 @utility reveal-pending {
   opacity: 0;
-  transform: translateY(18px);
+  transform: translateY(16px);
 }
 
 @utility reveal-visible {
   opacity: 1;
   transform: none;
   transition:
-    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
 }

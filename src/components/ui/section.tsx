@@ -1,7 +1,6 @@
 import { cn } from "@/lib/cn";
 import { Container } from "./container";
 
-/** A page section with consistent vertical rhythm and an anchorable id. */
 export function Section({
   id,
   className,
@@ -24,10 +23,22 @@ export function Section({
   );
 }
 
-export function Eyebrow({ children }: { children: React.ReactNode }) {
+/** Small blush dot followed by the section label. */
+export function Eyebrow({
+  children,
+  className,
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) {
   return (
-    <span className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-[0.18em] text-brand-300">
-      <span aria-hidden className="h-px w-6 bg-brand-400/70" />
+    <span
+      className={cn(
+        "inline-flex items-center gap-2 text-[0.9rem] text-ink-800",
+        className,
+      )}
+    >
+      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-blush-400" />
       {children}
     </span>
   );
@@ -38,7 +49,7 @@ export function SectionHeading({
   eyebrow,
   title,
   subtitle,
-  align = "left",
+  align = "center",
   className,
 }: {
   id?: string;
@@ -51,7 +62,7 @@ export function SectionHeading({
   return (
     <div
       className={cn(
-        "flex flex-col gap-4",
+        "flex flex-col gap-5",
         align === "center" && "items-center text-center",
         className,
       )}
@@ -59,14 +70,14 @@ export function SectionHeading({
       {eyebrow ? <Eyebrow>{eyebrow}</Eyebrow> : null}
       <h2
         id={id ? `${id}-title` : undefined}
-        className="max-w-3xl text-3xl font-semibold leading-[1.12] sm:text-4xl md:text-[2.75rem]"
+        className="max-w-3xl text-[2rem] leading-[1.14] sm:text-[2.6rem] md:text-[3rem]"
       >
         {title}
       </h2>
       {subtitle ? (
         <p
           className={cn(
-            "max-w-2xl text-base leading-relaxed text-mist-400 sm:text-lg",
+            "max-w-2xl text-base leading-relaxed text-ink-400",
             align === "center" && "mx-auto",
           )}
         >
