@@ -9,6 +9,7 @@
 //   banniere-linkedin-clair.png      variante claire, 1584 × 396
 //   banniere-linkedin-clair@2x.png   variante claire, 3168 × 792
 //   apercu-profil.png                simulation des deux variantes sur un profil
+//   variantes/*.png                  autres accroches (1584 × 396 et @2x)
 
 import { chromium } from "playwright";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -34,6 +35,11 @@ await shoot(banner, "#banner", "banniere-linkedin.png", 1);
 await shoot(banner, "#banner", "banniere-linkedin@2x.png", 2);
 await shoot(`${banner}?theme=clair`, "#banner", "banniere-linkedin-clair.png", 1);
 await shoot(`${banner}?theme=clair`, "#banner", "banniere-linkedin-clair@2x.png", 2);
+for (const name of ["variante-1-equipe-ia", "variante-2-avant-apres", "variante-3-fondateur"]) {
+  const url = pathToFileURL(path.join(dir, "variantes", `${name}.html`)).href;
+  await shoot(url, "#banner", `variantes/${name}.png`, 1);
+  await shoot(url, "#banner", `variantes/${name}@2x.png`, 2);
+}
 // L'aperçu lit les PNG ci-dessus : il doit être rendu en dernier.
 await shoot(preview, "#apercu", "apercu-profil.png", 2, { width: 1760, height: 480 });
 
