@@ -108,7 +108,8 @@
   }
   .glow--mid {
     width: 620px; height: 620px; left: 520px; top: -300px;
-    background: radial-gradient(closest-side, rgba(87, 140, 255, 0.14), transparent);
+    background: radial-gradient(closest-side, var(--glow-sky), transparent);
+    opacity: 0.35;
   }
 
   .dots {
@@ -284,6 +285,7 @@
   .zone--mobile { left: 65px; top: 185px; width: 422px; height: 422px; background: rgba(255, 180, 0, 0.18); outline-color: #ffb400; }
   [data-zones] .zone { display: block; }
 </style>
+<link rel="stylesheet" href="variantes/palettes.css">
 </head>
 <body>
 <div class="banner" id="banner">
@@ -400,6 +402,7 @@
   const params = new URLSearchParams(location.search);
   if (params.get("theme") === "clair") document.documentElement.dataset.theme = "clair";
   if (params.has("zones")) document.documentElement.dataset.zones = "";
+  if (new URLSearchParams(location.search).get("palette")) document.documentElement.dataset.palette = new URLSearchParams(location.search).get("palette");
 </script>
 </body>
 </html>

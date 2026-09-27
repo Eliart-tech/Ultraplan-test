@@ -96,3 +96,60 @@
   display: grid; place-items: center;
 }
 .offer__cta svg { width: 15px; height: 15px; }
+
+/* ---------- Manifeste typographique ----------------------------------- */
+
+.v-manifest h1 { font-size: 66px; line-height: 1.02; letter-spacing: -0.04em; margin-top: 22px; }
+.keywords {
+  position: absolute; right: 64px; top: 70px;
+  display: grid; gap: 0; width: 300px;
+}
+.keywords div {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px; border-bottom: 1px solid var(--pill-border);
+  font-size: 22px; font-weight: 500; letter-spacing: -0.015em;
+}
+.keywords div:first-child { border-top: 1px solid var(--pill-border); }
+.keywords svg { width: 22px; height: 22px; color: var(--accent); }
+
+/* ---------- Hub d'outils connectés ------------------------------------ */
+
+.hub { position: absolute; right: 60px; top: 18px; width: 420px; height: 360px; }
+.hub svg.lines { position: absolute; inset: 0; }
+.hub__core {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 96px; height: 96px; border-radius: 50%;
+  background: var(--blush-300); color: var(--ink-800);
+  display: grid; place-items: center; text-align: center;
+  box-shadow: 0 0 0 12px rgba(255, 255, 255, 0.06), 0 0 0 26px rgba(255, 255, 255, 0.03), 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+  font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+}
+.hub__core svg { width: 30px; height: 30px; margin-bottom: 2px; }
+.node {
+  position: absolute; transform: translate(-50%, -50%);
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 38px; padding: 0 14px 0 10px; border-radius: 999px;
+  background: var(--card-bg); border: 1px solid var(--card-border);
+  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+  font-size: 13.5px; font-weight: 550; white-space: nowrap;
+}
+.node svg { width: 16px; height: 16px; color: var(--icon); }
+
+/* ---------- Méthode en 3 étapes --------------------------------------- */
+
+.method { position: absolute; left: 548px; right: 56px; top: 200px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.method__step {
+  position: relative; padding: 20px 22px; border-radius: 18px;
+  background: var(--card-bg); border: 1px solid var(--card-border);
+}
+.method__num { font-size: 12px; font-weight: 650; letter-spacing: 0.14em; color: var(--accent); }
+.method__title { margin-top: 6px; font-size: 19px; font-weight: 600; letter-spacing: -0.015em; }
+.method__body { margin-top: 6px; font-size: 14px; color: var(--muted); line-height: 1.4; }
+.method__step:not(:last-child)::after {
+  content: ""; position: absolute; right: -12px; top: 50%; width: 10px; height: 10px;
+  border-top: 2px solid var(--accent); border-right: 2px solid var(--accent);
+  transform: translate(0, -50%) rotate(45deg);
+}
+.v-method .copy { top: 58px; width: 980px; }
+.v-method h1 { font-size: 46px; margin-top: 18px; }
+.v-method .foot { position: absolute; right: 56px; top: 66px; margin: 0; }

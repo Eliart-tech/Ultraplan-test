@@ -94,7 +94,8 @@
   }
   .glow--mid {
     width: 620px; height: 620px; left: 520px; top: -300px;
-    background: radial-gradient(closest-side, rgba(87, 140, 255, 0.14), transparent);
+    background: radial-gradient(closest-side, var(--glow-sky), transparent);
+    opacity: 0.35;
   }
 
   .dots {

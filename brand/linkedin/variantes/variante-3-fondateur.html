@@ -6,6 +6,7 @@
 <!-- Variante de la bannière LinkedIn Maiven, 1584 × 396. ?zones=1 affiche la zone de la photo. -->
 <link rel="stylesheet" href="base.css">
 <link rel="stylesheet" href="extra.css">
+<link rel="stylesheet" href="palettes.css">
 </head>
 <body>
 <div class="banner" id="banner">
@@ -49,6 +50,7 @@
 </div>
 <script>
   if (new URLSearchParams(location.search).has("zones")) document.documentElement.dataset.zones = "";
+  if (new URLSearchParams(location.search).get("palette")) document.documentElement.dataset.palette = new URLSearchParams(location.search).get("palette");
 </script>
 </body>
 </html>

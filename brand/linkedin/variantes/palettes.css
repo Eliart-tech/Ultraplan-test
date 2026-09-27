@@ -1,0 +1,46 @@
+/*
+  Palettes de couleurs alternatives. S'activent avec ?palette=<nom> sur
+  n'importe quelle bannière (thème sombre). « marine » est la palette Maiven.
+  Chaque palette redéfinit le fond, le texte et les deux couleurs d'accent
+  (rôle « pêche » = accent principal, rôle « ciel » = lueurs et icônes).
+*/
+:root[data-palette="emeraude"] {
+  --bg-a: #041a16; --bg-b: #0a3129; --bg-c: #0f4638;
+  --blush-200: #f8e7c6; --blush-300: #f0d19b; --sky-300: #bfeadb; --sky-500: #3fbf9b;
+  --muted: rgba(205, 238, 226, 0.74);
+  --glow-sky: rgba(63, 191, 155, 0.38); --glow-blush: rgba(240, 209, 155, 0.18);
+  --dot: rgba(191, 234, 219, 0.16);
+  --accent: var(--blush-300); --icon: var(--sky-300);
+}
+:root[data-palette="prune"] {
+  --bg-a: #150b1f; --bg-b: #261333; --bg-c: #3a1d4b;
+  --blush-200: #ffe1ea; --blush-300: #ffc3d6; --sky-300: #e0d0ff; --sky-500: #a57dff;
+  --muted: rgba(234, 220, 255, 0.72);
+  --glow-sky: rgba(165, 125, 255, 0.40); --glow-blush: rgba(255, 195, 214, 0.20);
+  --dot: rgba(224, 208, 255, 0.16);
+  --accent: var(--blush-300); --icon: var(--sky-300);
+}
+:root[data-palette="graphite"] {
+  --bg-a: #0b0c0f; --bg-b: #15171c; --bg-c: #22252d;
+  --blush-200: #fbe3c4; --blush-300: #f5c28b; --sky-300: #d9dde6; --sky-500: #8a93a8;
+  --muted: rgba(222, 226, 235, 0.68);
+  --glow-sky: rgba(138, 147, 168, 0.30); --glow-blush: rgba(245, 194, 139, 0.16);
+  --dot: rgba(217, 221, 230, 0.13);
+  --accent: var(--blush-300); --icon: var(--sky-300);
+}
+:root[data-palette="ocean"] {
+  --bg-a: #03163f; --bg-b: #073083; --bg-c: #0a5bb8;
+  --blush-200: #ffe7a8; --blush-300: #ffd166; --sky-300: #cfe7ff; --sky-500: #7cc4ff;
+  --muted: rgba(214, 233, 255, 0.78);
+  --glow-sky: rgba(124, 196, 255, 0.40); --glow-blush: rgba(255, 209, 102, 0.16);
+  --dot: rgba(207, 231, 255, 0.18);
+  --accent: var(--blush-300); --icon: var(--sky-300);
+}
+:root[data-palette="corail"] {
+  --bg-a: #2a0f12; --bg-b: #4a1a1f; --bg-c: #6e2a2c;
+  --blush-200: #ffe9dc; --blush-300: #ffcfb5; --sky-300: #ffe1d4; --sky-500: #ff8a6b;
+  --muted: rgba(255, 228, 216, 0.74);
+  --glow-sky: rgba(255, 138, 107, 0.34); --glow-blush: rgba(255, 207, 181, 0.18);
+  --dot: rgba(255, 225, 212, 0.14);
+  --accent: var(--blush-300); --icon: var(--sky-300);
+}
