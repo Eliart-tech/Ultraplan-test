@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Bannière LinkedIn — Maiven</title>
+<!--
+  Bannière LinkedIn (profil personnel) aux couleurs de Maiven.
+  Format LinkedIn : 1584 × 396 px. Export PNG : `node render.mjs`.
+
+  Zone réservée : la photo de profil recouvre le quart inférieur gauche
+  (environ x < 520 px, y > 180 px). Rien d'important n'y est placé.
+
+  Ajouter `?theme=clair` à l'URL pour la variante claire.
+-->
+<style>
+  @font-face {
+    font-family: "Inter";
+    src: url("fonts/inter-latin-wght-normal.woff2") format("woff2");
+    font-weight: 100 900;
+    font-display: block;
+  }
+
+  :root {
+    --ink-950: #121939;
+    --ink-900: #1b2450;
+    --ink-800: #253066;
+    --ink-700: #3a4680;
+    --sky-100: #f0f6ff;
+    --sky-200: #e6efff;
+    --sky-300: #d1e3ff;
+    --sky-500: #578cff;
+    --blush-200: #f9e2dc;
+    --blush-300: #f6d6cf;
+    --blush-400: #eeb9ad;
+    --ok: #5fd4a0;
+
+    /* Thème sombre (par défaut). */
+    --bg-a: var(--ink-950);
+    --bg-b: var(--ink-900);
+    --bg-c: var(--ink-800);
+    --text: #ffffff;
+    --muted: rgba(209, 227, 255, 0.72);
+    --faint: rgba(255, 255, 255, 0.07);
+    --ring: rgba(255, 255, 255, 0.075);
+    --dot: rgba(209, 227, 255, 0.16);
+    --glow-sky: rgba(87, 140, 255, 0.42);
+    --glow-blush: rgba(246, 214, 207, 0.20);
+    --pill-bg: rgba(255, 255, 255, 0.06);
+    --pill-border: rgba(255, 255, 255, 0.14);
+    --card-bg: linear-gradient(160deg, rgba(255, 255, 255, 0.11), rgba(255, 255, 255, 0.04));
+    --card-border: rgba(255, 255, 255, 0.16);
+    --row-bg: rgba(255, 255, 255, 0.05);
+    --icon-bg: rgba(209, 227, 255, 0.10);
+    --icon: var(--sky-300);
+    --accent: var(--blush-300);
+  }
+
+  :root[data-theme="clair"] {
+    --bg-a: #ffffff;
+    --bg-b: var(--sky-100);
+    --bg-c: var(--sky-200);
+    --text: var(--ink-800);
+    --muted: #5b5b5b;
+    --faint: rgba(37, 48, 102, 0.06);
+    --ring: rgba(37, 48, 102, 0.08);
+    --dot: rgba(37, 48, 102, 0.14);
+    --glow-sky: rgba(87, 140, 255, 0.22);
+    --glow-blush: rgba(246, 214, 207, 0.75);
+    --pill-bg: rgba(255, 255, 255, 0.75);
+    --pill-border: rgba(37, 48, 102, 0.12);
+    --card-bg: linear-gradient(160deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.82));
+    --card-border: rgba(37, 48, 102, 0.10);
+    --row-bg: var(--sky-100);
+    --icon-bg: var(--sky-200);
+    --icon: var(--ink-800);
+    --accent: #d9826f;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { background: #0b0f24; }
+
+  body {
+    font-family: "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+
+  .banner {
+    position: relative;
+    width: 1584px;
+    height: 396px;
+    overflow: hidden;
+    color: var(--text);
+    background: linear-gradient(118deg, var(--bg-a) 0%, var(--bg-b) 48%, var(--bg-c) 100%);
+  }
+
+  /* ---------- Décor ---------------------------------------------------- */
+
+  .glow { position: absolute; border-radius: 50%; filter: blur(10px); }
+  .glow--sky {
+    width: 900px; height: 900px; right: -260px; top: -520px;
+    background: radial-gradient(closest-side, var(--glow-sky), transparent);
+  }
+  .glow--blush {
+    width: 760px; height: 760px; left: -200px; bottom: -470px;
+    background: radial-gradient(closest-side, var(--glow-blush), transparent);
+  }
+  .glow--mid {
+    width: 620px; height: 620px; left: 520px; top: -300px;
+    background: radial-gradient(closest-side, rgba(87, 140, 255, 0.14), transparent);
+  }
+
+  .dots {
+    position: absolute; inset: 0;
+    background-image: radial-gradient(var(--dot) 1.2px, transparent 1.4px);
+    background-size: 22px 22px;
+    background-position: 11px 11px;
+    -webkit-mask-image: radial-gradient(ellipse 560px 300px at 1310px 170px, #000 20%, transparent 100%);
+            mask-image: radial-gradient(ellipse 560px 300px at 1310px 170px, #000 20%, transparent 100%);
+  }
+
+  /* Anneaux centrés sur l'emplacement de la photo de profil : ils l'encadrent. */
+  .rings { position: absolute; left: 0; top: 0; }
+
+  .grid-line {
+    position: absolute; top: 0; bottom: 0; width: 1px;
+    background: linear-gradient(to bottom, transparent, var(--faint), transparent);
+  }
+
+  /* ---------- Colonne texte -------------------------------------------- */
+
+  .copy {
+    position: absolute;
+    left: 548px;
+    top: 62px;
+    width: 600px;
+  }
+
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 21px; font-weight: 500; letter-spacing: -0.01em;
+  }
+  .brand__mark {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--blush-300);
+    display: grid; place-items: center;
+    box-shadow: 0 0 0 6px rgba(246, 214, 207, 0.12);
+  }
+  .brand__mark svg { width: 19px; height: 19px; }
+  .brand__sep { width: 1px; height: 18px; background: var(--pill-border); margin: 0 4px; }
+  .brand__tag {
+    font-size: 13px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  h1 {
+    margin-top: 26px;
+    font-size: 45px;
+    line-height: 1.08;
+    font-weight: 500;
+    letter-spacing: -0.028em;
+  }
+  h1 .accent {
+    background: linear-gradient(90deg, var(--blush-300) 0%, var(--blush-200) 45%, #ffffff 100%);
+    -webkit-background-clip: text;
+            background-clip: text;
+    color: transparent;
+  }
+  :root[data-theme="clair"] h1 .accent {
+    background: linear-gradient(90deg, #d9826f 0%, #c9705f 40%, var(--ink-700) 100%);
+    -webkit-background-clip: text;
+            background-clip: text;
+  }
+
+  .pills { display: flex; gap: 8px; margin-top: 24px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 36px; padding: 0 13px 0 12px;
+    border-radius: 999px;
+    background: var(--pill-bg);
+    border: 1px solid var(--pill-border);
+    font-size: 14px; font-weight: 500;
+    white-space: nowrap;
+  }
+  .pill svg { width: 15px; height: 15px; color: var(--accent); }
+
+  .foot {
+    display: flex; align-items: center; gap: 22px;
+    margin-top: 26px;
+    font-size: 15px; font-weight: 500; color: var(--muted);
+  }
+  .foot span { display: inline-flex; align-items: center; gap: 8px; }
+  .foot svg { width: 17px; height: 17px; }
+  .foot .cta { color: var(--text); }
+  .foot .cta svg { color: var(--accent); }
+  .foot .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--pill-border); }
+
+  /* ---------- Carte « workflow » ---------------------------------------- */
+
+  .card {
+    position: absolute;
+    right: 56px;
+    top: 58px;
+    width: 320px;
+    padding: 16px 16px 14px;
+    border-radius: 22px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: 0 30px 60px -20px rgba(5, 8, 25, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+    -webkit-backdrop-filter: blur(14px);
+            backdrop-filter: blur(14px);
+  }
+  :root[data-theme="clair"] .card {
+    box-shadow: 0 30px 60px -24px rgba(37, 48, 102, 0.28);
+  }
+
+  .card__head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 4px 12px;
+    font-size: 14px; font-weight: 600; letter-spacing: -0.005em;
+  }
+  .live {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 500; color: var(--muted);
+  }
+  .live i {
+    width: 8px; height: 8px; border-radius: 50%; background: var(--ok);
+    box-shadow: 0 0 0 4px rgba(95, 212, 160, 0.18);
+  }
+
+  .steps { list-style: none; display: grid; gap: 7px; position: relative; }
+  .step {
+    display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 11px;
+    height: 48px; padding: 0 10px 0 8px;
+    border-radius: 13px;
+    background: var(--row-bg);
+  }
+  .step__icon {
+    width: 34px; height: 34px; border-radius: 10px;
+    display: grid; place-items: center;
+    background: var(--icon-bg); color: var(--icon);
+  }
+  .step__icon svg { width: 17px; height: 17px; }
+  .step--agent .step__icon { background: var(--blush-300); color: var(--ink-800); }
+  .step__label { font-size: 13.5px; font-weight: 600; line-height: 1.2; }
+  .step__meta { font-size: 11.5px; font-weight: 450; color: var(--muted); margin-top: 2px; }
+  .check {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: rgba(95, 212, 160, 0.16); color: var(--ok);
+  }
+  :root[data-theme="clair"] .check { color: #1f9e6a; background: rgba(31, 158, 106, 0.12); }
+  .check svg { width: 13px; height: 13px; }
+  .pending {
+    width: 22px; height: 22px; border-radius: 50%;
+    border: 2px solid var(--pill-border);
+    border-top-color: var(--accent);
+    transform: rotate(35deg);
+  }
+
+  /* Pastille flottante au coin de la carte. */
+  .chip {
+    position: absolute;
+    right: 318px;
+    top: 36px;
+    display: inline-flex; align-items: center; gap: 8px;
+    height: 34px; padding: 0 14px 0 10px;
+    border-radius: 999px;
+    background: var(--blush-300);
+    color: var(--ink-800);
+    font-size: 13px; font-weight: 600; letter-spacing: -0.005em;
+    box-shadow: 0 14px 28px -10px rgba(5, 8, 25, 0.5);
+    transform: rotate(-4deg);
+  }
+  .chip svg { width: 16px; height: 16px; }
+
+  /* Aperçu de la zone masquée par la photo (?zones=1). */
+  .zone {
+    display: none;
+    position: absolute; left: 47px; top: 199px; width: 300px; height: 300px; border-radius: 50%;
+    background: rgba(255, 60, 60, 0.35); outline: 2px dashed #ff5a5a;
+  }
+  .zone--mobile { left: 65px; top: 185px; width: 422px; height: 422px; background: rgba(255, 180, 0, 0.18); outline-color: #ffb400; }
+  [data-zones] .zone { display: block; }
+</style>
+</head>
+<body>
+<div class="banner" id="banner">
+
+  <!-- Décor -->
+  <div class="glow glow--sky"></div>
+  <div class="glow glow--mid"></div>
+  <div class="glow glow--blush"></div>
+  <div class="dots"></div>
+  <div class="grid-line" style="left: 520px"></div>
+
+  <svg class="rings" width="1584" height="396" viewBox="0 0 1584 396" fill="none" aria-hidden="true">
+    <g stroke="var(--ring)" stroke-width="1.2">
+      <circle cx="200" cy="350" r="190"/>
+      <circle cx="200" cy="350" r="262"/>
+      <circle cx="200" cy="350" r="340" stroke-dasharray="2 7"/>
+      <circle cx="200" cy="350" r="424"/>
+    </g>
+    <!-- Nœuds posés sur les anneaux : clin d'œil aux agents connectés. -->
+    <g fill="var(--blush-300)">
+      <circle cx="310" cy="195" r="3.5"/>
+      <circle cx="420" cy="107" r="2.5" opacity=".7"/>
+      <circle cx="60" cy="96" r="2.5" opacity=".55"/>
+    </g>
+    <g fill="var(--sky-500)">
+      <circle cx="152" cy="98" r="3" opacity=".9"/>
+      <circle cx="470" cy="190" r="2.5" opacity=".6"/>
+    </g>
+  </svg>
+
+  <!-- Colonne texte -->
+  <div class="copy">
+    <div class="brand">
+      <span class="brand__mark">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M4 19V6.4c0-.62.75-.93 1.19-.49L12 12.7l6.81-6.79c.44-.44 1.19-.13 1.19.49V19"
+                stroke="#253066" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <span>Maiven</span>
+      <span class="brand__sep"></span>
+      <span class="brand__tag">Agence IA pour PME</span>
+    </div>
+
+    <h1>Automatisez vos opérations,<br><span class="accent">scalez plus vite.</span></h1>
+
+    <div class="pills">
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
+        Agents IA plug &amp; play
+      </span>
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></svg>
+        Automatisations sur mesure
+      </span>
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        Audit &amp; formation
+      </span>
+    </div>
+
+    <div class="foot">
+      <span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+        maivenagency.com
+      </span>
+      <i class="dot"></i>
+      <span class="cta">
+        Réservez un appel découverte
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+      </span>
+    </div>
+  </div>
+
+  <!-- Carte workflow -->
+  <div class="card">
+    <div class="card__head">
+      <span>Workflow actif</span>
+      <span class="live"><i></i>En direct</span>
+    </div>
+    <ol class="steps">
+      <li class="step">
+        <span class="step__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6"/><path d="M22 11h-6"/></svg></span>
+        <span><div class="step__label">Nouveau lead</div><div class="step__meta">Formulaire du site</div></span>
+        <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+      </li>
+      <li class="step step--agent">
+        <span class="step__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg></span>
+        <span><div class="step__label">Qualifié par l’agent IA</div><div class="step__meta">Analyse et priorisation</div></span>
+        <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+      </li>
+      <li class="step">
+        <span class="step__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg></span>
+        <span><div class="step__label">CRM mis à jour</div><div class="step__meta">Fiche et historique</div></span>
+        <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
+      </li>
+      <li class="step">
+        <span class="step__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg></span>
+        <span><div class="step__label">Relance personnalisée</div><div class="step__meta">Envoi automatique</div></span>
+        <span class="pending"></span>
+      </li>
+    </ol>
+  </div>
+
+  <div class="chip">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+    Actif 24h/24, 7j/7
+  </div>
+
+  <div class="zone zone--mobile"></div>
+  <div class="zone"></div>
+</div>
+<script>
+  const params = new URLSearchParams(location.search);
+  if (params.get("theme") === "clair") document.documentElement.dataset.theme = "clair";
+  if (params.has("zones")) document.documentElement.dataset.zones = "";
+</script>
+</body>
+</html>

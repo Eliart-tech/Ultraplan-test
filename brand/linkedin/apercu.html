@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Aperçu du profil — bannière Maiven</title>
+<!--
+  Simulation de la bannière sur un profil LinkedIn (bureau) : carte de 804 px,
+  bannière à l'échelle, photo de profil de 152 px qui déborde en bas à gauche.
+  Sert à vérifier que rien d'important n'est masqué. Lit les PNG exportés.
+-->
+<style>
+  @font-face {
+    font-family: "Inter";
+    src: url("fonts/inter-latin-wght-normal.woff2") format("woff2");
+    font-weight: 100 900;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    background: #f4f2ee;
+  }
+  #apercu { display: flex; gap: 36px; padding: 32px; width: max-content; }
+  .col { display: grid; gap: 12px; }
+  .caption { font-size: 13px; font-weight: 600; color: #5b5b5b; letter-spacing: 0.02em; }
+  .profile {
+    width: 804px;
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+  }
+  .profile img { display: block; width: 804px; height: 201px; }
+  .body { position: relative; padding: 64px 24px 24px; }
+  .avatar {
+    position: absolute; left: 24px; top: -104px;
+    width: 152px; height: 152px; border-radius: 50%;
+    border: 4px solid #fff;
+    background: #d9dde6;
+    overflow: hidden;
+  }
+  .avatar svg { width: 100%; height: 100%; }
+  .name { font-size: 24px; font-weight: 600; color: #1d1d1d; }
+  .headline { margin-top: 4px; font-size: 15px; color: #1d1d1d; }
+  .meta { margin-top: 8px; font-size: 13px; color: #666; }
+  .actions { display: flex; gap: 8px; margin-top: 14px; }
+  .btn { height: 32px; padding: 0 16px; border-radius: 999px; font-size: 15px; font-weight: 600; display: inline-flex; align-items: center; }
+  .btn--primary { background: #0a66c2; color: #fff; }
+  .btn--ghost { box-shadow: inset 0 0 0 1px #0a66c2; color: #0a66c2; }
+</style>
+</head>
+<body>
+<div id="apercu">
+  <div class="col">
+    <div class="caption">VERSION SOMBRE — banniere-linkedin.png</div>
+    <div class="profile">
+      <img src="banniere-linkedin@2x.png" alt="">
+      <div class="body">
+        <div class="avatar"><svg viewBox="0 0 152 152"><circle cx="76" cy="60" r="28" fill="#aab2c3"/><path d="M22 152c4-34 26-52 54-52s50 18 54 52z" fill="#aab2c3"/></svg></div>
+        <div class="name">Votre nom</div>
+        <div class="headline">Votre titre · Maiven — Agents IA &amp; automatisation pour PME</div>
+        <div class="meta">Votre ville · Coordonnées</div>
+        <div class="actions"><span class="btn btn--primary">Disponible pour</span><span class="btn btn--ghost">Ajouter une section</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="col">
+    <div class="caption">VERSION CLAIRE — banniere-linkedin-clair.png</div>
+    <div class="profile">
+      <img src="banniere-linkedin-clair@2x.png" alt="">
+      <div class="body">
+        <div class="avatar"><svg viewBox="0 0 152 152"><circle cx="76" cy="60" r="28" fill="#aab2c3"/><path d="M22 152c4-34 26-52 54-52s50 18 54 52z" fill="#aab2c3"/></svg></div>
+        <div class="name">Votre nom</div>
+        <div class="headline">Votre titre · Maiven — Agents IA &amp; automatisation pour PME</div>
+        <div class="meta">Votre ville · Coordonnées</div>
+        <div class="actions"><span class="btn btn--primary">Disponible pour</span><span class="btn btn--ghost">Ajouter une section</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
