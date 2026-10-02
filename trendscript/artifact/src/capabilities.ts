@@ -82,7 +82,16 @@ export interface McpError {
   result?: unknown;
 }
 
+export interface McpServerInfo {
+  server: string;
+  kind?: "connector" | "artifact";
+  authStatus: "connected" | "needs_reauth" | "unknown";
+  tools: { name: string }[];
+}
+
 export interface McpNamespace {
+  /** Connectors callable from this frame (manifest ∩ the viewer's connectors). Never prompts. */
+  listTools?(server?: string): Promise<{ servers: McpServerInfo[] }>;
   callTool(
     server: string,
     tool: string,
@@ -185,6 +194,35 @@ export function useEditionState(): EditionState {
 
 let ready: Promise<void> | null = null;
 
+const FIRECRAWL = "Firecrawl";
+
+/**
+ * `listTools()` never prompts: when it shows that Firecrawl is not connected
+ * (not listed, or listed without tools — also the state of a duplicate
+ * connector not chosen yet) or needs reconnecting, the page says so before
+ * the first analysis instead of promising live data. It only ever
+ * downgrades: before consent a connected Firecrawl lists from the manifest
+ * (`authStatus: "unknown"`), and a later successful call restores
+ * "available" (firecrawl.ts).
+ */
+async function checkFirecrawlListed(mcp: McpNamespace): Promise<void> {
+  if (typeof mcp.listTools !== "function") return;
+  let servers: McpServerInfo[];
+  try {
+    ({ servers } = await mcp.listTools(FIRECRAWL));
+  } catch {
+    return; // nothing learned: calls will tell
+  }
+  const current = getEditionState();
+  if (current.firecrawl !== "available" || current.firecrawlConfirmed) return;
+  const entry = (servers ?? []).find((server) => server.server === FIRECRAWL && server.kind !== "artifact");
+  if (!entry || !entry.tools?.length) {
+    updateEditionState({ firecrawl: "absent", firecrawlNote: "Firecrawl n'est pas connecté à votre compte claude.ai" });
+  } else if (entry.authStatus === "needs_reauth") {
+    updateEditionState({ firecrawl: "absent", firecrawlNote: "connexion Firecrawl expirée : reconnectez-le dans claude.ai" });
+  }
+}
+
 /** Resolves every `use()` once (free, no prompt) and records availability. */
 export function resolveCapabilities(): Promise<void> {
   ready ??= Promise.all([getSample(), getMcp(), getDownloads()]).then(([sample, mcp, downloads]) => {
@@ -194,6 +232,7 @@ export function resolveCapabilities(): Promise<void> {
       firecrawl: current.firecrawl === "blocked" ? "blocked" : mcp ? "available" : "absent",
       downloads: downloads ? "available" : "absent",
     });
+    if (mcp) void checkFirecrawlListed(mcp);
   });
   return ready;
 }

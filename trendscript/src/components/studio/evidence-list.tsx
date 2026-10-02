@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { PlatformIcon, platformLabel } from "@/components/ui/platform-icon";
 import { Thumbnail } from "@/components/ui/thumbnail";
 import { formatDateTime, formatRelative, formatSignalMetrics } from "@/lib/client/format";
+import { cn } from "@/lib/cn";
 import type { Signal } from "@/lib/types";
 import { SIGNAL_KIND_LABELS } from "./studio-options";
 import { safeHref } from "./studio-utils";
@@ -49,7 +50,7 @@ function EvidenceItem({ signal, now }: { signal: Signal; now: number }) {
           alt=""
           platform={signal.platform}
           aspect={vertical ? "portrait" : "video"}
-          className={vertical ? "w-12 sm:w-14" : "w-24 sm:w-32"}
+          className={cn("self-start", vertical ? "w-12 sm:w-14" : "w-24 sm:w-32")}
         />
       ) : (
         <PlatformIcon platform={signal.platform} size="md" decorative className="mt-0.5" />

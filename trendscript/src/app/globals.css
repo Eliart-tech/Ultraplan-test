@@ -258,8 +258,10 @@
 @layer base {
   html {
     color-scheme: light dark;
-    /* Keep anchored headings clear of the sticky header. */
+    /* Keep anchored headings clear of the sticky header, and focused fields
+       clear of the sticky action bar at the bottom of the Radar. */
     scroll-padding-top: 6rem;
+    scroll-padding-bottom: 11rem;
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
   }
@@ -439,11 +441,13 @@
   background-size: 200% 100%;
 }
 
-/* Translucent sticky bars (header, action bars). */
+/* Translucent sticky bars (header, action bars). The prefixed declaration
+   must come first: Lightning CSS merges the pair and keeps the last one, and
+   Chromium/Firefox ignore -webkit-backdrop-filter. */
 @utility glass {
   background-color: var(--ts-backdrop);
-  backdrop-filter: saturate(1.6) blur(14px);
   -webkit-backdrop-filter: saturate(1.6) blur(14px);
+  backdrop-filter: saturate(1.6) blur(14px);
 }
 
 /* Horizontal scrollers without a visible scrollbar (chips, tabs on mobile). */

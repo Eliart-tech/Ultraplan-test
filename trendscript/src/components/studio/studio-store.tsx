@@ -743,6 +743,12 @@ export interface ScriptJob {
   request: ScriptRequest;
   kind: ScriptRun["kind"];
   analysisId?: string;
+  /**
+   * Refine only: the web-research brief of the script being refined. A
+   * refinement keeps the same facts and sources without a new search, so the
+   * refined script carries the brief over (Faits & sources tab, exports).
+   */
+  previousResearch?: ResearchBrief;
 }
 
 export interface StudioActions {
@@ -856,7 +862,7 @@ export function StudioProvider({ entry, children }: StudioProviderProps) {
       research: request.settings.research,
     });
     try {
-      const script = await streamScript(
+      const streamed = await streamScript(
         request,
         (event) => {
           if (!controller.signal.aborted) dispatch({ type: "scriptEvent", event });
@@ -864,6 +870,10 @@ export function StudioProvider({ entry, children }: StudioProviderProps) {
         controller.signal,
       );
       if (controller.signal.aborted) return;
+      const script =
+        job.kind === "refine" && !streamed.research && job.previousResearch
+          ? { ...streamed, research: job.previousResearch }
+          : streamed;
       const saved = saveScriptToHistory({
         id: script.id,
         savedAt: new Date().toISOString(),

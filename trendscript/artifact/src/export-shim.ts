@@ -12,8 +12,9 @@ import { pushNotice } from "./notices";
 // Everything else is the app's own export code.
 export * from "../../src/lib/client/export";
 
+/** `undefined` while `use("downloads")` has not answered yet, `null` when absent. */
 let downloads: DownloadsNamespace | null | undefined;
-// `use()` is free: resolve it early so a click can act without waiting.
+// `use()` is free: resolve it early so a click can usually act without waiting.
 void getDownloads().then((value) => {
   downloads = value;
 });
@@ -44,23 +45,35 @@ async function copyInstead(name: string, content: string, why: string): Promise<
 
 /**
  * Offers `content` as a file. Call from a click handler. Same signature as
- * the app's version (fire-and-forget).
+ * the app's version (fire-and-forget); the outcome (saved, copied, refused)
+ * is reported by a toast in the polite live region.
  */
 export function downloadFile(name: string, content: string, mime = "text/plain"): void {
   void mime; // the platform derives the type from the extension
-  if (!downloads) {
-    // Clipboard first, while the click's user activation is still fresh.
+  if (downloads === null) {
+    // Clipboard right away, while the click's user activation is still fresh.
     void copyInstead(name, content, "Téléchargement indisponible dans cette vue");
     return;
   }
-  downloads.save({ filename: name, data: content }).then(
-    (result) => {
-      if (result.status === "saved") pushNotice("success", `« ${name} » enregistré.`);
-    },
-    (error: unknown) => {
-      const code = errorCode(error);
-      if (code === "declined") return;
-      void copyInstead(name, content, `Enregistrement impossible (${DOWNLOAD_ERRORS[code] ?? "indisponible dans cette vue"})`);
-    },
-  );
+  // Not answered yet: wait for it (claude.ai's save confirmation needs no fresh click).
+  const ready = downloads ? Promise.resolve(downloads) : getDownloads();
+  void ready.then((namespace) => {
+    if (!namespace) {
+      void copyInstead(name, content, "Téléchargement indisponible dans cette vue");
+      return;
+    }
+    namespace.save({ filename: name, data: content }).then(
+      (result) => {
+        if (result.status === "saved") pushNotice("success", `« ${name} » enregistré.`);
+      },
+      (error: unknown) => {
+        const code = errorCode(error);
+        if (code === "declined") {
+          pushNotice("info", `Enregistrement de « ${name} » annulé.`, 4_000);
+          return;
+        }
+        void copyInstead(name, content, `Enregistrement impossible (${DOWNLOAD_ERRORS[code] ?? "indisponible dans cette vue"})`);
+      },
+    );
+  });
 }

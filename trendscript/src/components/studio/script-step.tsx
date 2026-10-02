@@ -72,6 +72,7 @@ export function ScriptStep() {
       request: { ...baseRequest, settings: result.settings, refine: { previous, instruction } },
       kind: "refine",
       analysisId,
+      previousResearch: result.script.research,
     });
   };
 

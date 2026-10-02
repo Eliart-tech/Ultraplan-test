@@ -153,10 +153,10 @@ export function describeSampleError(error: unknown): string {
   }
 }
 
-/** Short French reason, for the banner and the script 503, once Claude is refused for this view. */
+/** Short French reason (a fragment), for the banner, hints and the script 503, once Claude is refused for this view. */
 const BLOCKED_NOTES: Record<string, string> = {
-  not_granted: "accès à Claude refusé pour cette page — rechargez-la pour l'autoriser",
-  sampling_disabled: "Claude non disponible pour ce compte claude.ai",
+  not_granted: "accès à Claude refusé pour cette page : rechargez-la et acceptez la demande de claude.ai",
+  sampling_disabled: "Claude n'est pas disponible pour ce compte ou cette organisation claude.ai",
 };
 
 /** Turns any `sample` rejection into a French AiError (and remembers permanent refusals). */
@@ -164,7 +164,10 @@ export function toAiError(error: unknown): AiError {
   if (error instanceof AiError) return error;
   const message = describeSampleError(error);
   if (isSampleError(error) && PERMANENT.has(error.code)) {
-    updateEditionState({ claude: "blocked", claudeNote: BLOCKED_NOTES[error.code] ?? "Claude indisponible dans cette vue" });
+    updateEditionState({
+      claude: "blocked",
+      claudeNote: BLOCKED_NOTES[error.code] ?? "Claude n'est pas disponible dans cette vue de claude.ai",
+    });
   }
   return new AiError(message);
 }

@@ -3,73 +3,54 @@
 import { CircleCheck, FileCode2, Info, TriangleAlert, X } from "lucide-react";
 import { useState } from "react";
 import { Container } from "@/components/ui/container";
+import { useNow } from "@/lib/client/use-now";
 import { cn } from "@/lib/cn";
-import { useEditionState, type EditionState } from "./capabilities";
-import { frenchDateTime } from "./edition";
+import { useEditionState } from "./capabilities";
+import { ageLabel, frenchDateTime, STALE_AFTER_MS } from "./edition";
+import { claudeBannerSentence, liveBannerSentence } from "./edition-text";
 import { dismissNotice, useNotices } from "./notices";
 
-const DISMISS_KEY = "trendscript:edition-banner:v1";
+/** Dismissal is per snapshot: a new capture shows the banner again. */
+const dismissKey = (capturedAt: string) => `trendscript:edition-banner:v2:${capturedAt}`;
 
-function readDismissed(): boolean {
+function readDismissed(capturedAt: string): boolean {
   try {
-    return window.localStorage.getItem(DISMISS_KEY) === "1";
+    return window.localStorage.getItem(dismissKey(capturedAt)) === "1";
   } catch {
     return false;
   }
 }
 
-function writeDismissed(): void {
+function writeDismissed(capturedAt: string): void {
   try {
-    window.localStorage.setItem(DISMISS_KEY, "1");
+    window.localStorage.setItem(dismissKey(capturedAt), "1");
   } catch {
     // storage blocked: the banner just comes back next time
   }
 }
 
-function liveSentence(state: EditionState): string {
-  switch (state.firecrawl) {
-    case "available":
-      return "+ Google Actualités et Tendances en direct via votre connecteur Firecrawl";
-    case "blocked":
-      return `(pas de données en direct : ${state.firecrawlNote ?? "Firecrawl refusé"})`;
-    case "absent":
-      return "(pas de connecteur Firecrawl ici : pas de données en direct)";
-    default:
-      return "+ données en direct via votre connecteur Firecrawl (vérification…)";
-  }
-}
-
-function claudeSentence(state: EditionState): string {
-  switch (state.claude) {
-    case "available":
-      return "Claude via votre compte claude.ai";
-    case "blocked":
-      return `mode sans IA (${state.claudeNote ?? "Claude refusé"})`;
-    case "absent":
-      return "Claude indisponible hors de claude.ai : mode sans IA";
-    default:
-      return "Claude via votre compte claude.ai (vérification…)";
-  }
-}
-
-/** Slim, dismissible notice under the header: what is real, live, or server-only here. */
+/** Slim, dismissible notice under the header: what is real, live, or server-only here, and how old the snapshot is. */
 export function EditionBanner({ capturedAt }: { capturedAt: string }) {
   const state = useEditionState();
-  const [dismissed, setDismissed] = useState(readDismissed);
+  const now = useNow();
+  const [dismissed, setDismissed] = useState(() => readDismissed(capturedAt));
   if (dismissed) return null;
+  const age = now - Date.parse(capturedAt);
   return (
     <div className="border-b border-line bg-surface/70">
       <Container className="flex items-start gap-2.5 py-2.5 text-[0.8125rem] leading-relaxed text-muted">
         <FileCode2 aria-hidden className="mt-0.5 size-4 shrink-0 text-accent" />
         <p className="min-w-0 flex-1">
           <span className="font-semibold text-ink">Édition HTML</span> — données réelles : instantané du{" "}
-          {frenchDateTime(capturedAt)} {liveSentence(state)} · {claudeSentence(state)} · Instagram, TikTok, YouTube et
-          SerpApi nécessitent la version serveur (clés API).
+          {frenchDateTime(capturedAt)} (heure de Paris,{" "}
+          <span className={cn(age > STALE_AFTER_MS && "font-medium text-warning-ink")}>{ageLabel(Math.max(0, age))}</span>){" "}
+          {liveBannerSentence(state)} · {claudeBannerSentence(state)} · Instagram, TikTok, YouTube et SerpApi nécessitent la
+          version serveur (clés API).
         </p>
         <button
           type="button"
           onClick={() => {
-            writeDismissed();
+            writeDismissed(capturedAt);
             setDismissed(true);
           }}
           aria-label="Masquer ce bandeau"

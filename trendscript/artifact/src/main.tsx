@@ -13,19 +13,18 @@ import NotFound from "@/app/not-found";
 import StudioPage from "@/app/page";
 import SettingsPage from "@/app/reglages/page";
 import { AppHeader } from "@/components/layout/app-header";
-import { Alert } from "@/components/ui/alert";
 import { Container } from "@/components/ui/container";
 import { useServerStatus } from "@/lib/client/use-server-status";
 import { useEditionState } from "./capabilities";
 import { EditionBanner, Toaster } from "./edition-banner";
-import { frenchDateTime, readInlineSnapshot } from "./edition";
+import { getSnapshot } from "./edition";
 import { installFakeServer } from "./fake-server";
 import { usePathname } from "./next-navigation";
 import { installPolyfills } from "./polyfills";
 import { installRouter, isRouteHash, navigate, scrollToAnchor } from "./router";
 
 installPolyfills();
-const snapshot = readInlineSnapshot();
+const snapshot = getSnapshot();
 installFakeServer(snapshot);
 installRouter();
 
@@ -69,20 +68,6 @@ function Page({ path }: { path: string }) {
   }
 }
 
-/** On Réglages: what applies in this edition, before the server-oriented setup guides. */
-function SettingsEditionNote() {
-  return (
-    <Container className="pt-8 sm:pt-12 -mb-4 sm:-mb-8">
-      <Alert tone="info" title="Édition HTML : aucune clé à configurer" role="none">
-        Claude répond avec votre compte claude.ai, et Google Trends et Google Actualités sont lus en direct par votre
-        connecteur Firecrawl quand il est connecté ; le reste vient de l&apos;instantané réel du{" "}
-        {frenchDateTime(snapshot.capturedAt)}. Les étapes de configuration ci-dessous (clés API, .env.local,
-        APP_PASSWORD) concernent la version serveur de TrendScript — voir trendscript/README.md.
-      </Alert>
-    </Container>
-  );
-}
-
 /** Re-reads the status (header pill, Réglages) when Claude / Firecrawl availability changes. */
 function StatusRefresher() {
   const { claude, firecrawl } = useEditionState();
@@ -116,7 +101,6 @@ function App() {
       <AppHeader />
       <EditionBanner capturedAt={snapshot.capturedAt} />
       <main id="contenu" tabIndex={-1} className="flex-1 outline-none">
-        {path === "/reglages" ? <SettingsEditionNote /> : null}
         <RouteErrorBoundary key={path}>
           <Suspense fallback={null}>
             <Page path={path} />

@@ -12,7 +12,11 @@
  * - every other source: the server connector itself, "non configurée" here
  *   because the edition has no API key — exactly like a server without keys.
  *
- * Every warning says where the data comes from and when the snapshot was taken.
+ * Every warning says where the data comes from and when the snapshot was taken,
+ * and every signal says it too (`editionOrigin`: "snapshot" or "live"), so the
+ * Sujets step can date what it shows. Thumbnails are dropped: claude.ai blocks
+ * every image host they come from, so rows use the compact platform-icon
+ * layout instead of an empty frame (and no blocked request is made).
  */
 
 import { SourceError } from "@/lib/server/http";
@@ -30,7 +34,7 @@ import { resolveRssChannels } from "@/lib/server/sources/youtube-rss";
 import type { Signal, SourceId } from "@/lib/types";
 import { capitalize, frenchDateTime, snapshotLabel } from "./edition";
 import { firecrawlUnavailableReason, firecrawlUsable } from "./firecrawl";
-import type { Snapshot, SnapshotSource } from "./snapshot-types";
+import type { EditionSignal, SignalOrigin, Snapshot, SnapshotSource } from "./snapshot-types";
 
 const MAX_NEWS_KEYWORDS = 8;
 
@@ -50,8 +54,17 @@ function joinWarnings(...parts: (string | undefined)[]): string | undefined {
   return text || undefined;
 }
 
-function cloneSignals(signals: Signal[]): Signal[] {
-  return structuredClone(signals);
+/** Signals as shown in this edition: origin recorded, thumbnail dropped (images are blocked here). */
+function tagSignals(signals: Signal[], origin: SignalOrigin): EditionSignal[] {
+  return signals.map((signal) => {
+    const tagged: EditionSignal = { ...signal, editionOrigin: origin };
+    delete tagged.thumbnailUrl;
+    return tagged;
+  });
+}
+
+function cloneSignals(signals: Signal[], origin: SignalOrigin): EditionSignal[] {
+  return tagSignals(structuredClone(signals), origin);
 }
 
 export function createEditionConnectors(snapshot: Snapshot): Record<SourceId, SourceConnector> {
@@ -102,15 +115,17 @@ export function createEditionConnectors(snapshot: Snapshot): Record<SourceId, So
       const liveKeys = new Set(live.map((trend) => trend.normalized));
       const merged = dedupeTrends([...live, ...snapTrends.filter((trend) => !liveKeys.has(trend.normalized))]);
       const signals = merged
-        .map((trend) =>
-          trendToSignal(trend, {
+        .map((trend) => {
+          const isLive = liveKeys.has(trend.normalized);
+          const signal = trendToSignal(trend, {
             source: "google_trends",
             geo,
             // Snapshot trends are described as of their capture ("en cours depuis…").
-            now: liveKeys.has(trend.normalized) ? ctx.now : capturedAt,
+            now: isLive ? ctx.now : capturedAt,
             keywords: ctx.keywords,
-          }),
-        )
+          });
+          return tagSignals([signal], isLive ? "live" : "snapshot")[0];
+        })
         .sort((a, b) => (b.metrics.searchVolume ?? 0) - (a.metrics.searchVolume ?? 0));
 
       const liveNote = live.length
@@ -164,7 +179,7 @@ export function createEditionConnectors(snapshot: Snapshot): Record<SourceId, So
           // The server connector itself: its RSS requests are routed through Firecrawl by the fake server.
           const result = await googleNewsConnector.fetch(ctx);
           return {
-            signals: result.signals,
+            signals: tagSignals(result.signals, "live"),
             warning: result.warning
               ? joinWarnings(result.warning, `Autres flux lus en direct via votre connecteur Firecrawl (${label} non utilisé)`)
               : undefined,
@@ -195,7 +210,7 @@ export function createEditionConnectors(snapshot: Snapshot): Record<SourceId, So
         throw new SourceError(`Google Actualités indisponible : en direct (${withoutDot(liveProblem)}), et ${entry.missing}.`);
       }
       // Same niche matching as the server connector does for top stories.
-      const signals = cloneSignals(entry.source.signals).map((signal) => ({
+      const signals = cloneSignals(entry.source.signals, "snapshot").map((signal) => ({
         ...signal,
         query: matchKeyword(keywords, [signal.title, ...signal.related.map((related) => related.title)]),
       }));
@@ -228,7 +243,7 @@ export function createEditionConnectors(snapshot: Snapshot): Record<SourceId, So
       }
       const entry = snapshotSource("wikipedia");
       if ("missing" in entry) throw new SourceError(`Wikipédia indisponible : ${entry.missing}.`);
-      const signals = cloneSignals(entry.source.signals).map((signal) => ({
+      const signals = cloneSignals(entry.source.signals, "snapshot").map((signal) => ({
         ...signal,
         query: matchKeyword(ctx.keywords, [signal.title]),
       }));
@@ -258,7 +273,7 @@ export function createEditionConnectors(snapshot: Snapshot): Record<SourceId, So
       const entry = snapshotSource("youtube_rss");
       if ("missing" in entry) throw new SourceError(`YouTube (RSS) indisponible : ${entry.missing}.`);
       return {
-        signals: cloneSignals(entry.source.signals),
+        signals: cloneSignals(entry.source.signals, "snapshot"),
         warning: joinWarnings(
           `${capitalize(label)} : vidéos publiées dans les 72 h précédant la capture, vues et likes relevés à ce moment-là`,
           warning,

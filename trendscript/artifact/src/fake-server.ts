@@ -19,16 +19,21 @@ import { jsonError, parseJsonBody } from "@/lib/server/request";
 import { getSourceStatuses } from "@/lib/server/sources";
 import { analyzeRequestSchema, scriptRequestSchema } from "@/lib/schemas";
 import { sseResponse } from "@/lib/sse";
-import type { AnalyzeEvent, ScriptEvent, ScriptRequest, SourceStatus } from "@/lib/types";
+import type { Analysis, AnalyzeEvent, ScriptEvent, ScriptRequest, SourceId, SourceStatus } from "@/lib/types";
 import { capabilitiesWithin, getEditionState, resolveCapabilities } from "./capabilities";
 import { createEditionConnectors } from "./connectors";
-import { AI_MODEL_LABEL, EDITION_ENV, frenchDateTime, SERVER_ONLY_SENTENCE } from "./edition";
+import { AI_MODEL_LABEL, EDITION_ENV, frenchDate, frenchDateTime, SERVER_ONLY_SENTENCE, STALE_AFTER_MS } from "./edition";
+import { claudeProblem, firecrawlMode } from "./edition-text";
 import { firecrawlFetchXml } from "./firecrawl";
 import { researchWithClaudeAi } from "./research";
 import { getClaudeClient } from "./sample-client";
-import type { Snapshot } from "./snapshot-types";
+import type { EditionAnalysis, EditionSignal, EditionTopic, Snapshot } from "./snapshot-types";
 
 const API_ORIGIN = "https://trendscript.edition";
+
+/** What Google Actualités costs in Firecrawl credits, everywhere it is described. */
+const NEWS_FEEDS =
+  "articles à la une + 1 flux par mot-clé de niche (8 au maximum) à chaque analyse, et 1 flux de titres récents sur le sujet à chaque script (même sans recherche web) ; 1 crédit Firecrawl par flux, résultats gardés 10 min";
 
 /** Feeds the server connectors fetch directly, routed through Firecrawl here. */
 const FIRECRAWL_FEEDS = [
@@ -36,13 +41,45 @@ const FIRECRAWL_FEEDS = [
   /^https:\/\/news\.google\.com\/rss(?:\/search)?(?:\?|$)/,
 ];
 
-const NO_CLAUDE_NOTE =
-  "Mode sans IA : Claude n'est pas accessible dans cette vue (ouvrez cette page dans claude.ai, connecté à votre compte, et autorisez-la à utiliser Claude). En attendant, les sujets ci-dessous sont regroupés automatiquement à partir des mêmes données réelles, sans angles proposés.";
+/** Replaces the server's "add ANTHROPIC_API_KEY" note: what applies in this view. */
+function noClaudeNote(): string {
+  return `Mode sans IA : ${claudeProblem()}. En attendant, les sujets ci-dessous sont regroupés automatiquement à partir des mêmes données réelles, sans angles proposés.`;
+}
 
-function scriptUnavailableMessage(note: string | undefined): string {
-  return note
-    ? `Génération de script indisponible : ${note}. Le script est écrit par Claude avec votre compte claude.ai.`
-    : "Génération de script indisponible : Claude n'est pas accessible dans cette vue. Ouvrez cette page dans claude.ai, connecté à votre compte, et autorisez-la à utiliser Claude : le script est écrit avec votre abonnement claude.ai.";
+function scriptUnavailableMessage(): string {
+  return `Génération de script indisponible : ${claudeProblem()}. Le script est écrit par Claude avec votre compte claude.ai.`;
+}
+
+/**
+ * Records where the analysis data came from (`analysis.edition`), and dates
+ * the topics built only from an old snapshot: past 48 h, a topic none of
+ * whose signals was read live gets its "Pourquoi maintenant" prefixed with
+ * the snapshot date and `editionAsOf` (its timing badge then says so too).
+ */
+export function withProvenance(analysis: Analysis, capturedAt: string): EditionAnalysis {
+  const signals = analysis.signals as EditionSignal[];
+  const sourcesOf = (origin: EditionSignal["editionOrigin"]) =>
+    [...new Set(signals.filter((signal) => signal.editionOrigin === origin).map((signal) => signal.source))] as SourceId[];
+  const snapshotSources = sourcesOf("snapshot");
+  const liveIds = new Set(signals.filter((signal) => signal.editionOrigin === "live").map((signal) => signal.id));
+  const age = Date.parse(analysis.createdAt) - Date.parse(capturedAt);
+  const stale = snapshotSources.length > 0 && age > STALE_AFTER_MS;
+  const topics = stale
+    ? analysis.topics.map((topic): EditionTopic => {
+        if (topic.signalIds.some((id) => liveIds.has(id))) return topic;
+        const whyNow = topic.whyNow.trim();
+        return {
+          ...topic,
+          whyNow: `Au moment de l'instantané du ${frenchDate(capturedAt)}${whyNow ? ` : ${whyNow}` : ""}`,
+          editionAsOf: capturedAt,
+        };
+      })
+    : analysis.topics;
+  return {
+    ...analysis,
+    topics,
+    edition: { capturedAt, snapshotSources, liveSources: sourcesOf("live") },
+  };
 }
 
 function abortError(): DOMException {
@@ -118,12 +155,9 @@ export function installFakeServer(snapshot: Snapshot): void {
   // -------------------------------------------------------------------------
 
   function editionStatus(source: SourceStatus): SourceStatus {
-    const state = getEditionState();
-    const firecrawlOk = state.firecrawl === "available";
-    const firecrawlWhy =
-      state.firecrawl === "blocked" && state.firecrawlNote
-        ? `Firecrawl indisponible (${state.firecrawlNote})`
-        : "connecteur Firecrawl non disponible dans cette vue";
+    // "maybe" until Firecrawl has answered once: say "if connected", never "en direct" as a fact.
+    const { mode, why } = firecrawlMode();
+    const firecrawlWhy = `pas de données en direct (${why})`;
     const snap = snapshot.sources[source.id as keyof Snapshot["sources"]];
     const count = snap && !snap.error ? snap.signals.length : 0;
     const snapNote = snap?.error
@@ -134,9 +168,12 @@ export function installFakeServer(snapshot: Snapshot): void {
       case "google_trends":
         return {
           ...source,
-          costNote: firecrawlOk
-            ? `${snapNote.replace(/\.$/, "")}, ${count} tendances (liste complète), + les 10 dernières tendances en direct via votre connecteur Firecrawl (1 crédit Firecrawl par analyse, résultat gardé 10 min).`
-            : `${snapNote.replace(/\.$/, "")}, ${count} tendances (liste complète). Tendances en direct : ${firecrawlWhy}.`,
+          costNote:
+            mode === "live"
+              ? `${snapNote.replace(/\.$/, "")}, ${count} tendances (liste complète), + les 10 dernières tendances en direct via votre connecteur Firecrawl (1 crédit Firecrawl par analyse, résultat gardé 10 min).`
+              : mode === "maybe"
+                ? `${snapNote.replace(/\.$/, "")}, ${count} tendances (liste complète), + les 10 dernières tendances en direct si votre connecteur Firecrawl est connecté à votre compte claude.ai (vérifié à la première analyse ; 1 crédit Firecrawl par analyse, résultat gardé 10 min).`
+                : `${snapNote.replace(/\.$/, "")}, ${count} tendances (liste complète). Tendances en direct : ${firecrawlWhy}.`,
           setup: [
             `Rien à configurer : l'instantané réel du ${capturedOn} (heure de Paris) est inclus dans cette page (France, fr).`,
             "Pour ajouter les tendances du moment en direct : connectez Firecrawl à votre compte claude.ai (Réglages → Connecteurs), puis autorisez cette page à l'utiliser lors de votre première analyse.",
@@ -146,9 +183,12 @@ export function installFakeServer(snapshot: Snapshot): void {
       case "google_news":
         return {
           ...source,
-          costNote: firecrawlOk
-            ? "En direct via votre connecteur Firecrawl : articles à la une + 1 flux par mot-clé de niche (8 au maximum), 1 crédit Firecrawl par flux, résultats gardés 10 min. Licence Google des flux RSS : usage personnel et non commercial."
-            : `${firecrawlWhy.charAt(0).toUpperCase()}${firecrawlWhy.slice(1)} : articles à la une de l'instantané du ${capturedOn} (${count} articles), sans recherche par mots-clés.`,
+          costNote:
+            mode === "live"
+              ? `En direct via votre connecteur Firecrawl : ${NEWS_FEEDS}. Licence Google des flux RSS : usage personnel et non commercial.`
+              : mode === "maybe"
+                ? `En direct si votre connecteur Firecrawl est connecté à votre compte claude.ai (vérifié à la première analyse) : ${NEWS_FEEDS}. Sinon : articles à la une de l'instantané du ${capturedOn} (${count} articles).`
+                : `${firecrawlWhy.charAt(0).toUpperCase()}${firecrawlWhy.slice(1)} : articles à la une de l'instantané du ${capturedOn} (${count} articles), sans recherche par mots-clés.`,
           setup: [
             "Rien à configurer pour les articles à la une : l'instantané réel est inclus dans cette page.",
             "Pour lire Google Actualités en direct (et chercher les articles de vos mots-clés de niche) : connectez Firecrawl à votre compte claude.ai (Réglages → Connecteurs), puis autorisez cette page à l'utiliser.",
@@ -189,8 +229,14 @@ export function installFakeServer(snapshot: Snapshot): void {
   // POST /api/analyze & /api/script
   // -------------------------------------------------------------------------
 
+  /**
+   * Claude for a run started by a click. Unlike the first paint (3 s cap),
+   * the progress UI is showing: wait for `use()` to settle (the platform
+   * answers within ~10 s, `null` at worst), so a slow host does not silently
+   * run the analysis without AI.
+   */
   async function usableClient() {
-    await capabilitiesWithin(3_000);
+    await capabilitiesWithin(15_000);
     if (getEditionState().claude !== "available") return null;
     return getClaudeClient();
   }
@@ -221,13 +267,14 @@ export function installFakeServer(snapshot: Snapshot): void {
     const client = await usableClient();
     return stream<AnalyzeEvent>(request, async (send, signal) => {
       const relay = (event: AnalyzeEvent) => {
-        if (event.type === "result" && !client) {
-          // The server's note names ANTHROPIC_API_KEY: say what applies here instead.
-          const blocked = getEditionState().claudeNote;
-          const note = blocked
-            ? `Mode sans IA : ${blocked}. En attendant, les sujets ci-dessous sont regroupés automatiquement à partir des mêmes données réelles, sans angles proposés.`
-            : NO_CLAUDE_NOTE;
-          event = { ...event, analysis: { ...event.analysis, notes: event.analysis.notes.map((line) => (line === NO_AI_NOTE ? note : line)) } };
+        if (event.type === "result") {
+          let { analysis } = event;
+          if (!client) {
+            // The server's note names ANTHROPIC_API_KEY: say what applies here instead.
+            const note = noClaudeNote();
+            analysis = { ...analysis, notes: analysis.notes.map((line) => (line === NO_AI_NOTE ? note : line)) };
+          }
+          event = { ...event, analysis: withProvenance(analysis, snapshot.capturedAt) };
         }
         send(event);
       };
@@ -237,7 +284,7 @@ export function installFakeServer(snapshot: Snapshot): void {
 
   async function script(request: Request): Promise<Response> {
     const client = await usableClient();
-    if (!client) return jsonError(scriptUnavailableMessage(getEditionState().claudeNote), 503);
+    if (!client) return jsonError(scriptUnavailableMessage(), 503);
     const body = await parseJsonBody(request, scriptRequestSchema, 2_000_000);
     if (!body.ok) return body.response;
     const scriptRequest = body.data as ScriptRequest;

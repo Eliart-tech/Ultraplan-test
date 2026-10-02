@@ -23,6 +23,8 @@ const INITIAL: ServerStatusState = { status: null, error: null, loading: true };
 let state: ServerStatusState = INITIAL;
 let fetchedAt = 0;
 let inflight: Promise<void> | null = null;
+/** A forced reload asked while a request was in flight: run one more when it settles. */
+let pendingForce = false;
 const listeners = new Set<() => void>();
 
 function setState(next: ServerStatusState) {
@@ -31,7 +33,11 @@ function setState(next: ServerStatusState) {
 }
 
 function load(force: boolean): Promise<void> {
-  if (inflight) return inflight;
+  if (inflight) {
+    // The in-flight request may have read the state before what prompted this reload.
+    if (force) pendingForce = true;
+    return inflight;
+  }
   if (!force && state.status && Date.now() - fetchedAt < STALE_MS) return Promise.resolve();
   if (!state.loading) setState({ ...state, loading: true });
   inflight = fetchServerStatus()
@@ -46,6 +52,10 @@ function load(force: boolean): Promise<void> {
     })
     .finally(() => {
       inflight = null;
+      if (pendingForce) {
+        pendingForce = false;
+        void load(true);
+      }
     });
   return inflight;
 }
