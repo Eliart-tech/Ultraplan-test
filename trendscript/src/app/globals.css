@@ -1,0 +1,465 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   TrendScript design tokens
+
+   Raw values live in `--ts-*` custom properties so the dark theme only has to
+   swap them; `@theme inline` below maps them to Tailwind utilities
+   (bg-surface, text-ink, border-line, bg-accent, text-hot-ink…).
+
+   Colour pairs that are guaranteed to pass WCAG AA (4.5:1) in both themes:
+     text-ink / text-muted / text-faint      on bg-canvas, bg-surface, bg-surface-2
+     text-accent                             on bg-canvas, bg-surface
+     text-{accent,hot,success,warning,danger}-fg   on bg-{same}
+     text-{accent,hot,success,warning,danger}-ink  on bg-{same}-soft or surfaces
+   The vivid `hot`, `success`, `warning` fills are for graphics (rings, bars,
+   dots, icons): use the `-ink` variant for text.
+--------------------------------------------------------------------------- */
+:root {
+  /* Neutrals */
+  --ts-canvas: #f6f7fb;
+  --ts-surface: #ffffff;
+  --ts-surface-2: #f0f1f7;
+  --ts-surface-3: #e7e9f2;
+  --ts-line: #e3e5ee;
+  --ts-line-strong: #cdd0de;
+  --ts-ink: #12142a;
+  --ts-muted: #5c6078;
+  --ts-faint: #686d8a;
+
+  /* Primary accent — electric violet */
+  --ts-accent: #6b4eff;
+  --ts-accent-hover: #5a3df2;
+  --ts-accent-fg: #ffffff;
+  --ts-accent-soft: #efecff;
+  --ts-accent-ink: #5233e8;
+
+  /* Secondary accent — "hot" coral for momentum / virality */
+  --ts-hot: #ff5c3a;
+  --ts-hot-hover: #f04a27;
+  --ts-hot-fg: #1f0b05;
+  --ts-hot-soft: #ffeee9;
+  --ts-hot-ink: #c2351a;
+
+  /* Semantic */
+  --ts-success: #12a150;
+  --ts-success-fg: #ffffff;
+  --ts-success-soft: #e6f6ec;
+  --ts-success-ink: #0b7a3b;
+  --ts-warning: #f5a524;
+  --ts-warning-fg: #2b1a00;
+  --ts-warning-soft: #fff4de;
+  --ts-warning-ink: #8a5300;
+  --ts-danger: #d93036;
+  --ts-danger-hover: #c2252b;
+  --ts-danger-fg: #ffffff;
+  --ts-danger-soft: #fdecec;
+  --ts-danger-ink: #b4232a;
+
+  /* Platforms (icons and small badges only) */
+  --ts-platform-google: #4285f4;
+  --ts-platform-news: #64748b;
+  --ts-platform-wikipedia: #52525b;
+  --ts-platform-youtube: #ff0033;
+  --ts-platform-instagram: #e1306c;
+  --ts-platform-tiktok: #00a6b0;
+
+  /* Elevation, focus, decoration */
+  --ts-shadow-xs: 0 1px 2px rgb(18 20 42 / 0.05);
+  --ts-shadow-card: 0 1px 2px rgb(18 20 42 / 0.04), 0 4px 16px -6px rgb(18 20 42 / 0.08);
+  --ts-shadow-pop: 0 2px 6px rgb(18 20 42 / 0.06), 0 18px 40px -12px rgb(18 20 42 / 0.22);
+  --ts-focus: rgb(107 78 255 / 0.65);
+  --ts-glow: rgb(107 78 255 / 0.09);
+  --ts-glow-hot: rgb(255 92 58 / 0.06);
+  --ts-backdrop: rgb(246 247 251 / 0.78);
+  --ts-selection: rgb(107 78 255 / 0.18);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ts-canvas: #0b0c12;
+    --ts-surface: #13141c;
+    --ts-surface-2: #1a1b25;
+    --ts-surface-3: #22242f;
+    --ts-line: #252735;
+    --ts-line-strong: #343748;
+    --ts-ink: #ecedf5;
+    --ts-muted: #9a9eb5;
+    --ts-faint: #7e839c;
+
+    /* Lighter violet so it reads as text on dark surfaces; buttons then
+       carry dark ink instead of white (AA either way). */
+    --ts-accent: #8c76ff;
+    --ts-accent-hover: #9d8aff;
+    --ts-accent-fg: #0d0a26;
+    --ts-accent-soft: rgb(140 118 255 / 0.15);
+    --ts-accent-ink: #b3a6ff;
+
+    --ts-hot: #ff6a4a;
+    --ts-hot-hover: #ff8366;
+    --ts-hot-fg: #1f0b05;
+    --ts-hot-soft: rgb(255 106 74 / 0.14);
+    --ts-hot-ink: #ff9a82;
+
+    --ts-success: #2fbf71;
+    --ts-success-fg: #04150b;
+    --ts-success-soft: rgb(47 191 113 / 0.14);
+    --ts-success-ink: #6ad79a;
+    --ts-warning: #f5b23d;
+    --ts-warning-fg: #2b1a00;
+    --ts-warning-soft: rgb(245 178 61 / 0.14);
+    --ts-warning-ink: #f7c76f;
+    --ts-danger: #d93036;
+    --ts-danger-hover: #e5484d;
+    --ts-danger-fg: #ffffff;
+    --ts-danger-soft: rgb(229 72 77 / 0.15);
+    --ts-danger-ink: #ff8589;
+
+    --ts-platform-google: #6ea2ff;
+    --ts-platform-news: #94a3b8;
+    --ts-platform-wikipedia: #c4c4cc;
+    --ts-platform-youtube: #ff3355;
+    --ts-platform-instagram: #f0568a;
+    --ts-platform-tiktok: #00c2cc;
+
+    --ts-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
+    --ts-shadow-card: 0 1px 2px rgb(0 0 0 / 0.35), 0 6px 20px -8px rgb(0 0 0 / 0.5);
+    --ts-shadow-pop: 0 2px 8px rgb(0 0 0 / 0.45), 0 24px 48px -12px rgb(0 0 0 / 0.65);
+    --ts-focus: rgb(157 138 255 / 0.75);
+    --ts-glow: rgb(140 118 255 / 0.12);
+    --ts-glow-hot: rgb(255 106 74 / 0.05);
+    --ts-backdrop: rgb(11 12 18 / 0.75);
+    --ts-selection: rgb(140 118 255 / 0.32);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Tailwind mapping (inline: utilities reference the live CSS variables, so
+   they follow the colour scheme without a `dark:` variant).
+--------------------------------------------------------------------------- */
+@theme inline {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-canvas: var(--ts-canvas);
+  --color-surface: var(--ts-surface);
+  --color-surface-2: var(--ts-surface-2);
+  --color-surface-3: var(--ts-surface-3);
+  --color-line: var(--ts-line);
+  --color-line-strong: var(--ts-line-strong);
+  --color-ink: var(--ts-ink);
+  --color-muted: var(--ts-muted);
+  --color-faint: var(--ts-faint);
+  /* Focus ring colour: outline-focus, ring-focus. */
+  --color-focus: var(--ts-focus);
+
+  --color-accent: var(--ts-accent);
+  --color-accent-hover: var(--ts-accent-hover);
+  --color-accent-fg: var(--ts-accent-fg);
+  --color-accent-soft: var(--ts-accent-soft);
+  --color-accent-ink: var(--ts-accent-ink);
+
+  --color-hot: var(--ts-hot);
+  --color-hot-hover: var(--ts-hot-hover);
+  --color-hot-fg: var(--ts-hot-fg);
+  --color-hot-soft: var(--ts-hot-soft);
+  --color-hot-ink: var(--ts-hot-ink);
+
+  --color-success: var(--ts-success);
+  --color-success-fg: var(--ts-success-fg);
+  --color-success-soft: var(--ts-success-soft);
+  --color-success-ink: var(--ts-success-ink);
+  --color-warning: var(--ts-warning);
+  --color-warning-fg: var(--ts-warning-fg);
+  --color-warning-soft: var(--ts-warning-soft);
+  --color-warning-ink: var(--ts-warning-ink);
+  --color-danger: var(--ts-danger);
+  --color-danger-hover: var(--ts-danger-hover);
+  --color-danger-fg: var(--ts-danger-fg);
+  --color-danger-soft: var(--ts-danger-soft);
+  --color-danger-ink: var(--ts-danger-ink);
+
+  --color-platform-google: var(--ts-platform-google);
+  --color-platform-news: var(--ts-platform-news);
+  --color-platform-wikipedia: var(--ts-platform-wikipedia);
+  --color-platform-youtube: var(--ts-platform-youtube);
+  --color-platform-instagram: var(--ts-platform-instagram);
+  --color-platform-tiktok: var(--ts-platform-tiktok);
+
+  --shadow-xs: var(--ts-shadow-xs);
+  --shadow-card: var(--ts-shadow-card);
+  --shadow-pop: var(--ts-shadow-pop);
+}
+
+@theme {
+  /* Display sizes for page titles (tight tracking is applied in base). */
+  --text-display: 2.25rem;
+  --text-display--line-height: 1.1;
+  --text-display--letter-spacing: -0.03em;
+  --text-title: 1.5rem;
+  --text-title--line-height: 1.2;
+  --text-title--letter-spacing: -0.02em;
+
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-indeterminate: ts-indeterminate 1.4s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  --animate-fade-in: ts-fade-in 180ms var(--ease-out-soft) both;
+  --animate-pop-in: ts-pop-in 160ms var(--ease-out-soft) both;
+  --animate-shimmer: ts-shimmer 1.6s linear infinite;
+
+  @keyframes ts-indeterminate {
+    0% {
+      transform: translateX(-100%) scaleX(0.4);
+    }
+    50% {
+      transform: translateX(30%) scaleX(0.6);
+    }
+    100% {
+      transform: translateX(160%) scaleX(0.4);
+    }
+  }
+
+  @keyframes ts-fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes ts-pop-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes ts-shimmer {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Base
+--------------------------------------------------------------------------- */
+@layer base {
+  html {
+    color-scheme: light dark;
+    /* Keep anchored headings clear of the sticky header. */
+    scroll-padding-top: 6rem;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: var(--ts-canvas);
+    /* A faint violet glow under the header: depth without decoration. */
+    background-image:
+      radial-gradient(60rem 22rem at 50% -10rem, var(--ts-glow), transparent 70%),
+      radial-gradient(40rem 18rem at 100% -8rem, var(--ts-glow-hot), transparent 70%);
+    background-repeat: no-repeat;
+    color: var(--ts-ink);
+    font-family: var(--font-sans);
+    /* Inter: straight-sided digits and disambiguated glyphs. */
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--ts-selection);
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ts-focus);
+    outline-offset: 2px;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    color: var(--ts-ink);
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Native controls inherit the theme (date pickers, scrollbars, selects). */
+  input,
+  select,
+  textarea {
+    accent-color: var(--ts-accent);
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--ts-faint);
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Components that need pseudo-elements (styled range input)
+--------------------------------------------------------------------------- */
+@layer components {
+  /* <input type="range" class="ts-range" style="--ts-fill: 42%">
+     The filled part of the track is painted from the --ts-fill percentage. */
+  .ts-range {
+    --ts-range-color: var(--ts-accent);
+    --ts-range-thumb: 1.25rem;
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    height: 1.75rem;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .ts-range:focus-visible {
+    outline: none;
+  }
+
+  .ts-range:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .ts-range::-webkit-slider-runnable-track {
+    height: 0.5rem;
+    border-radius: 999px;
+    background: linear-gradient(
+      to right,
+      var(--ts-range-color) 0 var(--ts-fill, 0%),
+      var(--ts-surface-3) var(--ts-fill, 0%) 100%
+    );
+  }
+
+  .ts-range::-moz-range-track {
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--ts-surface-3);
+  }
+
+  .ts-range::-moz-range-progress {
+    height: 0.5rem;
+    border-radius: 999px;
+    background: var(--ts-range-color);
+  }
+
+  .ts-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: var(--ts-range-thumb);
+    height: var(--ts-range-thumb);
+    margin-top: calc((0.5rem - var(--ts-range-thumb)) / 2);
+    border-radius: 999px;
+    background: var(--ts-surface);
+    border: 2px solid var(--ts-range-color);
+    box-shadow: var(--ts-shadow-card);
+    transition:
+      transform 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .ts-range::-moz-range-thumb {
+    width: var(--ts-range-thumb);
+    height: var(--ts-range-thumb);
+    border-radius: 999px;
+    background: var(--ts-surface);
+    border: 2px solid var(--ts-range-color);
+    box-shadow: var(--ts-shadow-card);
+    transition:
+      transform 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .ts-range:not(:disabled):hover::-webkit-slider-thumb {
+    transform: scale(1.08);
+  }
+
+  .ts-range:not(:disabled):hover::-moz-range-thumb {
+    transform: scale(1.08);
+  }
+
+  .ts-range:focus-visible::-webkit-slider-thumb {
+    box-shadow:
+      0 0 0 4px var(--ts-surface),
+      0 0 0 6px var(--ts-focus);
+  }
+
+  .ts-range:focus-visible::-moz-range-thumb {
+    box-shadow:
+      0 0 0 4px var(--ts-surface),
+      0 0 0 6px var(--ts-focus);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Utilities
+--------------------------------------------------------------------------- */
+
+/* Skeleton shimmer that follows the theme. */
+@utility shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--ts-surface-2) 0%,
+    var(--ts-surface-3) 50%,
+    var(--ts-surface-2) 100%
+  );
+  background-size: 200% 100%;
+}
+
+/* Translucent sticky bars (header, action bars). */
+@utility glass {
+  background-color: var(--ts-backdrop);
+  backdrop-filter: saturate(1.6) blur(14px);
+  -webkit-backdrop-filter: saturate(1.6) blur(14px);
+}
+
+/* Horizontal scrollers without a visible scrollbar (chips, tabs on mobile). */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Signature gradient of the logo mark and premium highlights. */
+@utility bg-brand {
+  background-image: linear-gradient(135deg, #7b5cff 0%, #6b4eff 45%, #ff5c3a 130%);
+}
+
+@utility text-brand {
+  background-image: linear-gradient(100deg, var(--ts-accent) 10%, var(--ts-hot) 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
