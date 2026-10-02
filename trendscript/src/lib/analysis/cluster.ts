@@ -7,7 +7,7 @@
 import type { AnalyzeRequest, Platform, Signal, Topic } from "../types";
 import { scoreTopic } from "./scoring";
 import { detectSensitivity } from "./sensitivity";
-import { containment, jaccard, shortHash, tokenSet, tokenize } from "./text";
+import { containment, jaccard, shortHash, tokenSet, tokenSetExact, tokenize } from "./text";
 
 interface Cluster {
   seed: Signal;
@@ -21,6 +21,16 @@ const SEED_KINDS = new Set(["search_trend", "article_views"]);
 
 function signalTokens(signal: Signal): Set<string> {
   return tokenSet(signal.title, signal.text, signal.tags.join(" "), ...signal.related.map((r) => r.title));
+}
+
+/**
+ * Tokens used to attach a signal to a trend: the author's name is removed so
+ * a "tf1" search trend does not swallow every "…｜TF1 INFO" video.
+ */
+function matchTokens(signal: Signal): Set<string> {
+  const tokens = signalTokens(signal);
+  for (const token of tokenSet(signal.author)) tokens.delete(token);
+  return tokens;
 }
 
 function capitalize(value: string): string {
@@ -58,17 +68,53 @@ function whyNow(members: Signal[]): string {
   return parts.length ? `${parts.join(" · ")}.` : "Signal détecté dans les sources analysées.";
 }
 
-function nicheFitFromKeywords(request: AnalyzeRequest, tokens: Set<string>): number | undefined {
-  const niche = tokenSet(request.niche, request.keywords.join(" "));
-  if (niche.size === 0) return undefined;
-  const overlap = containment(niche, tokens);
-  return Math.round(Math.min(100, overlap * 160));
+/** Token sets of a topic: `core` = titles and hashtags, `all` adds texts and related headlines. */
+interface TopicTokens {
+  core: Set<string>;
+  all: Set<string>;
+  coreExact: Set<string>;
+  allExact: Set<string>;
+}
+
+function topicTokens(members: Signal[]): TopicTokens {
+  const result: TopicTokens = { core: new Set(), all: new Set(), coreExact: new Set(), allExact: new Set() };
+  const add = (into: Set<string>, from: Set<string>) => from.forEach((token) => into.add(token));
+  for (const member of members) {
+    const core = [member.title, member.tags.join(" ")];
+    const extra = [member.text, ...member.related.map((r) => r.title)];
+    add(result.core, tokenSet(...core));
+    add(result.coreExact, tokenSetExact(...core));
+    add(result.all, tokenSet(...core, ...extra));
+    add(result.allExact, tokenSetExact(...core, ...extra));
+  }
+  return result;
+}
+
+/**
+ * Explicit keywords are strong intent: a topic whose titles contain one fully
+ * fits; a keyword found only in a related headline counts 70 % (homonyms such
+ * as "retraite" of a cyclist). Words of the free-text niche description
+ * ("jeunes", "actifs"…) are weaker evidence and reach 60 at most.
+ * A keyword typed with accents is matched with accents ("épargne" ≠ "épargné").
+ */
+function nicheFitFromKeywords(request: AnalyzeRequest, tokens: TopicTokens): number | undefined {
+  const hasAccent = (value: string) => /[^\u0000-\u007f]/.test(value);
+  const keywordFits = request.keywords.map((keyword) => {
+    const exact = hasAccent(keyword);
+    const set = exact ? tokenSetExact(keyword) : tokenSet(keyword);
+    const core = containment(set, exact ? tokens.coreExact : tokens.core);
+    const all = containment(set, exact ? tokens.allExact : tokens.all);
+    return Math.max(core, 0.7 * all);
+  });
+  const niche = tokenSet(request.niche);
+  if (keywordFits.length === 0 && niche.size === 0) return undefined;
+  const keywordFit = Math.max(0, ...keywordFits);
+  const nicheFit = Math.min(1, containment(niche, tokens.all) * 1.5) * 0.6;
+  return Math.round(100 * Math.max(keywordFit, nicheFit));
 }
 
 function buildTopic(cluster: Cluster, request: AnalyzeRequest, now: number): Topic {
   const { seed, members } = cluster;
-  const allTokens = new Set<string>();
-  for (const member of members) for (const token of signalTokens(member)) allTokens.add(token);
 
   const headlines = [
     ...members.flatMap((m) => m.related.map((r) => r.title)),
@@ -110,8 +156,8 @@ function buildTopic(cluster: Cluster, request: AnalyzeRequest, now: number): Top
     keywords,
     lifespan: isVideoOnly ? "court" : seed.kind === "search_trend" ? "flash" : "court",
     saturation: newsVolume >= 8 ? "elevee" : newsVolume >= 3 ? "moyenne" : "faible",
-    sensitivity: detectSensitivity(`${title} ${headlines.join(" ")}`),
-    scores: scoreTopic({ signals: members, nicheFit: nicheFitFromKeywords(request, allTokens), now }),
+    sensitivity: detectSensitivity(title, [...headlines, ...members.filter((m) => m.kind !== "news").map((m) => m.title)]),
+    scores: scoreTopic({ signals: members, nicheFit: nicheFitFromKeywords(request, topicTokens(members)), now }),
     angles: [],
   };
 }
@@ -140,7 +186,7 @@ export function basicTopics(signals: Signal[], request: AnalyzeRequest, now = Da
   // 2. Attach news and videos that mention a seed.
   for (const signal of byStrength) {
     if (assigned.has(signal.id)) continue;
-    const tokens = signalTokens(signal);
+    const tokens = matchTokens(signal);
     const match = clusters.find((c) => containment(c.key, tokens) >= (c.key.size === 1 ? 1 : 0.6));
     if (match) {
       match.members.push(signal);

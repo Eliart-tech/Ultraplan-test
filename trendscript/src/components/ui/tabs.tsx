@@ -24,7 +24,7 @@ export interface TabsProps<T extends string> {
   keepMounted?: boolean;
   /** Classes of the tab list. */
   listClassName?: string;
-  /** Classes of each panel. */
+  /** Classes of each panel (default "pt-5": replaces it when set). */
   panelClassName?: string;
   className?: string;
 }
@@ -46,7 +46,7 @@ export function Tabs<T extends string>({
   "aria-label": ariaLabel,
   keepMounted = false,
   listClassName,
-  panelClassName,
+  panelClassName = "pt-5",
   className,
 }: TabsProps<T>) {
   const base = useId();
@@ -126,7 +126,7 @@ export function Tabs<T extends string>({
             aria-labelledby={tabId(item.value)}
             hidden={!selected}
             tabIndex={0}
-            className={cn("pt-5 focus-visible:outline-offset-4", panelClassName)}
+            className={cn("focus-visible:outline-offset-4", panelClassName)}
           >
             {item.content}
           </div>

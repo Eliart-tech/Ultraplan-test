@@ -90,3 +90,35 @@ describe("basicTopics", () => {
     expect(topics[0].platforms).toEqual(expect.arrayContaining(["news", "youtube"]));
   });
 });
+
+describe("basicTopics niche fit", () => {
+  it("matches accented keywords exactly so 'épargné' is not 'épargne'", () => {
+    const signals = scoreSignals(
+      [
+        signal({
+          id: "t1",
+          title: "tadej pogacar",
+          source: "google_trends",
+          platform: "google",
+          kind: "search_trend",
+          metrics: { searchVolume: 2000 },
+          related: [{ title: "Pogacar épargné par les chutes", url: "https://example.org/a" }],
+        }),
+        signal({
+          id: "t2",
+          title: "livret a",
+          source: "google_trends",
+          platform: "google",
+          kind: "search_trend",
+          metrics: { searchVolume: 2000 },
+          related: [{ title: "Le Livret A, placement d'épargne préféré", url: "https://example.org/b" }],
+        }),
+      ],
+      NOW,
+    );
+    const topics = basicTopics(signals, { ...request, niche: "", keywords: ["épargne"] }, NOW);
+    const fit = (title: string) => topics.find((t) => t.title === title)?.scores.nicheFit;
+    expect(fit("Tadej pogacar")).toBe(0);
+    expect(fit("Livret a")).toBe(70);
+  });
+});

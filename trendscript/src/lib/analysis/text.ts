@@ -23,6 +23,24 @@ export function tokenize(value: string): string[] {
     .filter((token) => token.length > 2 && !STOP_WORDS.has(token) && !/^\d+$/.test(token));
 }
 
+/**
+ * Like `tokenize` but keeps accents: French needs it to tell "épargne"
+ * (savings) from "épargné" (spared) when matching a creator's keywords.
+ */
+export function tokenizeExact(value: string): string[] {
+  return value
+    .toLowerCase()
+    .normalize("NFC")
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((token) => token.length > 2 && !STOP_WORDS.has(stripAccents(token)) && !/^\d+$/.test(token));
+}
+
+export function tokenSetExact(...values: (string | undefined)[]): Set<string> {
+  const set = new Set<string>();
+  for (const value of values) if (value) for (const token of tokenizeExact(value)) set.add(token);
+  return set;
+}
+
 export function tokenSet(...values: (string | undefined)[]): Set<string> {
   const set = new Set<string>();
   for (const value of values) if (value) for (const token of tokenize(value)) set.add(token);

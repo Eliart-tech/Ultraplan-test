@@ -247,11 +247,8 @@ export function postProcessTopics(output: SynthesisOutput, { signals, request, n
     while (usedIds.has(id)) id = `${id}x`;
     usedIds.add(id);
 
-    const headlines = members.flatMap((m) => [m.title, ...m.related.map((r) => r.title)]).join(" ");
-    const sensitivity = mergeSensitivity(
-      proposal.sensitivity,
-      detectSensitivity(`${title} ${proposal.summary} ${headlines}`),
-    );
+    const headlines = members.flatMap((m) => [m.title, ...m.related.map((r) => r.title)]);
+    const sensitivity = mergeSensitivity(proposal.sensitivity, detectSensitivity(title, [proposal.summary, ...headlines]));
     const nicheFit = niche && Number.isFinite(proposal.nicheFit)
       ? Math.round(Math.min(100, Math.max(0, proposal.nicheFit)))
       : undefined;

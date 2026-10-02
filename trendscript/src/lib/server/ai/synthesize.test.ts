@@ -162,7 +162,7 @@ describe("postProcessTopics", () => {
   it("keeps the stricter sensitivity between Claude's and the keyword detector", () => {
     // Claude under-rates a deadly fire: the detector wins, with its own reason.
     const [fireTopic] = process(proposal({ signalRefs: ["s4"], title: "Incendie à Marseille", summary: "Un incendie." }));
-    expect(fireTopic.sensitivity).toEqual({ level: "elevee", reason: "Sujet sensible : décès / violence." });
+    expect(fireTopic.sensitivity).toEqual({ level: "elevee", reason: "Sujet sensible : drame / catastrophe." });
 
     // Claude is stricter than the detector: Claude's level and reason are kept.
     const [strict] = process(proposal({ sensitivity: { level: "elevee", reason: "  Mineurs impliqués  " } }));
