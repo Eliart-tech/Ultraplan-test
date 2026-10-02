@@ -13,6 +13,8 @@ interface Cluster {
   seed: Signal;
   key: Set<string>;
   members: Signal[];
+  /** Overrides the title derived from the seed. */
+  title?: string;
 }
 
 const SEED_KINDS = new Set(["search_trend", "article_views"]);
@@ -88,9 +90,10 @@ function buildTopic(cluster: Cluster, request: AnalyzeRequest, now: number): Top
     .map(([token]) => token);
 
   const title =
-    seed.kind === "short_video" || seed.kind === "video"
+    cluster.title ??
+    (seed.kind === "short_video" || seed.kind === "video"
       ? `Ce qui performe sur #${seed.query ?? keywords[0] ?? "niche"}`
-      : capitalize(seed.title);
+      : capitalize(seed.title));
 
   const summary = headlines.length
     ? `À la une : ${headlines.slice(0, 3).map((h) => `« ${h} »`).join(" ; ")}.`
@@ -145,31 +148,40 @@ export function basicTopics(signals: Signal[], request: AnalyzeRequest, now = Da
     }
   }
 
-  // 3. Remaining news: greedy grouping by headline similarity.
-  for (const signal of byStrength.filter((s) => s.kind === "news")) {
+  // 3. Niche keyword searches: one topic per keyword, so ten articles about
+  //    "intelligence artificielle" do not become ten topics.
+  const byQuery = new Map<string, Signal[]>();
+  for (const signal of byStrength) {
+    if (assigned.has(signal.id) || !signal.query) continue;
+    byQuery.set(signal.query, [...(byQuery.get(signal.query) ?? []), signal]);
+    assigned.add(signal.id);
+  }
+  for (const [query, members] of byQuery) {
+    const isVideo = members.every((m) => m.kind === "short_video" || m.kind === "video");
+    clusters.push({
+      seed: members[0],
+      key: tokenSet(query),
+      members,
+      title: isVideo ? `Ce qui performe sur #${query.replace(/\s+/g, "")}` : `Actualité « ${query} »`,
+    });
+  }
+
+  // 4. Everything else (general news, channel videos): greedy grouping by
+  //    headline similarity — an article and a video on the same story make a
+  //    cross-platform topic.
+  for (const signal of byStrength) {
     if (assigned.has(signal.id)) continue;
     const key = tokenSet(signal.title);
     const cluster: Cluster = { seed: signal, key, members: [signal] };
     assigned.add(signal.id);
     for (const other of byStrength) {
-      if (assigned.has(other.id) || other.kind !== "news") continue;
+      if (assigned.has(other.id)) continue;
       if (jaccard(key, tokenSet(other.title)) >= 0.3) {
         cluster.members.push(other);
         assigned.add(other.id);
       }
     }
     clusters.push(cluster);
-  }
-
-  // 4. Remaining niche videos: one topic per hashtag/keyword query.
-  const byQuery = new Map<string, Signal[]>();
-  for (const signal of byStrength) {
-    if (assigned.has(signal.id)) continue;
-    const query = signal.query ?? signal.tags[0] ?? signal.platform;
-    byQuery.set(query, [...(byQuery.get(query) ?? []), signal]);
-  }
-  for (const [, members] of byQuery) {
-    clusters.push({ seed: members[0], key: tokenSet(members[0].query), members });
   }
 
   return clusters
