@@ -18,11 +18,13 @@ function emit() {
   for (const listener of listeners) listener();
 }
 
-export function pushNotice(tone: Notice["tone"], text: string, durationMs = 6_000): void {
+/** Shows a toast for `durationMs`; returns its id (for an early `dismissNotice`). */
+export function pushNotice(tone: Notice["tone"], text: string, durationMs = 6_000): number {
   const notice = { id: nextId++, tone, text };
   notices = [...notices.slice(-2), notice];
   emit();
   setTimeout(() => dismissNotice(notice.id), durationMs);
+  return notice.id;
 }
 
 export function dismissNotice(id: number): void {

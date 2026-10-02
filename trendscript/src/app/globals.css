@@ -258,9 +258,10 @@
 @layer base {
   html {
     color-scheme: light dark;
-    /* Keep anchored headings clear of the sticky header, and focused fields
-       clear of the sticky action bar at the bottom of the Radar. */
-    scroll-padding-top: 6rem;
+    /* Keep anchored headings and focused fields clear of the sticky bars:
+       header + Studio step bar at the top (≈ 7.7rem from 640px up, 6.4rem
+       two-row header on phones), Radar action bar at the bottom. */
+    scroll-padding-top: 8rem;
     scroll-padding-bottom: 11rem;
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;

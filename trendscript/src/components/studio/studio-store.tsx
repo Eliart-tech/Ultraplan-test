@@ -751,6 +751,14 @@ export interface ScriptJob {
   previousResearch?: ResearchBrief;
 }
 
+/**
+ * A refinement runs no new research: the refined script keeps the brief of
+ * the script it refines (Faits & sources tab, exports, history).
+ */
+export function withPreviousResearch(script: GeneratedScript, job: Pick<ScriptJob, "kind" | "previousResearch">): GeneratedScript {
+  return job.kind === "refine" && !script.research && job.previousResearch ? { ...script, research: job.previousResearch } : script;
+}
+
 export interface StudioActions {
   /** Streams /api/analyze; moves to "Sujets" on success and saves the analysis to history. */
   runAnalysis: (request: AnalyzeRequest) => Promise<void>;
@@ -870,10 +878,7 @@ export function StudioProvider({ entry, children }: StudioProviderProps) {
         controller.signal,
       );
       if (controller.signal.aborted) return;
-      const script =
-        job.kind === "refine" && !streamed.research && job.previousResearch
-          ? { ...streamed, research: job.previousResearch }
-          : streamed;
+      const script = withPreviousResearch(streamed, job);
       const saved = saveScriptToHistory({
         id: script.id,
         savedAt: new Date().toISOString(),

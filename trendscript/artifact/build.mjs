@@ -287,6 +287,12 @@ const EDITION_PATCHES = [
   },
   // Studio
   {
+    file: file("components", "studio", "studio.tsx"),
+    find: "const meta = STEP_META[step];",
+    replace: "const meta = EditionUi.stepMeta(STEP_META[step], step, draft.analysis);",
+    why: "Sujets : « qui montaient le … » quand tout vient d'un vieil instantané",
+  },
+  {
     file: file("components", "studio", "radar-step.tsx"),
     find: 'Mode sans IA : sujets regroupés automatiquement, sans angles.{" "}',
     replace: '<EditionUi.RadarNoAiText />{" "}',
@@ -407,7 +413,8 @@ async function bundleJs() {
     legalComments: "none",
     jsx: "automatic",
     tsconfig,
-    charset: "utf8",
+    // ASCII output: non-ASCII characters (incl. U+FFFD in fast-xml-parser's regexes) become \u escapes.
+    charset: "ascii",
     define: {
       "process.env.NODE_ENV": '"production"',
       "process.env": "{}",

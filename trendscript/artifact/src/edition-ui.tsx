@@ -170,6 +170,19 @@ export function SnapshotNotice({ analysis, now }: { analysis: Analysis; now: num
   );
 }
 
+/**
+ * Studio step title: when every topic of the analysis is dated by an old
+ * snapshot (none has live data), "Les sujets qui montent" would state as
+ * current what was rising then — say when instead.
+ */
+export function stepMeta<T extends { title: string }>(meta: T, step: string, analysis: Analysis | null | undefined): T {
+  if (step !== "sujets" || !analysis) return meta;
+  const edition = metaOf(analysis);
+  const topics = analysis.topics as EditionTopic[];
+  if (!edition || topics.length === 0 || !topics.every((topic) => topic.editionAsOf)) return meta;
+  return { ...meta, title: `Les sujets qui montaient le ${frenchDate(edition.capturedAt)}` };
+}
+
 /** "Instantané du 2 oct. 2026" chip, next to the signal count. */
 export function SnapshotBadge({ analysis }: { analysis: Analysis }) {
   const meta = metaOf(analysis);

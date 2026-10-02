@@ -6,6 +6,7 @@ import {
   normalizeSettings,
   reachableSteps,
   studioReducer,
+  withPreviousResearch,
   type StudioAction,
   type StudioState,
 } from "./studio-store";
@@ -231,5 +232,27 @@ describe("normalizeSettings", () => {
 
   it("returns defaults for garbage", () => {
     expect(normalizeSettings("nope", "en").language).toBe("en");
+  });
+});
+
+describe("withPreviousResearch", () => {
+  const brief = {
+    facts: "FAITS VÉRIFIÉS\n- Le taux du livret A est fixé par arrêté.",
+    sources: [{ title: "Service-public.fr", url: "https://www.service-public.fr/particuliers/vosdroits/F2365", source: "service-public.fr" }],
+  };
+
+  it("keeps the brief of the refined script (a refinement runs no new research)", () => {
+    const refined = withPreviousResearch(script("refined"), { kind: "refine", previousResearch: brief });
+    expect(refined.research).toEqual(brief);
+    expect(refined.id).toBe("refined");
+  });
+
+  it("leaves a fresh generation, or a refinement that brought its own brief, untouched", () => {
+    const fresh = script("fresh");
+    expect(withPreviousResearch(fresh, { kind: "generate", previousResearch: brief })).toBe(fresh);
+    const own = { ...script("own"), research: { facts: "autre", sources: [] } };
+    expect(withPreviousResearch(own, { kind: "refine", previousResearch: brief })).toBe(own);
+    const none = script("none");
+    expect(withPreviousResearch(none, { kind: "refine" })).toBe(none);
   });
 });

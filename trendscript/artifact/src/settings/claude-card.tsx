@@ -6,10 +6,9 @@
  * key, no environment variable, no per-use Anthropic bill.
  */
 
-import { Check, Cpu, Sparkles, Wallet } from "lucide-react";
+import { Check, CircleCheck, CircleDashed, Cpu, Loader, Sparkles, Wallet } from "lucide-react";
 import { ExternalAnchor } from "@/components/settings/rich-text";
 import { SetupSteps } from "@/components/settings/setup-steps";
-import { StatusBadge } from "@/components/settings/source-card";
 import { Alert } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardFooter } from "@/components/ui/card";
@@ -51,7 +50,19 @@ export function ClaudeCard({ ai }: { ai: ServerStatus["ai"] }) {
             </h3>
             <p className="mt-0.5 text-sm text-muted">Le moteur d&apos;analyse et d&apos;écriture de TrendScript.</p>
             <div className="mt-2.5 flex flex-wrap gap-1.5">
-              <StatusBadge configured={ai.configured} feminine={false} />
+              {ai.configured ? (
+                <Badge tone="success" icon={<CircleCheck />}>
+                  Disponible
+                </Badge>
+              ) : state.claude === "pending" ? (
+                <Badge tone="neutral" icon={<Loader />}>
+                  Vérification…
+                </Badge>
+              ) : (
+                <Badge tone="neutral" icon={<CircleDashed />}>
+                  Indisponible ici
+                </Badge>
+              )}
               <Badge tone="neutral" variant="outline">
                 Inclus dans votre abonnement
               </Badge>

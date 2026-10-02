@@ -7,7 +7,7 @@
 
 import { copyText } from "@/components/ui/copy-button";
 import { getDownloads, type DownloadsNamespace } from "./capabilities";
-import { pushNotice } from "./notices";
+import { dismissNotice, pushNotice } from "./notices";
 
 // Everything else is the app's own export code.
 export * from "../../src/lib/client/export";
@@ -25,6 +25,9 @@ const DOWNLOAD_ERRORS: Record<string, string> = {
   too_large: "fichier trop volumineux",
   rate_limited: "une autre demande d'enregistrement est déjà ouverte",
 };
+
+/** Codes after which saves stay unusable in this view (contract: "treat like unavailable"). */
+const UNUSABLE = new Set(["unavailable", "not_granted", "capability_disabled", "capability_removed"]);
 
 function errorCode(error: unknown): string {
   return error && typeof error === "object" && typeof (error as { code?: unknown }).code === "string"
@@ -55,9 +58,18 @@ export function downloadFile(name: string, content: string, mime = "text/plain")
     void copyInstead(name, content, "Téléchargement indisponible dans cette vue");
     return;
   }
-  // Not answered yet: wait for it (claude.ai's save confirmation needs no fresh click).
+  // Not answered yet: wait for it (claude.ai's save confirmation needs no fresh click),
+  // and say so if it takes more than a moment.
+  let waiting: number | undefined;
+  const timer = downloads
+    ? undefined
+    : setTimeout(() => {
+        waiting = pushNotice("info", `Préparation de l'enregistrement de « ${name} »…`, 15_000);
+      }, 600);
   const ready = downloads ? Promise.resolve(downloads) : getDownloads();
   void ready.then((namespace) => {
+    clearTimeout(timer);
+    if (waiting !== undefined) dismissNotice(waiting);
     if (!namespace) {
       void copyInstead(name, content, "Téléchargement indisponible dans cette vue");
       return;
@@ -68,6 +80,8 @@ export function downloadFile(name: string, content: string, mime = "text/plain")
       },
       (error: unknown) => {
         const code = errorCode(error);
+        // Saves are unusable in this view: later clicks copy at once, while the click is fresh.
+        if (UNUSABLE.has(code)) downloads = null;
         if (code === "declined") {
           pushNotice("info", `Enregistrement de « ${name} » annulé.`, 4_000);
           return;
