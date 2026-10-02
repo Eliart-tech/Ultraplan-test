@@ -6,6 +6,7 @@
  * Streams progress events as it goes.
  */
 
+import type Anthropic from "@anthropic-ai/sdk";
 import { basicTopics } from "../analysis/cluster";
 import { scoreSignals } from "../analysis/scoring";
 import { stripAccents } from "../analysis/text";
@@ -46,6 +47,11 @@ export interface AnalysisDeps {
   /** Epoch ms of the run (tests pin it). */
   now?: number;
   sourceTimeoutMs?: number;
+  /**
+   * Claude client used for the synthesis (defaults to one built from
+   * ANTHROPIC_API_KEY). The HTML edition passes a claude.ai-backed client.
+   */
+  client?: Anthropic;
 }
 
 interface SourceOutcome {
@@ -61,6 +67,7 @@ export async function runAnalysis(
   deps: AnalysisDeps = {},
 ): Promise<Analysis> {
   const connectors = deps.connectors ?? CONNECTORS;
+  const client = deps.client ?? getAnthropic(env);
   const now = deps.now ?? Date.now();
   const timeoutMs = deps.sourceTimeoutMs ?? SOURCE_TIMEOUT_MS;
   if (signal.aborted) throw cancelled();
@@ -93,12 +100,12 @@ export async function runAnalysis(
     notes.push(
       "Aucun signal n'a pu être récupéré : vérifiez les sources choisies (ou leur configuration dans Réglages) et relancez l'analyse.",
     );
-  } else if (getAnthropic(env)) {
+  } else if (client) {
     const selected = selectForSynthesis(signals);
     emit({ type: "synthesis_start", signalCount: selected.length, mode: "ai" });
     try {
       const aiTopics = await untilAborted(
-        synthesizeTopics({ signals: selected, request, signal, now, env }),
+        synthesizeTopics({ signals: selected, request, signal, now, env, client }),
         signal,
       );
       if (aiTopics.length > 0) {
