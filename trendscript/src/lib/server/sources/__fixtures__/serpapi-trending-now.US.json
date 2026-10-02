@@ -1,0 +1,128 @@
+{
+ "search_metadata": {
+  "id": "695926bc8c24bd247f1be7bc",
+  "status": "Success",
+  "json_endpoint": "https://serpapi.com/searches/207620ddb13648f8/695926bc8c24bd247f1be7bc.json",
+  "created_at": "2026-01-03 14:25:00 UTC",
+  "processed_at": "2026-01-03 14:25:00 UTC",
+  "google_trends_trending_now_url": "https://trends.google.com/_/TrendsUi/data/batchexecute?rpcids=i0OFE&source-path=%2Ftrending&hl=en",
+  "raw_html_file": "https://serpapi.com/searches/207620ddb13648f8/695926bc8c24bd247f1be7bc.html",
+  "prettify_html_file": "https://serpapi.com/searches/207620ddb13648f8/695926bc8c24bd247f1be7bc.prettify",
+  "total_time_taken": 0.86
+ },
+ "search_parameters": {
+  "engine": "google_trends_trending_now",
+  "hl": "en",
+  "geo": "US"
+ },
+ "trending_searches": [
+  {
+   "query": "venezuela",
+   "start_timestamp": 1767421200,
+   "active": true,
+   "search_volume": 2000000,
+   "increase_percentage": 1000,
+   "categories": [
+    {
+     "id": 11,
+     "name": "Other"
+    }
+   ],
+   "trend_breakdown": [
+    "maduro",
+    "venezuela news",
+    "nicolas maduro",
+    "venezuela bombing",
+    "news"
+   ],
+   "serpapi_google_trends_link": "https://serpapi.com/search.json?data_type=TIMESERIES&date=now+1-d&engine=google_trends&geo=US&hl=en&q=venezuela&tz=420",
+   "news_page_token": "xVXAj3icZZh7WM1nHMDP-f1-8SgswswW5ZZ7u7BL6bjMLXdyZ1ZamCzS6dHFnhJLIylCilCSLm5NOZ1q1co5ZaO07KLMZcpmtCTTHm32dDDvR__9Ps_3_b2X7_u9vhvT13l4-3r4aD_-xE3rVq1O3FWmUqnUSmH94AQPr4S5LiL7vODi7WaQe_37F7htL63I8t-D6iFPi1gJzk5ZJrJ65IAs8EK_MZjPzeEtcE3cDsy3zMz6GV-ssJ7mIu5dPmU_QmTpzpodIqsnlORgfO0XK7CW4jAMazk2XYT83tEyyL9KxP_qy7a7ILcYkALODDsG_rx2EvjAeXesd-s014tIyAGb7kq4O73lNcij6oLBQz48DV44siu4wCMO5zHpS5CfMwRDf5G8SyXH6QLYbiDOowy_jf2oMmd_LLL0hqcebLXjCv5fNXgo2Hb6PrCxPPS5bXx_f9JxyELq3XC2NQtqIPcZ_DPY0HAHPP3oZfBmP66dOqMQd1dkvhdnKc6aD84ImobxGdsaMF_svbW864Tal_yqOziwbwQ4vs1q3u3EIJz_WMxVns_fEpzkRv3syzoHPtHTBXzKxpr726IDb1hJX9ijsYWvJhd-DVvu7j0V8u_cLsD26gMHUT8ZU8D20QfA4Ws-A09stKL-xszAfex0vk17KC_H_kz25COeN53nD4wGp7d_E_yOhSN9Z0gq1vdWQiDXJdOXsx4wlkxwoq8GVzuAd4QhbiurK2ZhvV1_I07LHTx30_enVoMHvQ79P421glzjn435TLFZtO82FtxPtAf4A_V7sNdmt86IHdELVmH8_gLe5-hfmmif1X7c3y3a-8lrNuC84x2x_9yjza1joSAP-vbb57GnOdU9Crox2a7w73wdbFtZMfo--PM8a3Dha3kiqxIqLJHX_DVzMN6onYnxJl0JvnM4iLbgub8UHOcQCfbLYg0wVQfdKEanP7F-t4W_gA0ZIeCNRub8yOOHwNrv0zD_N91-43y_jgEXTXlMW3CFrclR58fjPmKWtIV83jX6ftj4BLBVPWqSp7FK9L0tBzG-r0sh9dNyHwIfN5yi_ncOwHlsA6LAucF24E1vTwLrfKrA-WZJiJ2VfdtD3t9uM-zBLt8X8lXvsgZzMY_BfiO3S-DE3G7g0CDWgJlDfwTbyIwlZ24hN0jdt2-FfLYD9KsE1L0N-9Zsu4lYUXo7HvvvklnEXGTRlvfT6TLOr8nm_caF7gGnuZ9lLCsOB2_xZu3RZanqeWx4WrMKsvZ_IO7JZiOKcZb3uo7C-BkHGzG-6Q5qJnmJF33rbkMH_O88kro_d2k7bMEUxwRdzI3Nb51nBLmNbbuXfPE7jJ81xfX52Z9c9fL6_3vNsDcwbtdM5s-QGFvq6WEdzjWubCnkC0p7gnMt-4AtS7vQRpsYA8ONAeCeR85gvcpEGfyD9WSMTx7NfHBYU8n8HdMJ8o7dx4GdO6Cekyou005WHkN9Kv1hVoX_ezij3pOHhc3G_0GTb-CetDpX6qMf7_loGfWV2t-f-dGX_6ucY7G_2Ouoj-Xx9tCHXNKRMTt1JvtOK_Ny3kcz83teInxeWbcXLLUpuQF-5-oEcGk25pfTgn7l-o_YG7rmoz6X9JeQo9T1TugdZb-DP0H-YCH6DzlmYDue5z56N3nj2iHP7uuZ3wjxPPCAP-NVS60lsKnWE3z6kOYt1gdG1jK2etqaceJGsKHhJPiE83rUYr6NzN83VrNXiZ0GXSqZ5gZwTAz7yMl3NzNOCLVOyM1anMVUh4q5Lu0D3FPvsXOYm08lQZ77G-pAqcfwWzhbZBL8SNa_iZ5UblLNwH5y_KnrnIdh4LyGFeBlO5F75PnGkeABHQ6zFrigp51W0M9NfZPAhxcvpq7X086_rECfIhmiGDeNnReAMx6wB-_leZdxNxm1lrJl3ibwWb05uL-atlbwxNj6fKI-t_JNwSoStas6-xX0HYphVAE4fp0384w5azHDaOhLXrsPfYQ0_-o87Ce8hrVEUgH7iHAz5BHlmPIquF9Pvsdp69hHhz1-xPs9cAnnrQxEXlGHJqNWkSpdUC-oG69_BPnYsbgfKWQp49iyFYh7ss82e8yXYkH7anlPXP7pC05JtRFZ_icsA_Kzwx3Bdtoq8AQnA3hPSA245U1IZF3yk1bzw55behUxTwajtpUD9rNPPRcRKrLqpyd4N1HXjsD8Kl0_9unGKg3fNbaNh3_PNXsF64dZ3cP_G8oetq4zhNr3on4I5m_Rf8DKF_PdbvQV2RQvRXlLXy7K46PwLqUUxbO3Mc5i3VQUjb5aLv5y_UvyRHCUdgP49a09wPnpGYwf_XzAp79g3oy8GUj9-B0B63V8F_H7mXVeXLvz4JyZP3D_er6p5pdowFmvMv6dXNSL-13F3kiznO9yjotOgPvsXwf7cu_xLvTboPCdqLAG8VPqGoB6X777dR31Wc13k-BHjJdp71Mf35TzHTKvmu96ae7k3htYl1n-i_yrGB6MBU9K5fnjFoPVVT4lkB8px__SlVrEd9neA72jvNwF_ioNG8Fe_7HL7_Dfm-mZkJ95jW8dp6_jzVoJD2R_tSeEbw8JV9CLSu1TmuH_pnc2wX9N_Zgw3rMxAuMd_VwxPnoU3u2U3Xl89-tiUIGD8p_5639hYVxr",
+   "serpapi_news_link": "https://serpapi.com/search.json?engine=google_trends_news&page_token=xVXAj3icZZh7WM1nHMDP-f1-8SgswswW5ZZ7u7BL6bjMLXdyZ1ZamCzS6dHFnhJLIylCilCSLm5NOZ1q1co5ZaO07KLMZcpmtCTTHm32dDDvR__9Ps_3_b2X7_u9vhvT13l4-3r4aD_-xE3rVq1O3FWmUqnUSmH94AQPr4S5LiL7vODi7WaQe_37F7htL63I8t-D6iFPi1gJzk5ZJrJ65IAs8EK_MZjPzeEtcE3cDsy3zMz6GV-ssJ7mIu5dPmU_QmTpzpodIqsnlORgfO0XK7CW4jAMazk2XYT83tEyyL9KxP_qy7a7ILcYkALODDsG_rx2EvjAeXesd-s014tIyAGb7kq4O73lNcij6oLBQz48DV44siu4wCMO5zHpS5CfMwRDf5G8SyXH6QLYbiDOowy_jf2oMmd_LLL0hqcebLXjCv5fNXgo2Hb6PrCxPPS5bXx_f9JxyELq3XC2NQtqIPcZ_DPY0HAHPP3oZfBmP66dOqMQd1dkvhdnKc6aD84ImobxGdsaMF_svbW864Tal_yqOziwbwQ4vs1q3u3EIJz_WMxVns_fEpzkRv3syzoHPtHTBXzKxpr726IDb1hJX9ijsYWvJhd-DVvu7j0V8u_cLsD26gMHUT8ZU8D20QfA4Ws-A09stKL-xszAfex0vk17KC_H_kz25COeN53nD4wGp7d_E_yOhSN9Z0gq1vdWQiDXJdOXsx4wlkxwoq8GVzuAd4QhbiurK2ZhvV1_I07LHTx30_enVoMHvQ79P421glzjn435TLFZtO82FtxPtAf4A_V7sNdmt86IHdELVmH8_gLe5-hfmmif1X7c3y3a-8lrNuC84x2x_9yjza1joSAP-vbb57GnOdU9Crox2a7w73wdbFtZMfo--PM8a3Dha3kiqxIqLJHX_DVzMN6onYnxJl0JvnM4iLbgub8UHOcQCfbLYg0wVQfdKEanP7F-t4W_gA0ZIeCNRub8yOOHwNrv0zD_N91-43y_jgEXTXlMW3CFrclR58fjPmKWtIV83jX6ftj4BLBVPWqSp7FK9L0tBzG-r0sh9dNyHwIfN5yi_ncOwHlsA6LAucF24E1vTwLrfKrA-WZJiJ2VfdtD3t9uM-zBLt8X8lXvsgZzMY_BfiO3S-DE3G7g0CDWgJlDfwTbyIwlZ24hN0jdt2-FfLYD9KsE1L0N-9Zsu4lYUXo7HvvvklnEXGTRlvfT6TLOr8nm_caF7gGnuZ9lLCsOB2_xZu3RZanqeWx4WrMKsvZ_IO7JZiOKcZb3uo7C-BkHGzG-6Q5qJnmJF33rbkMH_O88kro_d2k7bMEUxwRdzI3Nb51nBLmNbbuXfPE7jJ81xfX52Z9c9fL6_3vNsDcwbtdM5s-QGFvq6WEdzjWubCnkC0p7gnMt-4AtS7vQRpsYA8ONAeCeR85gvcpEGfyD9WSMTx7NfHBYU8n8HdMJ8o7dx4GdO6Cekyou005WHkN9Kv1hVoX_ezij3pOHhc3G_0GTb-CetDpX6qMf7_loGfWV2t-f-dGX_6ucY7G_2Ouoj-Xx9tCHXNKRMTt1JvtOK_Ny3kcz83teInxeWbcXLLUpuQF-5-oEcGk25pfTgn7l-o_YG7rmoz6X9JeQo9T1TugdZb-DP0H-YCH6DzlmYDue5z56N3nj2iHP7uuZ3wjxPPCAP-NVS60lsKnWE3z6kOYt1gdG1jK2etqaceJGsKHhJPiE83rUYr6NzN83VrNXiZ0GXSqZ5gZwTAz7yMl3NzNOCLVOyM1anMVUh4q5Lu0D3FPvsXOYm08lQZ77G-pAqcfwWzhbZBL8SNa_iZ5UblLNwH5y_KnrnIdh4LyGFeBlO5F75PnGkeABHQ6zFrigp51W0M9NfZPAhxcvpq7X086_rECfIhmiGDeNnReAMx6wB-_leZdxNxm1lrJl3ibwWb05uL-atlbwxNj6fKI-t_JNwSoStas6-xX0HYphVAE4fp0384w5azHDaOhLXrsPfYQ0_-o87Ce8hrVEUgH7iHAz5BHlmPIquF9Pvsdp69hHhz1-xPs9cAnnrQxEXlGHJqNWkSpdUC-oG69_BPnYsbgfKWQp49iyFYh7ss82e8yXYkH7anlPXP7pC05JtRFZ_icsA_Kzwx3Bdtoq8AQnA3hPSA245U1IZF3yk1bzw55behUxTwajtpUD9rNPPRcRKrLqpyd4N1HXjsD8Kl0_9unGKg3fNbaNh3_PNXsF64dZ3cP_G8oetq4zhNr3on4I5m_Rf8DKF_PdbvQV2RQvRXlLXy7K46PwLqUUxbO3Mc5i3VQUjb5aLv5y_UvyRHCUdgP49a09wPnpGYwf_XzAp79g3oy8GUj9-B0B63V8F_H7mXVeXLvz4JyZP3D_er6p5pdowFmvMv6dXNSL-13F3kiznO9yjotOgPvsXwf7cu_xLvTboPCdqLAG8VPqGoB6X777dR31Wc13k-BHjJdp71Mf35TzHTKvmu96ae7k3htYl1n-i_yrGB6MBU9K5fnjFoPVVT4lkB8px__SlVrEd9neA72jvNwF_ioNG8Fe_7HL7_Dfm-mZkJ95jW8dp6_jzVoJD2R_tSeEbw8JV9CLSu1TmuH_pnc2wX9N_Zgw3rMxAuMd_VwxPnoU3u2U3Xl89-tiUIGD8p_5639hYVxr"
+  },
+  {
+   "query": "cnn",
+   "start_timestamp": 1767423600,
+   "active": true,
+   "search_volume": 50000,
+   "increase_percentage": 300,
+   "categories": [
+    {
+     "id": 7,
+     "name": "Health"
+    }
+   ],
+   "trend_breakdown": [
+    "wsj",
+    "wall street journal",
+    "trump health"
+   ],
+   "serpapi_google_trends_link": "https://serpapi.com/search.json?data_type=TIMESERIES&date=now+1-d&engine=google_trends&geo=US&hl=en&q=cnn&tz=420",
+   "news_page_token": "DJUy3nica1xTlFpYmlpcEp-SWJJ4h0F08nkGBgZG5rfLzi9KzVsUGgzhszQdOYLC3_VjMTKfkVnRCpnPdLGqDEV--7-ZKPK1Z6ehmHfwgzYKX35KOAp_BtMiFH7GipvIfOYfr3ahyB_dm4rCX2t1CoXvs4MPhS_wLwSFP-mdMQp_3t5kFL7HqnXIfIYlUX9Q5BWtayB8ACcXgdM",
+   "serpapi_news_link": "https://serpapi.com/search.json?engine=google_trends_news&page_token=DJUy3nica1xTlFpYmlpcEp-SWJJ4h0F08nkGBgZG5rfLzi9KzVsUGgzhszQdOYLC3_VjMTKfkVnRCpnPdLGqDEV--7-ZKPK1Z6ehmHfwgzYKX35KOAp_BtMiFH7GipvIfOYfr3ahyB_dm4rCX2t1CoXvs4MPhS_wLwSFP-mdMQp_3t5kFL7HqnXIfIYlUX9Q5BWtayB8ACcXgdM"
+  },
+  {
+   "query": "akay diamonds",
+   "start_timestamp": 1767380400,
+   "active": true,
+   "search_volume": 50000,
+   "increase_percentage": 600,
+   "categories": [
+    {
+     "id": 10,
+     "name": "Law and Government"
+    },
+    {
+     "id": 16,
+     "name": "Shopping"
+    }
+   ],
+   "trend_breakdown": [
+    "traxnyc",
+    "trax nyc"
+   ],
+   "serpapi_google_trends_link": "https://serpapi.com/search.json?data_type=TIMESERIES&date=now+1-d&engine=google_trends&geo=US&hl=en&q=akay+diamonds&tz=420",
+   "news_page_token": "VmlwX3ica1xTlFpYmlpcEp-SWJI4cfJ5BgYGRpZ9FfKLUvMWhQYDAM7mDDw",
+   "serpapi_news_link": "https://serpapi.com/search.json?engine=google_trends_news&page_token=VmlwX3ica1xTlFpYmlpcEp-SWJI4cfJ5BgYGRpZ9FfKLUvMWhQYDAM7mDDw"
+  },
+  {
+   "query": "usc vs michigan",
+   "start_timestamp": 1767398400,
+   "end_timestamp": 1767449400,
+   "active": false,
+   "search_volume": 50000,
+   "increase_percentage": 900,
+   "categories": [
+    {
+     "id": 17,
+     "name": "Sports"
+    }
+   ],
+   "trend_breakdown": [
+    "michigan basketball",
+    "usc basketball",
+    "michigan basketball schedule",
+    "morez johnson jr.",
+    "where to watch usc trojans men's basketball vs michigan wolverines men's basketball"
+   ],
+   "serpapi_google_trends_link": "https://serpapi.com/search.json?data_type=TIMESERIES&date=now+1-d&engine=google_trends&geo=US&hl=en&q=usc+vs+michigan&tz=420",
+   "news_page_token": "uzM93nica1xTlFpYmlpcEp-SWJI4c_J5BgYGRpZlixoWpeYtCg1G4mclIvPdUOSPb_-Kwj-yeB0yn3lf7CMU-VUMT1Hk3wr9QJHf8OIFhA8AQl89vg",
+   "serpapi_news_link": "https://serpapi.com/search.json?engine=google_trends_news&page_token=uzM93nica1xTlFpYmlpcEp-SWJI4c_J5BgYGRpZlixoWpeYtCg1G4mclIvPdUOSPb_-Kwj-yeB0yn3lf7CMU-VUMT1Hk3wr9QJHf8OIFhA8AQl89vg"
+  },
+  {
+   "query": "bbc",
+   "start_timestamp": 1767423600,
+   "active": true,
+   "search_volume": 10000,
+   "increase_percentage": 400,
+   "categories": [
+    {
+     "id": 11,
+     "name": "Other"
+    }
+   ],
+   "serpapi_google_trends_link": "https://serpapi.com/search.json?data_type=TIMESERIES&date=now+1-d&engine=google_trends&geo=US&hl=en&q=bbc&tz=420",
+   "news_page_token": "vs23ZHica1xTlFpYmlpcEp-SWJI4Y_J5BgYGRpbNDz0WpeYtCg2G8tdtfoXCL32yB4Uf_3IuCv_Y9Gso_OPTtFH5tpeQ-cyCuWUQPgDXPzad",
+   "serpapi_news_link": "https://serpapi.com/search.json?engine=google_trends_news&page_token=vs23ZHica1xTlFpYmlpcEp-SWJI4Y_J5BgYGRpbNDz0WpeYtCg2G8tdtfoXCL32yB4Uf_3IuCv_Y9Gso_OPTtFH5tpeQ-cyCuWUQPgDXPzad"
+  }
+ ]
+}

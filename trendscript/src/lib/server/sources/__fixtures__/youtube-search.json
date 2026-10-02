@@ -1,0 +1,96 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Shape of GET /youtube/v3/search?part=snippet&type=video (search.list reference); ids and texts made up except 8Qn-7lnJ9rw (a real HugoDécrypte Short from the research notes).",
+  "response": {
+    "kind": "youtube#searchListResponse",
+    "etag": "e1",
+    "nextPageToken": "CBkQAA",
+    "regionCode": "FR",
+    "pageInfo": {
+      "totalResults": 1000000,
+      "resultsPerPage": 25
+    },
+    "items": [
+      {
+        "kind": "youtube#searchResult",
+        "etag": "s1",
+        "id": {
+          "kind": "youtube#video",
+          "videoId": "8Qn-7lnJ9rw"
+        },
+        "snippet": {
+          "publishedAt": "2026-10-01T13:33:34Z",
+          "channelId": "UCAcAnMF0OrCtUep3Y4M-ZPw",
+          "title": "Budget étudiant : le vrai coût de la rentrée",
+          "description": "…",
+          "channelTitle": "HugoDécrypte - Actus du jour",
+          "liveBroadcastContent": "none",
+          "publishTime": "2026-10-01T13:33:34Z"
+        }
+      },
+      {
+        "kind": "youtube#searchResult",
+        "etag": "s2",
+        "id": {
+          "kind": "youtube#video",
+          "videoId": "wIiKS1FR2KI"
+        },
+        "snippet": {
+          "publishedAt": "2026-09-29T18:40:43Z",
+          "channelId": "UCtest00000000000000002",
+          "title": "Intelligence artificielle : ce qui change pour les étudiants",
+          "description": "…",
+          "channelTitle": "Chaîne Test",
+          "liveBroadcastContent": "none"
+        }
+      },
+      {
+        "kind": "youtube#searchResult",
+        "etag": "s3",
+        "id": {
+          "kind": "youtube#video",
+          "videoId": "enTest00001"
+        },
+        "snippet": {
+          "publishedAt": "2026-09-30T10:00:00Z",
+          "channelId": "UCtest00000000000000003",
+          "title": "Student budget hacks",
+          "description": "…",
+          "channelTitle": "English Channel",
+          "liveBroadcastContent": "none"
+        }
+      },
+      {
+        "kind": "youtube#searchResult",
+        "etag": "s4",
+        "id": {
+          "kind": "youtube#video",
+          "videoId": "liveTest001"
+        },
+        "snippet": {
+          "publishedAt": "2026-10-02T08:00:00Z",
+          "channelId": "UCtest00000000000000004",
+          "title": "Live à venir : budget",
+          "description": "",
+          "channelTitle": "Chaîne Live",
+          "liveBroadcastContent": "upcoming"
+        }
+      },
+      {
+        "kind": "youtube#searchResult",
+        "etag": "s5",
+        "id": {
+          "kind": "youtube#channel",
+          "channelId": "UCtest00000000000000005"
+        },
+        "snippet": {
+          "publishedAt": "2020-01-01T00:00:00Z",
+          "channelId": "UCtest00000000000000005",
+          "title": "Une chaîne",
+          "description": "",
+          "channelTitle": "Une chaîne",
+          "liveBroadcastContent": "none"
+        }
+      }
+    ]
+  }
+}

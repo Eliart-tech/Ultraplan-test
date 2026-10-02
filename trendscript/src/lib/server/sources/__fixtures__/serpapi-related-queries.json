@@ -1,0 +1,52 @@
+{
+  "search_metadata": { "status": "Success", "google_trends_url": "https://trends.google.com/trends/embed/explore/RELATED_QUERIES?hl=fr&req=%7B%7D" },
+  "search_parameters": { "engine": "google_trends", "q": "coffee", "hl": "en", "date": "today 12-m", "data_type": "RELATED_QUERIES", "geo": "FR" },
+  "related_queries": {
+    "rising": [
+      {
+        "query": "usagi coffee",
+        "value": "Breakout",
+        "extracted_value": 8700,
+        "link": "https://trends.google.com/trends/explore?q=usagi+coffee&date=today+12-m&geo=FR",
+        "serpapi_link": "https://serpapi.com/search.json?data_type=RELATED_QUERIES&date=today+12-m&engine=google_trends&geo=FR&hl=en&q=usagi+coffee&tz=420"
+      },
+      {
+        "query": "bacha coffee champs-élysées",
+        "value": "Breakout",
+        "extracted_value": 7050,
+        "link": "https://trends.google.com/trends/explore?q=bacha+coffee+champs-%C3%A9lys%C3%A9es&date=today+12-m&geo=FR",
+        "serpapi_link": "https://serpapi.com/search.json?data_type=RELATED_QUERIES&date=today+12-m&engine=google_trends&geo=FR&hl=en&q=bacha+coffee+champs-%C3%A9lys%C3%A9es&tz=420"
+      },
+      {
+        "query": "crep and coffee",
+        "value": "+4,500%",
+        "extracted_value": 4500,
+        "link": "https://trends.google.com/trends/explore?q=crep+and+coffee&date=today+12-m&geo=FR",
+        "serpapi_link": "https://serpapi.com/search.json?data_type=RELATED_QUERIES&date=today+12-m&engine=google_trends&geo=FR&hl=en&q=crep+and+coffee&tz=420"
+      }
+    ],
+    "top": [
+      {
+        "query": "coffee shop",
+        "value": "100",
+        "extracted_value": 100,
+        "link": "https://trends.google.com/trends/explore?q=coffee+shop&date=today+12-m&geo=FR",
+        "serpapi_link": "https://serpapi.com/search.json?data_type=RELATED_QUERIES&date=today+12-m&engine=google_trends&geo=FR&hl=en&q=coffee+shop&tz=420"
+      },
+      {
+        "query": "the coffee",
+        "value": "30",
+        "extracted_value": 30,
+        "link": "https://trends.google.com/trends/explore?q=the+coffee&date=today+12-m&geo=FR",
+        "serpapi_link": "https://serpapi.com/search.json?data_type=RELATED_QUERIES&date=today+12-m&engine=google_trends&geo=FR&hl=en&q=the+coffee&tz=420"
+      },
+      {
+        "query": "cafe",
+        "value": "25",
+        "extracted_value": 25,
+        "link": "https://trends.google.com/trends/explore?q=cafe&date=today+12-m&geo=FR",
+        "serpapi_link": "https://serpapi.com/search.json?data_type=RELATED_QUERIES&date=today+12-m&engine=google_trends&geo=FR&hl=en&q=cafe&tz=420"
+      }
+    ]
+  }
+}

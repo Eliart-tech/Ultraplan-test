@@ -1,0 +1,66 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Shape of GET /{ig-user-id}?fields=business_discovery.username(x){followers_count,media_count,media.limit(25){...}} per Meta's IG User Business Discovery reference (counts 267788 / 5837 / 50 / 7757 are the doc's sample values; captions, permalinks and dates made up). Covers: reel, feed image, reel > 30 days, reel with hidden likes.",
+  "response": {
+    "business_discovery": {
+      "username": "hugodecrypte",
+      "name": "HugoDécrypte",
+      "followers_count": 267788,
+      "media_count": 1205,
+      "media": {
+        "data": [
+          {
+            "id": "17858843269216389",
+            "caption": "Ce qu'il faut retenir du budget 2027 en 60 secondes 👇\n#actu #budget",
+            "media_type": "VIDEO",
+            "media_product_type": "REELS",
+            "like_count": 5837,
+            "comments_count": 50,
+            "view_count": 7757,
+            "permalink": "https://www.instagram.com/reel/DPtest0001/",
+            "timestamp": "2026-09-30T18:00:00+0000",
+            "thumbnail_url": "https://scontent.cdninstagram.com/v/t51.2885-15/thumb1.jpg?oe=69139C40"
+          },
+          {
+            "id": "17894036119131554",
+            "caption": "Notre équipe en tournage",
+            "media_type": "IMAGE",
+            "media_product_type": "FEED",
+            "like_count": 2997,
+            "comments_count": 11,
+            "permalink": "https://www.instagram.com/p/DPtest0002/",
+            "timestamp": "2026-09-29T09:00:00+0000"
+          },
+          {
+            "id": "17894449363137701",
+            "caption": "Résumé de l'été",
+            "media_type": "VIDEO",
+            "media_product_type": "REELS",
+            "like_count": 3643,
+            "comments_count": 28,
+            "view_count": 50210,
+            "permalink": "https://www.instagram.com/reel/DPtest0003/",
+            "timestamp": "2026-08-01T09:00:00+0000"
+          },
+          {
+            "id": "17844278716241265",
+            "caption": "Pourquoi tout le monde parle de cette loi ?",
+            "media_type": "VIDEO",
+            "media_product_type": "REELS",
+            "comments_count": 43,
+            "view_count": 912000,
+            "permalink": "https://www.instagram.com/reel/DPtest0004/",
+            "timestamp": "2026-10-01T07:30:00+0000"
+          }
+        ],
+        "paging": {
+          "cursors": {
+            "before": "QVFIUmx1WTBpMGpJWDhvTW",
+            "after": "QVFIUjlUZAWtGcVlsOEsx"
+          }
+        }
+      },
+      "id": "17841401441775531"
+    },
+    "id": "17841405309211844"
+  }
+}

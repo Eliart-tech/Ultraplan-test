@@ -1,0 +1,10 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Doc sample of GET /ig_hashtag_search?user_id=…&q=bluebottle (IG Hashtag Search reference).",
+  "response": {
+    "data": [
+      {
+        "id": "17843857450040591"
+      }
+    ]
+  }
+}

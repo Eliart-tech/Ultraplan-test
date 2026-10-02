@@ -397,6 +397,12 @@ export interface ScriptRequest {
   profile: CreatorProfile;
   /** When refining, the previous version and what to change. */
   refine?: { previous: ScriptDraft; instruction: string };
+  /**
+   * Country of the analysis (ISO 3166-1 alpha-2) — locale of the web research
+   * and of the Google News enrichment. Optional: derived from the language
+   * when absent (fr → FR).
+   */
+  geo?: string;
 }
 
 // ---------------------------------------------------------------------------

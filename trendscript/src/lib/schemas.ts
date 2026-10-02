@@ -193,6 +193,12 @@ export const scriptRequestSchema = z.object({
   refine: z
     .object({ previous: scriptDraftSchema, instruction: shortText(1000).min(3) })
     .optional(),
+  geo: z
+    .string()
+    .trim()
+    .regex(/^[A-Za-z]{2}$/, "Code pays sur 2 lettres attendu")
+    .transform((value) => value.toUpperCase())
+    .optional(),
 });
 
 /** First zod issue as a French sentence for API error responses. */

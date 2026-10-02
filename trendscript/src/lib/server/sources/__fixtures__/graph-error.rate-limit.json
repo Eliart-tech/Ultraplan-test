@@ -1,0 +1,12 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Graph error payload shape for code 4 (application request limit reached).",
+  "response": {
+    "error": {
+      "message": "(#4) Application request limit reached",
+      "type": "OAuthException",
+      "is_transient": true,
+      "code": 4,
+      "fbtrace_id": "AbCdEfGh456"
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Graph error payload shape (code 10 = permission not granted, as documented for Instagram Public Content Access); message text made up.",
+  "response": {
+    "error": {
+      "message": "(#10) To use 'Instagram Public Content Access', your use of this endpoint must be reviewed and approved by Facebook.",
+      "type": "OAuthException",
+      "code": 10,
+      "fbtrace_id": "AbCdEfGh123"
+    }
+  }
+}

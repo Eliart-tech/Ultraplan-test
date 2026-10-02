@@ -1,0 +1,335 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Dataset of clockworks~tiktok-scraper (searchSection /video). Row 1 reproduces the README 'Scraped TikTok search queries' sample (CDN URLs shortened); the other rows are made up with the same documented fields to cover: French video with licensed sound, slideshow (duration 0), ad, video older than a week, unknown language ('un'), error row.",
+  "response": [
+    {
+      "id": "7543693751290481942",
+      "text": "ootd ☁️☁️\n\n#foruyou #fürdich #outfit #fit #viralvideos ",
+      "textLanguage": "en",
+      "createTime": 1756403075,
+      "createTimeISO": "2025-08-28T17:44:35.000Z",
+      "isAd": false,
+      "authorMeta": {
+        "id": "6733984297591636998",
+        "name": "gretalynnhihi",
+        "profileUrl": "https://www.tiktok.com/@gretalynnhihi",
+        "nickName": "Greta Lynn",
+        "verified": false,
+        "signature": "hellouu\nfashion | beauty | lifestyle",
+        "bioLink": null,
+        "privateAccount": false,
+        "following": 269,
+        "friends": 0,
+        "fans": 51200,
+        "heart": 3000000,
+        "video": 259,
+        "digg": 194800
+      },
+      "musicMeta": {
+        "musicName": "original sound",
+        "musicAuthor": "WYA ADRIAN | DJ",
+        "musicOriginal": true,
+        "musicId": "7529403355681147665"
+      },
+      "webVideoUrl": "https://www.tiktok.com/@gretalynnhihi/video/7543693751290481942",
+      "mediaUrls": [],
+      "videoMeta": {
+        "height": 1024,
+        "width": 576,
+        "duration": 15,
+        "coverUrl": "https://p16-pu-sign-no.tiktokcdn-eu.com/cover~tplv-tiktokx-origin.image?x-expires=1756886400",
+        "definition": "540p",
+        "format": "mp4"
+      },
+      "diggCount": 23400,
+      "shareCount": 145,
+      "playCount": 145900,
+      "collectCount": 1637,
+      "commentCount": 46,
+      "mentions": [],
+      "detailedMentions": [],
+      "hashtags": [
+        {
+          "id": "4982299",
+          "name": "foruyou",
+          "title": "",
+          "cover": ""
+        }
+      ],
+      "effectStickers": [],
+      "isSlideshow": false,
+      "isPinned": false,
+      "searchQuery": "ootd"
+    },
+    {
+      "id": "7540000000000000001",
+      "text": "Comment je tiens avec 600 € par mois en étant étudiant 💸\n#budget #etudiant #argent",
+      "textLanguage": "fr",
+      "createTime": 1759240000,
+      "createTimeISO": "2025-09-30T13:46:40.000Z",
+      "isAd": false,
+      "authorMeta": {
+        "id": "6800000000000000001",
+        "name": "createur_1",
+        "profileUrl": "https://www.tiktok.com/@createur_1",
+        "nickName": "Créateur 1",
+        "verified": false,
+        "privateAccount": false,
+        "following": 120,
+        "friends": 0,
+        "fans": 51200,
+        "heart": 3000000,
+        "video": 259,
+        "digg": 194800
+      },
+      "musicMeta": {
+        "musicName": "Balance ton quoi",
+        "musicAuthor": "Angèle",
+        "musicOriginal": false,
+        "musicId": "6600000000000000001"
+      },
+      "webVideoUrl": "https://www.tiktok.com/@createur_1/video/7540000000000000001",
+      "mediaUrls": [],
+      "videoMeta": {
+        "height": 1024,
+        "width": 576,
+        "duration": 15,
+        "coverUrl": "https://p16-pu-sign-no.tiktokcdn-eu.com/cover~tplv-tiktokx-origin.image?x-expires=1756886400&x-signature=Y20",
+        "definition": "540p",
+        "format": "mp4"
+      },
+      "diggCount": 98000,
+      "shareCount": 15400,
+      "playCount": 1250000,
+      "collectCount": 40100,
+      "commentCount": 2100,
+      "mentions": [],
+      "detailedMentions": [],
+      "hashtags": [
+        {
+          "id": "1",
+          "name": "budget",
+          "title": "",
+          "cover": ""
+        },
+        {
+          "id": "2",
+          "name": "Etudiant",
+          "title": "",
+          "cover": ""
+        },
+        {
+          "id": "3",
+          "name": "argent",
+          "title": "",
+          "cover": ""
+        }
+      ],
+      "effectStickers": [],
+      "isSlideshow": false,
+      "isPinned": false,
+      "searchQuery": "budget étudiant"
+    },
+    {
+      "id": "7540000000000000002",
+      "text": "5 applis pour faire des économies",
+      "textLanguage": "fr",
+      "createTime": 1759240000,
+      "createTimeISO": "2025-09-30T13:46:40.000Z",
+      "isAd": false,
+      "authorMeta": {
+        "id": "6800000000000000002",
+        "name": "createur_2",
+        "profileUrl": "https://www.tiktok.com/@createur_2",
+        "nickName": "Créateur 2",
+        "verified": false,
+        "privateAccount": false,
+        "following": 120,
+        "friends": 0,
+        "fans": 51200,
+        "heart": 3000000,
+        "video": 259,
+        "digg": 194800
+      },
+      "musicMeta": {
+        "musicName": "son original",
+        "musicAuthor": "createur_2",
+        "musicOriginal": true,
+        "musicId": "7529403355681147665"
+      },
+      "webVideoUrl": "https://www.tiktok.com/@createur_2/video/7540000000000000002",
+      "mediaUrls": [],
+      "videoMeta": {
+        "duration": 0,
+        "coverUrl": "https://p16-sign.tiktokcdn-eu.com/c2.jpeg"
+      },
+      "diggCount": 23400,
+      "shareCount": 145,
+      "playCount": 88000,
+      "collectCount": 1637,
+      "commentCount": 46,
+      "mentions": [],
+      "detailedMentions": [],
+      "hashtags": [],
+      "effectStickers": [],
+      "isSlideshow": true,
+      "isPinned": false,
+      "searchQuery": "budget étudiant"
+    },
+    {
+      "id": "7540000000000000003",
+      "text": "Publicité banque en ligne",
+      "textLanguage": "fr",
+      "createTime": 1759240000,
+      "createTimeISO": "2025-09-30T13:46:40.000Z",
+      "isAd": true,
+      "authorMeta": {
+        "id": "6800000000000000003",
+        "name": "createur_3",
+        "profileUrl": "https://www.tiktok.com/@createur_3",
+        "nickName": "Créateur 3",
+        "verified": false,
+        "privateAccount": false,
+        "following": 120,
+        "friends": 0,
+        "fans": 51200,
+        "heart": 3000000,
+        "video": 259,
+        "digg": 194800
+      },
+      "musicMeta": {
+        "musicName": "son original",
+        "musicAuthor": "createur_3",
+        "musicOriginal": true,
+        "musicId": "7529403355681147665"
+      },
+      "webVideoUrl": "https://www.tiktok.com/@createur_3/video/7540000000000000003",
+      "mediaUrls": [],
+      "videoMeta": {
+        "height": 1024,
+        "width": 576,
+        "duration": 15,
+        "coverUrl": "https://p16-pu-sign-no.tiktokcdn-eu.com/cover~tplv-tiktokx-origin.image?x-expires=1756886400&x-signature=Y20",
+        "definition": "540p",
+        "format": "mp4"
+      },
+      "diggCount": 23400,
+      "shareCount": 145,
+      "playCount": 145900,
+      "collectCount": 1637,
+      "commentCount": 46,
+      "mentions": [],
+      "detailedMentions": [],
+      "hashtags": [],
+      "effectStickers": [],
+      "isSlideshow": false,
+      "isPinned": false,
+      "searchQuery": "budget étudiant"
+    },
+    {
+      "id": "7540000000000000004",
+      "text": "Ma routine budget de l'an dernier",
+      "textLanguage": "fr",
+      "createTime": 1756000000,
+      "createTimeISO": "2025-08-24T01:46:40.000Z",
+      "isAd": false,
+      "authorMeta": {
+        "id": "6800000000000000004",
+        "name": "createur_4",
+        "profileUrl": "https://www.tiktok.com/@createur_4",
+        "nickName": "Créateur 4",
+        "verified": false,
+        "privateAccount": false,
+        "following": 120,
+        "friends": 0,
+        "fans": 51200,
+        "heart": 3000000,
+        "video": 259,
+        "digg": 194800
+      },
+      "musicMeta": {
+        "musicName": "son original",
+        "musicAuthor": "createur_4",
+        "musicOriginal": true,
+        "musicId": "7529403355681147665"
+      },
+      "webVideoUrl": "https://www.tiktok.com/@createur_4/video/7540000000000000004",
+      "mediaUrls": [],
+      "videoMeta": {
+        "height": 1024,
+        "width": 576,
+        "duration": 15,
+        "coverUrl": "https://p16-pu-sign-no.tiktokcdn-eu.com/cover~tplv-tiktokx-origin.image?x-expires=1756886400&x-signature=Y20",
+        "definition": "540p",
+        "format": "mp4"
+      },
+      "diggCount": 23400,
+      "shareCount": 145,
+      "playCount": 145900,
+      "collectCount": 1637,
+      "commentCount": 46,
+      "mentions": [],
+      "detailedMentions": [],
+      "hashtags": [],
+      "effectStickers": [],
+      "isSlideshow": false,
+      "isPinned": false,
+      "searchQuery": "budget étudiant"
+    },
+    {
+      "id": "7540000000000000005",
+      "text": "💸💸💸",
+      "textLanguage": "un",
+      "createTime": 1759300000,
+      "createTimeISO": null,
+      "isAd": false,
+      "authorMeta": {
+        "id": "6800000000000000005",
+        "name": "createur_5",
+        "profileUrl": "https://www.tiktok.com/@createur_5",
+        "nickName": "Créateur 5",
+        "verified": false,
+        "privateAccount": false,
+        "following": 120,
+        "friends": 0,
+        "fans": 51200,
+        "heart": 3000000,
+        "video": 259,
+        "digg": 194800
+      },
+      "musicMeta": {
+        "musicName": "son original",
+        "musicAuthor": "createur_5",
+        "musicOriginal": true,
+        "musicId": "7529403355681147665"
+      },
+      "webVideoUrl": "https://www.tiktok.com/@createur_5/video/7540000000000000005",
+      "mediaUrls": [],
+      "videoMeta": {
+        "height": 1024,
+        "width": 576,
+        "duration": 15,
+        "coverUrl": "https://p16-pu-sign-no.tiktokcdn-eu.com/cover~tplv-tiktokx-origin.image?x-expires=1756886400&x-signature=Y20",
+        "definition": "540p",
+        "format": "mp4"
+      },
+      "diggCount": 23400,
+      "shareCount": 145,
+      "playCount": 5400,
+      "collectCount": 1637,
+      "commentCount": 46,
+      "mentions": [],
+      "detailedMentions": [],
+      "hashtags": [],
+      "effectStickers": [],
+      "isSlideshow": false,
+      "isPinned": false,
+      "searchQuery": "budget étudiant"
+    },
+    {
+      "url": "https://www.tiktok.com/search?q=budget%20%C3%A9tudiant",
+      "error": "No results found for this query",
+      "errorCode": "NO_RESULTS",
+      "input": "budget étudiant"
+    }
+  ]
+}

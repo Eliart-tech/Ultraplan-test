@@ -1,0 +1,132 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Dataset of clockworks~tiktok-trends-scraper (adsScrapeHashtags, adsCountryCode FR, adsTimeRange 7). Row 1 is the README sample verbatim (country CZ); the other rows are made up with the field names and types of the actor's dataset schema (build 0.0.236) to cover: histogram growth, promoted entry, non-hashtag row, duplicate name with '#'.",
+  "response": [
+    {
+      "id": "1686858772679682",
+      "name": "выпуск2025",
+      "url": "https://www.tiktok.com/tag/выпуск2025",
+      "countryCode": "CZ",
+      "rank": 1,
+      "industryName": "Education",
+      "videoCount": 1572,
+      "viewCount": 5659920,
+      "rankDiff": 0,
+      "markedAsNew": true,
+      "isPromoted": false
+    },
+    {
+      "id": "7000000000000000001",
+      "type": "hashtag",
+      "name": "rentreescolaire",
+      "url": "https://www.tiktok.com/tag/rentreescolaire",
+      "countryCode": "FR",
+      "rank": 2,
+      "rankDiff": 5,
+      "markedAsNew": false,
+      "isPromoted": false,
+      "trendingHistogram": [
+        {
+          "date": "2025-09-24",
+          "value": 0.2
+        },
+        {
+          "date": "2025-09-25",
+          "value": 0.2
+        },
+        {
+          "date": "2025-09-26",
+          "value": 0.4
+        },
+        {
+          "date": "2025-09-27",
+          "value": 0.5
+        },
+        {
+          "date": "2025-09-28",
+          "value": 0.7
+        },
+        {
+          "date": "2025-09-29",
+          "value": 0.9
+        },
+        {
+          "date": "2025-09-30",
+          "value": 1
+        }
+      ],
+      "industryName": "Education",
+      "videoCount": 48210,
+      "viewCount": 91500000,
+      "relatedCreators": [
+        {
+          "nickName": "Prof Test",
+          "avatar": "https://p16-sign.tiktokcdn-eu.com/avatar.jpg",
+          "profileUrl": "https://www.tiktok.com/@prof_test"
+        }
+      ]
+    },
+    {
+      "id": "7000000000000000002",
+      "type": "hashtag",
+      "name": "#Promo2025",
+      "url": "https://www.tiktok.com/tag/promo2025",
+      "countryCode": "FR",
+      "rank": 3,
+      "rankDiff": -2,
+      "markedAsNew": false,
+      "isPromoted": true,
+      "videoCount": 120,
+      "viewCount": 3000000
+    },
+    {
+      "id": "7000000000000000003",
+      "type": "sound",
+      "name": "Balance ton quoi",
+      "url": "https://www.tiktok.com/music/x-7000000000000000003",
+      "countryCode": "FR",
+      "rank": 1,
+      "author": "Angèle",
+      "durationSec": 30
+    },
+    {
+      "id": "7000000000000000004",
+      "type": "hashtag",
+      "name": "#RentreeScolaire",
+      "url": "https://www.tiktok.com/tag/rentreescolaire",
+      "countryCode": "FR",
+      "rank": 9,
+      "viewCount": 100
+    },
+    {
+      "id": "7000000000000000005",
+      "type": "hashtag",
+      "name": "cuisine",
+      "countryCode": "FR",
+      "rank": 4,
+      "rankDiff": -3,
+      "markedAsNew": true,
+      "isPromoted": false,
+      "industryName": "Food & Beverage",
+      "videoCount": 2500,
+      "viewCount": 12000000,
+      "trendingHistogram": [
+        {
+          "date": "2025-09-24",
+          "value": 0.9
+        },
+        {
+          "date": "2025-09-25",
+          "value": 0.8
+        },
+        {
+          "date": "2025-09-29",
+          "value": 0.5
+        },
+        {
+          "date": "2025-09-30",
+          "value": 0.4
+        }
+      ]
+    }
+  ]
+}

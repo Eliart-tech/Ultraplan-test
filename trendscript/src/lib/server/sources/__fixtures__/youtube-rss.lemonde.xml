@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- TEST FIXTURE ONLY - never imported by app code. Real YouTube channel feed of "Le Monde" (UCYpRDnhk5H8h16jpS84uqsA) fetched on 2026-10-02 ~17:45 UTC, trimmed to 4 of its 15 entries (2 long-form, 2 Shorts; the last one is > 72 h old at 2026-10-02T18:00Z). -->
+<feed xmlns:yt="http://www.youtube.com/xml/schemas/2015" xmlns:media="http://search.yahoo.com/mrss/" xmlns="http://www.w3.org/2005/Atom">
+ <link rel="self" href="http://www.youtube.com/feeds/videos.xml?channel_id=UCYpRDnhk5H8h16jpS84uqsA"/>
+ <id>yt:channel:YpRDnhk5H8h16jpS84uqsA</id>
+ <yt:channelId>YpRDnhk5H8h16jpS84uqsA</yt:channelId>
+ <title>Le Monde</title>
+ <link rel="alternate" href="https://www.youtube.com/channel/UCYpRDnhk5H8h16jpS84uqsA"/>
+ <author>
+  <name>Le Monde</name>
+  <uri>https://www.youtube.com/channel/UCYpRDnhk5H8h16jpS84uqsA</uri>
+ </author>
+ <published>2006-03-17T14:41:41+00:00</published>
+ <entry>
+  <id>yt:video:1xfkh6m3zZ8</id>
+  <yt:videoId>1xfkh6m3zZ8</yt:videoId>
+  <yt:channelId>UCYpRDnhk5H8h16jpS84uqsA</yt:channelId>
+  <title>Christa Pike : son exécution ratée ravive le débat sur la peine de mort aux Etats-Unis</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=1xfkh6m3zZ8"/>
+  <author>
+   <name>Le Monde</name>
+   <uri>https://www.youtube.com/channel/UCYpRDnhk5H8h16jpS84uqsA</uri>
+  </author>
+  <published>2026-10-02T13:13:44+00:00</published>
+  <updated>2026-10-02T16:02:49+00:00</updated>
+  <media:group>
+   <media:title>Christa Pike : son exécution ratée ravive le débat sur la peine de mort aux Etats-Unis</media:title>
+   <media:content url="https://www.youtube.com/v/1xfkh6m3zZ8?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/1xfkh6m3zZ8/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Aux Etats-Unis, l’exécution totalement ratée, mercredi 30 septembre, Christa Pike femme de 50 ans, condamnée à mort en 1996 pour torture et meurtre, est le plus gros échec du système judiciaire américain en matière d’administration de la peine capitale, depuis son rétablissement, en 1976. Christa Pike a été transférée en soins intensifs, où elle se trouvait encore le 1er octobre au soir.
+
+✅ Pour comprendre l'actualité, abonnez-vous à la chaîne YouTube du Monde (et activez la cloche pour les notifications 🔔 !) 
+👉http://www.youtube.com/subscription_center?add_user=LeMonde</media:description>
+   <media:community>
+    <media:starRating count="374" average="5.00" min="1" max="5"/>
+    <media:statistics views="20669"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:_ha8Gx69i-o</id>
+  <yt:videoId>_ha8Gx69i-o</yt:videoId>
+  <yt:channelId>UCYpRDnhk5H8h16jpS84uqsA</yt:channelId>
+  <title>Budget 2027 : ce qu’il faut retenir du texte du gouvernement qui fait réagir l’opposition</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/_ha8Gx69i-o"/>
+  <author>
+   <name>Le Monde</name>
+   <uri>https://www.youtube.com/channel/UCYpRDnhk5H8h16jpS84uqsA</uri>
+  </author>
+  <published>2026-10-01T17:30:48+00:00</published>
+  <updated>2026-10-02T11:34:47+00:00</updated>
+  <media:group>
+   <media:title>Budget 2027 : ce qu’il faut retenir du texte du gouvernement qui fait réagir l’opposition</media:title>
+   <media:content url="https://www.youtube.com/v/_ha8Gx69i-o?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/_ha8Gx69i-o/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Le gouvernement a dévoilé, le 1er octobre 2026, le projet de loi de finances (PLF) et le projet de loi de financement de la Sécurité sociale (PLFSS) pour 2027, qui a été examiné la veille en conseil des ministres. Le gouvernement prévoit notamment 43 milliards d’euros de « mesures de redressement » des finances publiques dans son projet de budget, dans l’objectif de ramener le déficit à 5 % du PIB en 2027, contre 5,6 % prévu pour 2026.</media:description>
+   <media:community>
+    <media:starRating count="307" average="5.00" min="1" max="5"/>
+    <media:statistics views="19980"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:wmgMJ139KFQ</id>
+  <yt:videoId>wmgMJ139KFQ</yt:videoId>
+  <yt:channelId>UCYpRDnhk5H8h16jpS84uqsA</yt:channelId>
+  <title>Cette vidéo contredit la version des policiers dans une interpellation violente à Corbeil-Essonnes</title>
+  <link rel="alternate" href="https://www.youtube.com/watch?v=wmgMJ139KFQ"/>
+  <author>
+   <name>Le Monde</name>
+   <uri>https://www.youtube.com/channel/UCYpRDnhk5H8h16jpS84uqsA</uri>
+  </author>
+  <published>2026-10-01T10:02:49+00:00</published>
+  <updated>2026-10-02T12:27:47+00:00</updated>
+  <media:group>
+   <media:title>Cette vidéo contredit la version des policiers dans une interpellation violente à Corbeil-Essonnes</media:title>
+   <media:content url="https://www.youtube.com/v/wmgMJ139KFQ?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i4.ytimg.com/vi/wmgMJ139KFQ/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Les images saisies par une deuxième caméra-piéton lors d’un contrôle de police qui a dégénéré, le 5 novembre 2024, dans le quartier de Montconseil, à Corbeil-Essonnes, démontrent, selon l’IGPN, « que les faits ne s[e so]nt pas déroulés tels qu’ils [o]nt été relatés par le gardien de la paix dans le procès-verbal ».
+
+✅ Pour comprendre l'actualité, abonnez-vous à la chaîne YouTube du Monde (et activez la cloche pour les notifications 🔔 !) 👉http://www.youtube.com/subscription_center?add_user=LeMonde
+
+#corbeilessonne #police</media:description>
+   <media:community>
+    <media:starRating count="5557" average="5.00" min="1" max="5"/>
+    <media:statistics views="353301"/>
+   </media:community>
+  </media:group>
+ </entry>
+ <entry>
+  <id>yt:video:yOAXbyq2CdI</id>
+  <yt:videoId>yOAXbyq2CdI</yt:videoId>
+  <yt:channelId>UCYpRDnhk5H8h16jpS84uqsA</yt:channelId>
+  <title>Emmanuel Macron fait un discours avec le pape Léon XIV à Metz</title>
+  <link rel="alternate" href="https://www.youtube.com/shorts/yOAXbyq2CdI"/>
+  <author>
+   <name>Le Monde</name>
+   <uri>https://www.youtube.com/channel/UCYpRDnhk5H8h16jpS84uqsA</uri>
+  </author>
+  <published>2026-09-28T12:29:11+00:00</published>
+  <updated>2026-09-30T14:55:40+00:00</updated>
+  <media:group>
+   <media:title>Emmanuel Macron fait un discours avec le pape Léon XIV à Metz</media:title>
+   <media:content url="https://www.youtube.com/v/yOAXbyq2CdI?version=3" type="application/x-shockwave-flash" width="640" height="390"/>
+   <media:thumbnail url="https://i2.ytimg.com/vi/yOAXbyq2CdI/hqdefault.jpg" width="480" height="360"/>
+   <media:description>Léon XIV effectue la dernière étape de son voyage en France avec une visite à Metz, où il a prononcé, lundi midi, un discours sur l’Europe et la paix introduit par Emmanuel Macron.</media:description>
+   <media:community>
+    <media:starRating count="610" average="5.00" min="1" max="5"/>
+    <media:statistics views="55539"/>
+   </media:community>
+  </media:group>
+ </entry>
+</feed>

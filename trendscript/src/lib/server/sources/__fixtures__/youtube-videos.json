@@ -1,0 +1,173 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Shape of GET /youtube/v3/videos?part=snippet,statistics,contentDetails&id=… (videos.list reference: counters are JSON strings, likeCount absent when hidden). Values made up. Order differs from the search order on purpose.",
+  "response": {
+    "kind": "youtube#videoListResponse",
+    "etag": "e2",
+    "pageInfo": {
+      "totalResults": 4,
+      "resultsPerPage": 4
+    },
+    "items": [
+      {
+        "kind": "youtube#video",
+        "etag": "v-wIiKS1FR2KI",
+        "id": "wIiKS1FR2KI",
+        "snippet": {
+          "publishedAt": "2026-09-29T18:40:43Z",
+          "channelId": "UCtest00000000000000002",
+          "title": "Intelligence artificielle : ce qui change pour les étudiants",
+          "description": "Tout comprendre sur l'intelligence artificielle à la fac. #IA #etudiants",
+          "thumbnails": {
+            "default": {
+              "url": "https://i.ytimg.com/vi/wIiKS1FR2KI/default.jpg",
+              "width": 120,
+              "height": 90
+            },
+            "high": {
+              "url": "https://i.ytimg.com/vi/wIiKS1FR2KI/hqdefault.jpg",
+              "width": 480,
+              "height": 360
+            }
+          },
+          "channelTitle": "Chaîne Test",
+          "categoryId": "25",
+          "liveBroadcastContent": "none",
+          "defaultAudioLanguage": "fr",
+          "tags": [
+            "IA",
+            "Étudiants",
+            "actu"
+          ]
+        },
+        "contentDetails": {
+          "duration": "PT12M5S",
+          "dimension": "2d",
+          "definition": "hd",
+          "caption": "false"
+        },
+        "statistics": {
+          "viewCount": "467501",
+          "favoriteCount": "0",
+          "likeCount": "21000",
+          "commentCount": "1500"
+        }
+      },
+      {
+        "kind": "youtube#video",
+        "etag": "v-8Qn-7lnJ9rw",
+        "id": "8Qn-7lnJ9rw",
+        "snippet": {
+          "publishedAt": "2026-10-01T13:33:34Z",
+          "channelId": "UCtest00000000000000002",
+          "title": "Budget étudiant : le vrai coût de la rentrée",
+          "description": "Le budget étudiant explose cette année.",
+          "thumbnails": {
+            "default": {
+              "url": "https://i.ytimg.com/vi/8Qn-7lnJ9rw/default.jpg",
+              "width": 120,
+              "height": 90
+            },
+            "high": {
+              "url": "https://i.ytimg.com/vi/8Qn-7lnJ9rw/hqdefault.jpg",
+              "width": 480,
+              "height": 360
+            }
+          },
+          "channelTitle": "HugoDécrypte - Actus du jour",
+          "categoryId": "25",
+          "liveBroadcastContent": "none",
+          "defaultAudioLanguage": "fr"
+        },
+        "contentDetails": {
+          "duration": "PT58S",
+          "dimension": "2d",
+          "definition": "hd",
+          "caption": "false"
+        },
+        "statistics": {
+          "viewCount": "1203344",
+          "favoriteCount": "0",
+          "commentCount": "2210"
+        }
+      },
+      {
+        "kind": "youtube#video",
+        "etag": "v-enTest00001",
+        "id": "enTest00001",
+        "snippet": {
+          "publishedAt": "2026-09-30T10:00:00Z",
+          "channelId": "UCtest00000000000000002",
+          "title": "Student budget hacks",
+          "description": "Description de la vidéo.",
+          "thumbnails": {
+            "default": {
+              "url": "https://i.ytimg.com/vi/enTest00001/default.jpg",
+              "width": 120,
+              "height": 90
+            },
+            "high": {
+              "url": "https://i.ytimg.com/vi/enTest00001/hqdefault.jpg",
+              "width": 480,
+              "height": 360
+            }
+          },
+          "channelTitle": "Chaîne Test",
+          "categoryId": "25",
+          "liveBroadcastContent": "none",
+          "defaultAudioLanguage": "en"
+        },
+        "contentDetails": {
+          "duration": "PT8M",
+          "dimension": "2d",
+          "definition": "hd",
+          "caption": "false"
+        },
+        "statistics": {
+          "viewCount": "90000",
+          "favoriteCount": "0",
+          "likeCount": "1200",
+          "commentCount": "80"
+        }
+      },
+      {
+        "kind": "youtube#video",
+        "etag": "v-liveTest001",
+        "id": "liveTest001",
+        "snippet": {
+          "publishedAt": "2026-10-02T08:00:00Z",
+          "channelId": "UCtest00000000000000002",
+          "title": "Live à venir : budget",
+          "description": "Description de la vidéo.",
+          "thumbnails": {
+            "default": {
+              "url": "https://i.ytimg.com/vi/liveTest001/default.jpg",
+              "width": 120,
+              "height": 90
+            },
+            "high": {
+              "url": "https://i.ytimg.com/vi/liveTest001/hqdefault.jpg",
+              "width": 480,
+              "height": 360
+            }
+          },
+          "channelTitle": "Chaîne Test",
+          "categoryId": "25",
+          "liveBroadcastContent": "upcoming",
+          "defaultAudioLanguage": "fr"
+        },
+        "contentDetails": {
+          "duration": "P0D",
+          "dimension": "2d",
+          "definition": "hd",
+          "caption": "false"
+        },
+        "statistics": {
+          "viewCount": "0",
+          "favoriteCount": "0",
+          "likeCount": "0",
+          "commentCount": "0"
+        }
+      }
+    ]
+  }
+}

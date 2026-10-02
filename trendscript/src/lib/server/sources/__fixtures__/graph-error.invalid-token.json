@@ -1,0 +1,11 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Real response captured live on 2026-10-02 (HTTP 400) for a malformed access token.",
+  "response": {
+    "error": {
+      "message": "Invalid OAuth access token - Cannot parse access token",
+      "type": "OAuthException",
+      "code": 190,
+      "fbtrace_id": "ALTRcsDfKOjWd6SDVSoVgah"
+    }
+  }
+}

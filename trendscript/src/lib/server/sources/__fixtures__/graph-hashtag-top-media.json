@@ -1,0 +1,36 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Shape of GET /{ig-hashtag-id}/top_media?fields=id,caption,media_type,comments_count,like_count,permalink,timestamp (IG Hashtag Top Media reference; first row and paging are the doc sample, other rows made up with documented fields). Covers: image (dropped), video, video with hidden likes, unix timestamp.",
+  "response": {
+    "data": [
+      {
+        "id": "17880997618081620",
+        "media_type": "IMAGE",
+        "comments_count": 84,
+        "like_count": 177
+      },
+      {
+        "id": "17871527143187462",
+        "media_type": "VIDEO",
+        "caption": "Batch cooking du dimanche : 5 repas en 1 h ⏱️ #batchcooking #mealprep",
+        "comments_count": 240,
+        "like_count": 9120,
+        "permalink": "https://www.instagram.com/reel/DPhash0001/",
+        "timestamp": "2026-09-28T19:02:11+0000"
+      },
+      {
+        "id": "17896450804038745",
+        "media_type": "VIDEO",
+        "caption": "Mes 3 recettes préférées",
+        "comments_count": 19,
+        "permalink": "https://www.instagram.com/reel/DPhash0002/",
+        "timestamp": 1790800000
+      }
+    ],
+    "paging": {
+      "cursors": {
+        "after": "NTAyYmE4"
+      },
+      "next": "https://graph.facebook.com/v25.0/17843857450040591/top_media?after=NTAyYmE4"
+    }
+  }
+}
