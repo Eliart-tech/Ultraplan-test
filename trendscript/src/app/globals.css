@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* The HTML edition (bundled page + data snapshot) is not part of this app's class sources. */
+@source not "../../artifact";
 
 /* ---------------------------------------------------------------------------
    TrendScript design tokens

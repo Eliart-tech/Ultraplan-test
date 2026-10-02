@@ -13,7 +13,7 @@ export function SetupSteps({ steps, className }: { steps: string[]; className?: 
           >
             {index + 1}
           </span>
-          <span className="min-w-0 flex-1">
+          <span className="min-w-0 flex-1 [overflow-wrap:anywhere]">
             <RichText text={step} />
           </span>
         </li>
