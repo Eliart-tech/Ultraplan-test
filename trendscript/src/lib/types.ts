@@ -12,6 +12,7 @@ export const SOURCE_IDS = [
   "google_news",
   "wikipedia",
   "serpapi_trends",
+  "youtube_rss",
   "youtube",
   "instagram_graph",
   "instagram_apify",
@@ -293,7 +294,16 @@ export interface ScriptSettings {
   /** Let Claude search the web for fresh, sourced facts before writing. */
   research: boolean;
   extraInstructions?: string;
+  /** Speaking pace: "pose" ≈ 2.2 words/s, "normal" ≈ 2.5, "dynamique" ≈ 2.8. */
+  pace: SpeakingPace;
+  /** Paid partnership → legal "Publicité / Collaboration commerciale" mention. */
+  sponsored: boolean;
+  /** Realistic AI-generated visuals → AI label reminder. */
+  aiVisuals: boolean;
 }
+
+export const SPEAKING_PACES = ["pose", "normal", "dynamique"] as const;
+export type SpeakingPace = (typeof SPEAKING_PACES)[number];
 
 /** Saved in the browser and sent with every generation request. */
 export interface CreatorProfile {
@@ -362,8 +372,12 @@ export interface GeneratedScript extends ScriptDraft {
   createdAt: string;
   model: string;
   wordCount: number;
-  /** Estimated from wordCount and the language's speaking rate. */
+  /** Target voice-over word count for the requested duration and pace. */
+  wordBudget: number;
+  /** Estimated from wordCount and the speaking pace. */
   estimatedDurationSec: number;
+  /** Checks computed in code (hashtag caps, hook length, platform rules…), in French. */
+  warnings: string[];
   /** Research brief produced with web search, when enabled. */
   research?: ResearchBrief;
 }

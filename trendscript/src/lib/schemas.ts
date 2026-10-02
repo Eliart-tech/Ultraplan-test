@@ -12,6 +12,7 @@ import {
   PLATFORMS,
   SCRIPT_PLATFORMS,
   SOURCE_IDS,
+  SPEAKING_PACES,
   TONES,
   VIDEO_FORMATS,
 } from "./types";
@@ -127,6 +128,9 @@ export const scriptSettingsSchema = z.object({
   language: z.string().trim().regex(/^[a-z]{2}$/),
   research: z.boolean(),
   extraInstructions: shortText(1000).optional(),
+  pace: z.enum(SPEAKING_PACES),
+  sponsored: z.boolean(),
+  aiVisuals: z.boolean(),
 });
 
 export const creatorProfileSchema = z.object({
