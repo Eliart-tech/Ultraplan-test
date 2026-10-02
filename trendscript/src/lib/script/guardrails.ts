@@ -21,10 +21,12 @@ export type TopicRisk = "vert" | "orange" | "orange_strict";
 
 export const MAX_SENSITIVE_VIRALITY = 39;
 
+// Elections and trials are matched as words: "électricité", "électrique",
+// "sélection", "processeur" or "processus" must not turn a topic orange.
 const ORANGE_REASONS =
-  /politi|elect|scrutin|gouvern|judiciaire|justice|proces|tribunal|enquete|presomption|plainte|sante|medic|maladie|vaccin|sanitaire|epidemi|clivant|religi|immigr/;
+  /politi|\b(re)?elect(ion|ora|eur)|scrutin|gouvern|judiciaire|justice|\bproces\b|tribunal|enquete|presomption|plainte|sante|medic|maladie|vaccin|sanitaire|epidemi|clivant|religi|immigr/;
 const FINANCE_REASONS = /financ|bourse|crypto|invest|placement/;
-const POLITICAL_REASONS = /politi|elect|scrutin|gouvern/;
+const POLITICAL_REASONS = /politi|\b(re)?elect(ion|ora|eur)|scrutin|gouvern/;
 
 const FORBIDDEN_TONES = new Set<ScriptSettings["tone"]>(["humoristique", "provocateur"]);
 const FORBIDDEN_STRICT_HOOKS = new Set<ScriptSettings["hookStyle"]>(["chiffre_choc", "polemique_mesuree", "pov"]);

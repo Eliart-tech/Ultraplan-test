@@ -147,11 +147,12 @@ function checkCompliance(draft: ScriptDraft, settings: ScriptSettings, warnings:
 
 function checkFacts(draft: ScriptDraft, warnings: string[]): void {
   const unsourced = draft.factsToVerify.filter((fact) => !fact.sourceUrl).length;
-  const weak = draft.factsToVerify.filter((fact) => fact.confidence === "faible").length;
+  // Unsourced claims are already reported above: only count the weak ones that have a source.
+  const weak = draft.factsToVerify.filter((fact) => fact.sourceUrl && fact.confidence === "faible").length;
   if (unsourced > 0) {
     warnings.push(`${plural(unsourced, "affirmation")} sans source : vérifiez-les avant de publier.`);
   }
-  if (weak > 0 && weak !== unsourced) {
+  if (weak > 0) {
     warnings.push(`${plural(weak, "affirmation")} à confiance faible dans la liste des faits à vérifier.`);
   }
   const placeholders = (draft.fullScript.match(/\{\s*[AÀ] V[ÉE]RIFIER/gi) ?? []).length;

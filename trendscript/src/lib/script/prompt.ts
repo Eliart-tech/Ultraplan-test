@@ -277,7 +277,10 @@ function evidenceLines(signals: Signal[], now: number, geo?: string): string {
         .filter(Boolean)
         .join(" · ");
       const extra: string[] = [];
-      if (signal.text && signal.kind !== "news") extra.push(`   extrait : ${quote(signal.text, 240)}`);
+      // Video connectors often use the caption as the title: don't repeat it.
+      if (signal.text && signal.kind !== "news" && signal.text.trim() !== signal.title.trim()) {
+        extra.push(`   extrait : ${quote(signal.text, 240)}`);
+      }
       for (const related of signal.related.slice(0, 3)) {
         extra.push(`   titre lié : ${quote(related.title, 160)}${related.source ? ` (${related.source})` : ""} ${related.url}`);
       }

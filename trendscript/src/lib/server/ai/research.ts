@@ -149,6 +149,20 @@ export function collectSources(content: BetaContentBlock[], into: CollectedSourc
   }
 }
 
+/**
+ * The brief itself: the text written after the last tool block of a turn.
+ * Text before or between searches is narration ("Je vais vérifier…") that
+ * fallback models and ANTHROPIC_MODEL overrides write between tool calls —
+ * it must not end up in the facts given to the script writer.
+ */
+export function briefText(content: BetaContentBlock[]): string {
+  let start = 0;
+  content.forEach((block, index) => {
+    if (block.type === "server_tool_use" || block.type === "web_search_tool_result") start = index + 1;
+  });
+  return finalText(content.slice(start));
+}
+
 /** Cited sources first (they back the brief), then other results; deduped, http(s) only. */
 export function rankSources({ cited, results }: CollectedSources): RelatedLink[] {
   const seen = new Set<string>();
@@ -216,7 +230,7 @@ export async function researchTopic({
     );
     last = await stream.finalMessage();
     collectSources(last.content, collected);
-    const text = finalText(last.content).trim();
+    const text = briefText(last.content).trim();
     if (text) texts.push(text);
     // A long server-side search loop pauses: send the turn back as-is to resume.
     if (last.stop_reason !== "pause_turn") break;

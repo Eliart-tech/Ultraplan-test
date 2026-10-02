@@ -62,7 +62,12 @@ export function estimateDuration(words: number, pace: SpeakingPace): number {
   return Math.round(words / (wordsPerSecond(pace) * SPOKEN_SHARE));
 }
 
-/** Accepted ±10 % window around the budget (playbook §0). */
+/**
+ * Accepted ±10 % window around the budget (playbook §0). Computed as
+ * `budget × 9 / 10` and `budget × 11 / 10` so integer budgets stay exact
+ * (`100 × 1.1` is 110.00000000000001 in floating point, which `ceil` turned
+ * into 111).
+ */
 export function budgetRange(budget: number): { min: number; max: number } {
-  return { min: Math.floor(budget * 0.9), max: Math.ceil(budget * 1.1) };
+  return { min: Math.floor((budget * 9) / 10), max: Math.ceil((budget * 11) / 10) };
 }
