@@ -94,6 +94,19 @@ export function scoreSignals(signals: Signal[], now = Date.now()): Signal[] {
         (v !== undefined && views.length >= 5 && med > 0 && v >= 3 * med) ||
         (v !== undefined && f !== undefined && f > 0 && v >= 2 * f);
     }
+
+    // Social posts (LinkedIn) expose no views: compare their engagement.
+    const posts = group.filter((s) => s.kind === "social_post");
+    const engagement = (s: Signal) =>
+      s.metrics.likes === undefined && s.metrics.comments === undefined
+        ? undefined
+        : (s.metrics.likes ?? 0) + 3 * (s.metrics.comments ?? 0) + 5 * (s.metrics.shares ?? 0);
+    const scores = posts.map(engagement).filter((v): v is number => v !== undefined);
+    const postMedian = median(scores);
+    for (const post of posts) {
+      const e = engagement(post);
+      post.outlier = e !== undefined && scores.length >= 5 && postMedian > 0 && e >= 3 * postMedian;
+    }
   }
   return signals;
 }
@@ -155,7 +168,7 @@ export function scoreTopic({ signals, nicheFit, now = Date.now() }: TopicScoreIn
 /** Human-readable explanation of the formula, displayed in the UI. */
 export const SCORE_EXPLANATION = [
   "Force d'un signal : rang percentile de son audience (volume de recherche, vues) parmi les signaux de la même source, pondéré par sa fraîcheur. Les articles sans audience mesurée sont classés par fraîcheur et position.",
-  "Momentum : fraîcheur, présence dans les recherches en forte hausse, pourcentage de hausse, vidéos virales (3× la médiane ou 2× l'audience du compte).",
+  "Momentum : fraîcheur, présence dans les recherches en forte hausse, pourcentage de hausse, vidéos virales (3× la médiane ou 2× l'audience du compte) et publications LinkedIn à l'engagement 3× supérieur à la médiane.",
   "Portée : force des 3 meilleurs signaux du sujet.",
   "Multi-plateforme : nombre de plateformes où le sujet apparaît.",
   "Fraîcheur : demi-vie de 24 h sur le signal le plus récent.",

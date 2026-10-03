@@ -67,9 +67,9 @@ export function firecrawlMode(state: EditionState = getEditionState()): { mode: 
 /** Banner wording for the live part of the data. */
 export function liveBannerSentence(state: EditionState = getEditionState()): string {
   const { mode, why } = firecrawlMode(state);
-  if (mode === "live") return "+ Google Actualités et Tendances en direct via votre connecteur Firecrawl";
+  if (mode === "live") return "+ Google Actualités, Tendances et publications LinkedIn en direct via votre connecteur Firecrawl";
   if (mode === "maybe") {
-    return "+ Google Actualités et Tendances en direct si votre connecteur Firecrawl est connecté (vérifié à la première analyse)";
+    return "+ Google Actualités, Tendances et publications LinkedIn en direct si votre connecteur Firecrawl est connecté (vérifié à la première analyse)";
   }
   return state.firecrawl === "pending" ? `(${why}…)` : `(pas de données en direct : ${why})`;
 }

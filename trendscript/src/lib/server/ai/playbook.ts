@@ -119,6 +119,15 @@ const PLATFORMS: Record<ScriptPlatform, string> = {
 - Mesure : chaque lecture ou relecture compte comme une vue ; le panneau « regardée vs balayée » mesure le hook — les meilleurs Shorts gardent 70 à 90 % des spectateurs au-delà de l'accroche.
 - Hashtags : 1 à 3, en lien direct avec la vidéo (au-delà de 60, YouTube les ignore tous ; des hashtags hors sujet peuvent entraîner un retrait).
 - Titre : 100 caractères maximum, mot-clé principal au début ; le champ « title » sert de titre YouTube.`,
+  linkedin: `## LinkedIn (vidéo native)
+- Public professionnel, en contexte de travail : une grande partie regarde sans le son, au bureau ou en déplacement. Sous-titres incrustés obligatoires et texte à l'écran qui porte le message seul.
+- Le hook doit fonctionner deux fois : dans la vidéo (1re seconde) ET dans les 2 premières lignes du texte du post, seules visibles avant « …voir plus » (environ 200 caractères).
+- Ton : expertise incarnée, retour d'expérience, chiffres sourcés, leçon actionnable. Bannir le jargon creux et le sensationnalisme ; l'humour passe s'il sert le propos professionnel. Toujours relier l'actualité à une conséquence concrète pour le métier, l'entreprise, la carrière ou les finances de l'audience.
+- Durée : format court, 30 à 90 s, une seule idée ; vertical ou carré.
+- Texte du post (champ caption) : 3 000 caractères maximum ; phrases courtes, sauts de ligne aérés, puis une question ouverte qui invite des commentaires argumentés (les échanges de fond comptent plus que les réactions).
+- Hashtags : 3 au maximum, précis (métier, sujet), placés en fin de post.
+- Liens externes : les mettre en commentaire plutôt que dans le post, une pratique répandue pour préserver la portée (non confirmée par LinkedIn).
+- À éviter : les appâts à engagement (« commentez OUI », « likez si… »), les sondages déguisés, la reprise d'une vidéo d'un autre créateur sans apport.`,
 };
 
 const SCREEN_TEXT = `## Texte à l'écran et sous-titres
@@ -147,11 +156,11 @@ const CTA = `## CTA : un seul principal, placé après le payoff
 Jamais d'appel mécanique du type « like si… » ou « tague 3 amis » : c'est un appât à engagement pénalisé.`;
 
 const CAPTION = `## Légende et hashtags
-1. Ligne 1 (environ 125 caractères visibles sur Instagram, 100–150 sur TikTok) : le hook reformulé + le mot-clé principal.
+1. Ligne 1 (environ 125 caractères visibles sur Instagram, 100–150 sur TikTok, 2 lignes ≈ 200 caractères avant « …voir plus » sur LinkedIn) : le hook reformulé + le mot-clé principal.
 2. Corps : 1 à 3 phrases de contexte ou de valeur, sans répéter le script.
 3. Ligne sources : « Sources : {média}, {date} · {institution}, {date} ».
 4. Une question ouverte ou le CTA, identique à celui de la vidéo.
-5. Hashtags (dans le champ dédié, pas dans la légende) : Instagram 3–5 (plafond 5), TikTok 3–5, YouTube 1–3. Composition : 1 sujet précis, 1 ou 2 de niche, 1 de format ou de communauté. Pas de hashtags génériques (#fyp, #viral) : aucun effet démontré.
+5. Hashtags (dans le champ dédié, pas dans la légende) : Instagram 3–5 (plafond 5), TikTok 3–5, YouTube 1–3, LinkedIn 3 au maximum. Composition : 1 sujet précis, 1 ou 2 de niche, 1 de format ou de communauté. Pas de hashtags génériques (#fyp, #viral) : aucun effet démontré.
 6. Mentions légales : « Publicité » ou « Collaboration commerciale » en tête de légende s'il y a une contrepartie ; « Images retouchées » ou « Images virtuelles » si besoin ; étiquette IA de la plateforme.
 7. Le mot-clé principal apparaît à l'oral (avant 5 s), à l'écran et dans la légende.`;
 

@@ -1,4 +1,4 @@
-import { BookOpen, Camera, Music2, Newspaper, Play, TrendingUp, type LucideIcon } from "lucide-react";
+import { BookOpen, Briefcase, Camera, Music2, Newspaper, Play, TrendingUp, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/cn";
 import type { Platform, ScriptPlatform } from "@/lib/types";
 
@@ -53,6 +53,12 @@ export const PLATFORM_META: Record<Platform, PlatformMeta> = {
     textClass: "text-platform-tiktok",
     tileClass: "bg-platform-tiktok/10 text-platform-tiktok",
   },
+  linkedin: {
+    label: "LinkedIn",
+    icon: Briefcase,
+    textClass: "text-platform-linkedin",
+    tileClass: "bg-platform-linkedin/10 text-platform-linkedin",
+  },
 };
 
 /** French label of a platform ("Wikipédia"). */
@@ -64,6 +70,7 @@ export function platformLabel(platform: Platform): string {
 export function scriptPlatformToPlatform(platform: ScriptPlatform): Platform {
   if (platform === "instagram_reels") return "instagram";
   if (platform === "youtube_shorts") return "youtube";
+  if (platform === "linkedin") return "linkedin";
   return "tiktok";
 }
 

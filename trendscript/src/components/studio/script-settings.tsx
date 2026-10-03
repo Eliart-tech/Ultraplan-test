@@ -69,13 +69,13 @@ export interface ScriptSettingsPanelProps {
   hasResult: boolean;
 }
 
-/** "Instagram Reels" — the brand prefix is visually dropped on phones to fit the segmented control. */
+/** "Instagram Reels" → "Reels": the brand prefix is visually dropped so 4 platforms fit the segmented control. */
 function PlatformName({ platform }: { platform: ScriptPlatform }) {
   const [brand, ...rest] = PLATFORM_LABELS[platform].label.split(" ");
   if (rest.length === 0) return <>{brand}</>;
   return (
     <>
-      <span className="max-sm:sr-only">{brand} </span>
+      <span className="sr-only">{brand} </span>
       {rest.join(" ")}
     </>
   );

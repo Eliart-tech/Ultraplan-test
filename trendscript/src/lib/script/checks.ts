@@ -15,8 +15,11 @@ const CAPTION_LIMIT: Record<ScriptSettings["platform"], number> = {
   instagram_reels: 2200,
   tiktok: 4000,
   youtube_shorts: 5000,
+  linkedin: 3000,
 };
 const YOUTUBE_TITLE_LIMIT = 100;
+/** Characters of a LinkedIn post shown before "…voir plus" (about two lines). */
+const LINKEDIN_VISIBLE_CHARS = 210;
 /** Tolerance on the end of the last beat vs. the target duration. */
 const timingTolerance = (duration: number) => Math.max(2, duration * 0.1);
 
@@ -121,6 +124,26 @@ function checkPlatform(draft: ScriptDraft, settings: ScriptSettings, warnings: s
         );
       }
       break;
+    case "linkedin": {
+      if (count > 3) {
+        warnings.push(`LinkedIn : 3 hashtags maximum recommandés (${count} proposés).`);
+      }
+      const firstLine = draft.caption.trim().split("\n")[0] ?? "";
+      if (firstLine.length > LINKEDIN_VISIBLE_CHARS) {
+        warnings.push(
+          `Première ligne du post LinkedIn de ${firstLine.length} caractères : seuls ~200 s'affichent avant « …voir plus ». Raccourcissez-la et placez le hook dedans.`,
+        );
+      }
+      if (/https?:\/\//.test(draft.caption)) {
+        warnings.push("Lien dans le texte du post LinkedIn : beaucoup de créateurs le placent en premier commentaire pour préserver la portée.");
+      }
+      if (settings.cta === "comment_keyword") {
+        warnings.push(
+          "CTA « commente un mot-clé » sur LinkedIn : il peut être traité comme un appât à engagement. Préférez une question ouverte qui appelle des réponses argumentées.",
+        );
+      }
+      break;
+    }
   }
 
   const limit = CAPTION_LIMIT[settings.platform];

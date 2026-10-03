@@ -66,7 +66,7 @@ export function filterTopics(
 
 /** Platforms present in the topics, with the number of topics on each, in a stable order. */
 export function platformCounts(topics: Topic[]): { platform: Platform; count: number }[] {
-  const order: Platform[] = ["google", "news", "wikipedia", "youtube", "instagram", "tiktok"];
+  const order: Platform[] = ["google", "news", "wikipedia", "youtube", "instagram", "tiktok", "linkedin"];
   const counts = new Map<Platform, number>();
   for (const topic of topics) {
     for (const platform of new Set(topic.platforms)) counts.set(platform, (counts.get(platform) ?? 0) + 1);

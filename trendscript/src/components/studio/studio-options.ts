@@ -78,6 +78,8 @@ export const SOURCE_FALLBACK: Record<SourceId, { label: string; platform: Platfo
   instagram_graph: { label: "Instagram (API Meta)", platform: "instagram" },
   instagram_apify: { label: "Instagram Reels (Apify)", platform: "instagram" },
   tiktok_apify: { label: "TikTok (Apify)", platform: "tiktok" },
+  linkedin_web: { label: "LinkedIn (recherche web)", platform: "linkedin" },
+  linkedin_apify: { label: "LinkedIn (Apify)", platform: "linkedin" },
 };
 
 export const LIFESPAN_META: Record<Lifespan, { label: string; tone: BadgeTone; window: string }> = {
@@ -98,6 +100,7 @@ export const SIGNAL_KIND_LABELS: Record<SignalKind, string> = {
   article_views: "Article consulté",
   short_video: "Vidéo courte",
   video: "Vidéo",
+  social_post: "Publication",
 };
 
 export type TopicSort = "score" | "momentum" | "freshness" | "niche";
@@ -153,4 +156,5 @@ export const CAPTION_LIMITS: Record<ScriptSettings["platform"], number> = {
   instagram_reels: 2200,
   tiktok: 4000,
   youtube_shorts: 5000,
+  linkedin: 3000,
 };

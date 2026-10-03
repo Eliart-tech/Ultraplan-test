@@ -1,0 +1,38 @@
+{
+  "success": true,
+  "data": {
+    "web": [
+      {
+        "url": "https://fr.linkedin.com/posts/romainfargeot_la-cour-des-comptes-veut-taxer-votre-livret-activity-7510571580230402048-r6io",
+        "title": "Post de Romain Fargeot - LinkedIn",
+        "description": "4 days ago · Le Livret A reste néanmoins très utile pour l'épargne de précaution : disponible à tout moment, sans risque en capital et exonéré d'impôt. Et l'argent collecté ...",
+        "position": 1
+      },
+      {
+        "url": "https://fr.linkedin.com/posts/j%C3%A9zabel-couppey-soubeyran-6b62673b_le-livret-a-pour-financer-ladaptation-climatique-activity-7511378182328152064-InZ8",
+        "title": "Le livret A pour financer l'adaptation climatique | Jézabel Couppey ...",
+        "description": "2 days ago · Cette décollecte est propre à l'épargne réglementée, puisque les livrets bancaires non réglementés ont vu leurs encours progresser sur la même période.",
+        "position": 2
+      },
+      {
+        "url": "https://fr.linkedin.com/posts/le-revenu_pourquoi-les-fran%C3%A7ais-retirent-ils-leur-argent-activity-7494060342545858562-N6ZW",
+        "title": "Pourquoi les Français retirent-ils leur argent du Livret A ? Depuis le début ...",
+        "description": "Depuis le début de l'année, près de 5 milliards d'euros ont quitté le Livret A. Face à un rendement jugé insuffisant, une partie de cette ...",
+        "position": 3
+      },
+      {
+        "url": "https://fr.linkedin.com/posts/romainfargeot_la-cour-des-comptes-veut-taxer-votre-livret-activity-7510571580230402048-r6io?utm_source=share",
+        "title": "Post de Romain Fargeot - LinkedIn",
+        "description": "Doublon de la même publication avec un paramètre de suivi.",
+        "position": 4
+      },
+      {
+        "url": "https://fr.linkedin.com/in/romainfargeot",
+        "title": "Romain Fargeot - LinkedIn",
+        "description": "Profil, pas une publication.",
+        "position": 5
+      }
+    ]
+  },
+  "creditsUsed": 2
+}

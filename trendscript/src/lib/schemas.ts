@@ -57,7 +57,7 @@ const signalSchema = z.object({
   id: shortText(200),
   source: z.enum(SOURCE_IDS),
   platform: z.enum(PLATFORMS),
-  kind: z.enum(["search_trend", "news", "article_views", "short_video", "video"]),
+  kind: z.enum(["search_trend", "news", "article_views", "short_video", "video", "social_post"]),
   title: shortText(500),
   text: shortText(2000).optional(),
   url: z.string().max(2000).optional(),

@@ -1,6 +1,6 @@
 # TrendScript
 
-**Des vraies tendances (Google, actualité, Wikipédia, YouTube, Instagram, TikTok) au script de vidéo courte prêt à tourner.**
+**Des vraies tendances (Google, actualité, Wikipédia, YouTube, Instagram, TikTok, LinkedIn) au script de vidéo courte prêt à tourner — Reels, TikTok, Shorts ou vidéo LinkedIn.**
 
 TrendScript est un outil personnel pour créateur de contenu francophone. En quatre étapes :
 
@@ -30,6 +30,8 @@ Chaque source mesure quelque chose de précis — et seulement ça :
 | **Instagram Reels (Apify)** | Payant à l'usage (5 $ de crédit gratuit/mois) | Reels des 30 derniers jours sous vos hashtags de niche, avec vraies vues, likes et commentaires. | **Instagram ne publie aucun classement de reels tendance** (aucune API, officielle ou non) : TrendScript repère les reels qui sortent du lot en comparant leurs vues à celles des autres. Nécessite des mots-clés. Collecte de données publiques par un tiers, hors API officielle (contraire aux conditions d'Instagram ; les pseudos et légendes sont des données personnelles). ≈ 0,26 $ par analyse. |
 | **Instagram (API officielle Meta)** | Gratuit, configuration longue | Reels récents des comptes Créateur/Entreprise que vous surveillez, avec vues, likes et **nombre d'abonnés** (repère les reels qui dépassent l'audience de leur auteur). En option : publications populaires de vos hashtags. | La recherche par hashtag exige l'autorisation Meta « Instagram Public Content Access » et ne donne ni vues ni auteur. Jeton à renouveler tous les 60 jours. 30 hashtags différents max par 7 jours. |
 | **TikTok (Apify)** | Payant à l'usage (même jeton Apify) | Hashtags tendance du TikTok Creative Center pour votre pays sur 7 jours, et, avec vos mots-clés, les vidéos les plus likées de la semaine. | TikTok n'ouvre pas son API de tendances aux usages commerciaux : données publiques collectées via Apify. ≈ 0,20 à 0,50 $ par analyse. |
+| **LinkedIn — recherche web (Firecrawl)** | Crédits Firecrawl (offre gratuite disponible) | Publications LinkedIn publiques de la semaine sur vos mots-clés, avec leur **date exacte** (décodée de l'identifiant de chaque publication) et un extrait. | **LinkedIn n'a aucune API publique de recherche ni de tendances.** Les publications sont celles déjà indexées par le moteur de recherche, sans réactions ni commentaires. Nécessite des mots-clés. ≈ 6 crédits Firecrawl par analyse. |
+| **LinkedIn — engagement (Apify)** | Payant à l'usage (même jeton Apify) | Publications LinkedIn publiques de la semaine sur vos mots-clés, avec leurs vraies réactions, commentaires et republications : celles qui sortent du lot sont repérées. | Collecte de données publiques par un tiers (acteur `harvestapi/linkedin-post-search`, sans compte LinkedIn), hors API officielle : vérifiez que cet usage respecte les conditions de LinkedIn. Pas de nombre de vues. ≈ 0,12 $ par analyse. |
 
 Autres limites, en toute transparence :
 
@@ -104,6 +106,13 @@ Coût indicatif : une analyse = un appel (≈ 160 signaux résumés) ; un script
 4. Facultatif : `APIFY_MAX_CHARGE_USD` plafonne le coût de chaque exécution (0,50 $ par défaut).
 
 Les sources Apify ont besoin de **mots-clés de niche** (transformés en hashtags pour Instagram).
+
+### Firecrawl (LinkedIn — recherche web)
+
+1. Créez un compte sur https://www.firecrawl.dev, puis copiez votre clé dans **API Keys** (elle commence par `fc-`).
+2. Renseignez `FIRECRAWL_API_KEY`. Les 3 premiers mots-clés du Radar sont cherchés parmi les publications LinkedIn de la semaine.
+
+Le même jeton Apify que pour Instagram et TikTok active aussi **LinkedIn — engagement (Apify)**.
 
 ### Instagram — API officielle Meta (facultatif, gratuit)
 

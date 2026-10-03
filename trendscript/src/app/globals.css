@@ -65,6 +65,7 @@
   --ts-platform-youtube: #ff0033;
   --ts-platform-instagram: #e1306c;
   --ts-platform-tiktok: #00a6b0;
+  --ts-platform-linkedin: #0a66c2;
 
   /* Elevation, focus, decoration */
   --ts-shadow-xs: 0 1px 2px rgb(18 20 42 / 0.05);
@@ -123,6 +124,7 @@
     --ts-platform-youtube: #ff3355;
     --ts-platform-instagram: #f0568a;
     --ts-platform-tiktok: #00c2cc;
+    --ts-platform-linkedin: #5aa2ea;
 
     --ts-shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
     --ts-shadow-card: 0 1px 2px rgb(0 0 0 / 0.35), 0 6px 20px -8px rgb(0 0 0 / 0.5);
@@ -186,6 +188,7 @@
   --color-platform-youtube: var(--ts-platform-youtube);
   --color-platform-instagram: var(--ts-platform-instagram);
   --color-platform-tiktok: var(--ts-platform-tiktok);
+  --color-platform-linkedin: var(--ts-platform-linkedin);
 
   --shadow-xs: var(--ts-shadow-xs);
   --shadow-card: var(--ts-shadow-card);

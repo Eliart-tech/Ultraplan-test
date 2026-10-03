@@ -1,0 +1,29 @@
+[
+  {
+    "type": "post",
+    "id": "7511394996198039553",
+    "linkedinUrl": "https://www.linkedin.com/posts/alice-lhabouz_livret-a-activity-7511394996198039553-pOhS",
+    "content": "LIVRET A\nLe Livret A reste indispensable pour votre épargne de précaution. Le problème, c'est quand tout votre argent y dort. #epargne #finance",
+    "author": { "name": "Alice Lhabouz", "publicIdentifier": "alice-lhabouz", "type": "profile", "info": "Fondatrice | Finance durable" },
+    "postedAt": { "timestamp": 1790856122064, "date": "2026-10-01T12:02:02.064Z" },
+    "engagement": { "likes": 412, "comments": 57, "shares": 18, "reactions": [{ "type": "LIKE", "count": 400 }, { "type": "PRAISE", "count": 12 }] }
+  },
+  {
+    "type": "post",
+    "id": "7330988768578920448",
+    "linkedinUrl": "https://www.linkedin.com/posts/nickbennett05_hiring-activity-7330988768578920448-Je01",
+    "content": "I'm #hiring. Are you passionate about the intersection of physical and virtual worlds, including AI-powered systems and agent-based workflows?",
+    "author": { "name": "Nick Bennett", "publicIdentifier": "nickbennett05", "type": "profile" },
+    "postedAt": { "timestamp": 1747843925614, "date": "2025-05-21T16:12:05.614Z" },
+    "engagement": { "likes": 13, "comments": 1, "shares": 9 }
+  },
+  {
+    "type": "post",
+    "id": "7510571580230402048",
+    "linkedinUrl": "https://fr.linkedin.com/posts/romainfargeot_la-cour-des-comptes-veut-taxer-votre-livret-activity-7510571580230402048-r6io",
+    "content": "La Cour des comptes veut taxer votre Livret A ? Voici ce que dit vraiment le rapport, et ce que ça change pour vous.",
+    "author": { "name": "Romain Fargeot", "publicIdentifier": "romainfargeot", "type": "profile" },
+    "postedAt": { "timestamp": 1790659804399 },
+    "engagement": { "likes": 96, "comments": 31, "shares": 4 }
+  }
+]

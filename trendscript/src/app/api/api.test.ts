@@ -155,7 +155,7 @@ describe("GET /api/sources", () => {
     const text = await response.text();
     expect(text).not.toContain(SECRET);
     const body = JSON.parse(text);
-    expect(body.sources).toHaveLength(9);
+    expect(body.sources).toHaveLength(11);
     expect(body.sources.find((s: { id: string }) => s.id === "tiktok_apify").configured).toBe(true);
     expect(body.sources.find((s: { id: string }) => s.id === "youtube").configured).toBe(Boolean(process.env.YOUTUBE_API_KEY));
     expect(body.ai).toEqual({ configured: false, model: "claude-test-model" });

@@ -26,7 +26,7 @@ const MARKERS: ScriptPlaybook = {
   facts: "<<FACTS>>",
   rubric: "<<RUBRIC>>",
   screenText: "<<SCREEN>>",
-  platforms: { instagram_reels: "<<IG>>", tiktok: "<<TIKTOK>>", youtube_shorts: "<<YOUTUBE>>" },
+  platforms: { instagram_reels: "<<IG>>", tiktok: "<<TIKTOK>>", youtube_shorts: "<<YOUTUBE>>", linkedin: "<<LINKEDIN>>" },
   formats: {
     face_camera: "<<FACE>>",
     voice_over_broll: "<<BROLL>>",

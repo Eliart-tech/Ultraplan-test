@@ -17,6 +17,8 @@ export const SOURCE_IDS = [
   "instagram_graph",
   "instagram_apify",
   "tiktok_apify",
+  "linkedin_web",
+  "linkedin_apify",
 ] as const;
 export type SourceId = (typeof SOURCE_IDS)[number];
 
@@ -27,6 +29,7 @@ export const PLATFORMS = [
   "youtube",
   "instagram",
   "tiktok",
+  "linkedin",
 ] as const;
 export type Platform = (typeof PLATFORMS)[number];
 
@@ -35,7 +38,8 @@ export type SignalKind =
   | "news" // a news article (Google News)
   | "article_views" // a most-read encyclopedia article (Wikipedia pageviews)
   | "short_video" // Reel / TikTok / Short
-  | "video"; // long-form video
+  | "video" // long-form video
+  | "social_post"; // LinkedIn post (text, image, document or video)
 
 export interface SignalMetrics {
   /** Approximate search volume (Google Trends "20K+" → 20000). */
@@ -227,6 +231,7 @@ export const SCRIPT_PLATFORMS = [
   "instagram_reels",
   "tiktok",
   "youtube_shorts",
+  "linkedin",
 ] as const;
 export type ScriptPlatform = (typeof SCRIPT_PLATFORMS)[number];
 

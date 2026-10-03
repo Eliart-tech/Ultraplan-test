@@ -168,6 +168,36 @@ describe("checkScript", () => {
     });
   });
 
+  describe("LinkedIn", () => {
+    const linkedin: Partial<ScriptSettings> = { platform: "linkedin" };
+
+    it("accepts a short first line, 3 hashtags and no link", () => {
+      const caption = "Le Livret A va-t-il être taxé ? Ce que dit vraiment le rapport.\n\nTrois points à retenir.";
+      expect(check({ caption, hashtags: ["#epargne", "#livretA", "#finance"] }, linkedin)).toEqual([]);
+    });
+
+    it("flags more than 3 hashtags, a long first line, a link and the comment-keyword CTA", () => {
+      const warnings = check(
+        { caption: `${"a".repeat(230)}\nLien : https://example.com`, hashtags: ["#a", "#b", "#c", "#d"] },
+        { ...linkedin, cta: "comment_keyword" },
+      );
+      expect(warnings).toEqual(
+        expect.arrayContaining([
+          "LinkedIn : 3 hashtags maximum recommandés (4 proposés).",
+          expect.stringMatching(/^Première ligne du post LinkedIn de 230 caractères/),
+          expect.stringMatching(/^Lien dans le texte du post LinkedIn/),
+          expect.stringMatching(/^CTA « commente un mot-clé » sur LinkedIn/),
+        ]),
+      );
+    });
+
+    it("applies the 3 000-character post limit", () => {
+      expect(check({ caption: "a".repeat(3100), hashtags: [] }, linkedin)).toContain(
+        "Légende + hashtags : 3100 caractères pour une limite de 3000.",
+      );
+    });
+  });
+
   describe("compliance", () => {
     it("requires the legal mention on a paid partnership", () => {
       expect(check({}, { sponsored: true })[0]).toMatch(/^Partenariat rémunéré : ajoutez « Publicité »/);

@@ -263,6 +263,10 @@ export const PLATFORM_LABELS: Record<ScriptPlatform, LabelInfo> = {
     label: "YouTube Shorts",
     description: "1 à 3 hashtags. Au-delà d'1 min, aucune musique ou extrait protégé (Content ID).",
   },
+  linkedin: {
+    label: "LinkedIn",
+    description: "Vidéo native + texte du post : hook dans les 2 premières lignes, 3 hashtags maximum, sous-titres indispensables.",
+  },
 };
 
 export const PACE_LABELS: Record<SpeakingPace, LabelInfo> = {

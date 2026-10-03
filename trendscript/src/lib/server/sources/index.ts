@@ -3,6 +3,8 @@ import { googleNewsConnector } from "./google-news";
 import { googleTrendsConnector } from "./google-trends";
 import { instagramApifyConnector } from "./instagram-apify";
 import { instagramGraphConnector } from "./instagram-graph";
+import { linkedinApifyConnector } from "./linkedin-apify";
+import { linkedinWebConnector } from "./linkedin-web";
 import { serpapiTrendsConnector } from "./serpapi-trends";
 import { tiktokApifyConnector } from "./tiktok-apify";
 import type { Env, SourceConnector } from "./types";
@@ -20,6 +22,8 @@ export const CONNECTORS: Record<SourceId, SourceConnector> = {
   instagram_graph: instagramGraphConnector,
   instagram_apify: instagramApifyConnector,
   tiktok_apify: tiktokApifyConnector,
+  linkedin_web: linkedinWebConnector,
+  linkedin_apify: linkedinApifyConnector,
 };
 
 export function getSourceStatuses(env: Env = process.env): SourceStatus[] {

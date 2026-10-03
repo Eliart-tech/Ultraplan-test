@@ -277,10 +277,11 @@ export function firecrawlFetchXml(url: string, signal?: AbortSignal): Promise<Fe
 /** Web search through `firecrawl_search`. */
 export function firecrawlSearch(
   query: string,
-  { limit = 5, location, signal }: { limit?: number; location?: string; signal?: AbortSignal } = {},
+  { limit = 5, location, tbs, signal }: { limit?: number; location?: string; tbs?: string; signal?: AbortSignal } = {},
 ): Promise<SearchResult[]> {
   const input: Record<string, unknown> = { query, limit, sources: ["web"] };
   if (location) input.location = location;
+  if (tbs) input.tbs = tbs;
   return cachedCall("firecrawl_search", input, signal, readSearch);
 }
 

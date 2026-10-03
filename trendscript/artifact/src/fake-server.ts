@@ -206,6 +206,19 @@ export function installFakeServer(snapshot: Snapshot): void {
           costNote: `${snapNote.replace(/\.$/, "")} : ${count} vidéos des chaînes d'actualité suivies (72 h précédant la capture). Pas de lecture en direct dans l'édition HTML (version serveur : en direct, gratuit).`,
           setup: [`Rien à configurer : l'instantané réel du ${capturedOn} est inclus dans cette page.`],
         };
+      case "linkedin_web":
+        return {
+          ...source,
+          configured: mode !== "off",
+          costNote:
+            mode === "off"
+              ? `Indisponible ici : ${why}. Cette source cherche en direct les publications LinkedIn de la semaine sur vos mots-clés ; elle n'est pas dans l'instantané.`
+              : `En direct${mode === "maybe" ? " si votre connecteur Firecrawl est connecté à votre compte claude.ai (vérifié à la première analyse)" : " via votre connecteur Firecrawl"} : une recherche par mot-clé (3 maximum), environ 2 crédits Firecrawl chacune, résultat gardé 10 min. Publications déjà indexées par le moteur de recherche, sans réactions ni commentaires.`,
+          setup: [
+            "Connectez Firecrawl à votre compte claude.ai (Réglages → Connecteurs), puis autorisez cette page à l'utiliser lors de votre première analyse.",
+            "Saisissez vos mots-clés de niche dans le Radar : les 3 premiers sont cherchés parmi les publications LinkedIn de la semaine.",
+          ],
+        };
       default:
         return source.configured ? source : { ...source, description: `${source.description} ${SERVER_ONLY_SENTENCE}` };
     }

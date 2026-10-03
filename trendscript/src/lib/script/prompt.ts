@@ -181,6 +181,8 @@ export const SOURCE_LABELS: Record<SourceId, string> = {
   instagram_graph: "Instagram",
   instagram_apify: "Instagram",
   tiktok_apify: "TikTok",
+  linkedin_web: "LinkedIn",
+  linkedin_apify: "LinkedIn",
 };
 
 export const KIND_LABELS: Record<Signal["kind"], string> = {
@@ -189,6 +191,7 @@ export const KIND_LABELS: Record<Signal["kind"], string> = {
   article_views: "article très lu",
   short_video: "vidéo courte",
   video: "vidéo",
+  social_post: "publication LinkedIn",
 };
 
 const TIME_ZONES: Record<string, string> = {
@@ -310,6 +313,8 @@ function hashtagRule(platform: ScriptPlatform): string {
       return "3 à 5 hashtags";
     case "youtube_shorts":
       return "1 à 3 hashtags";
+    case "linkedin":
+      return "3 hashtags au maximum, en fin de post";
   }
 }
 
@@ -348,7 +353,9 @@ function ctaInstruction(request: ScriptRequest): string {
       return "CTA : aucun. La vidéo se termine sur le payoff ou la boucle ; le champ cta vaut « Aucun ».";
     case "comment_keyword":
       return `CTA : ${CTA_LABELS.comment_keyword.label}${detail ? ` — mot-clé / ressource : « ${detail} »` : " — mot-clé à choisir, en MAJUSCULES"}.${
-        settings.platform === "instagram_reels" ? " Sur Instagram, signale dans risks le risque d'appât à engagement." : ""
+        settings.platform === "instagram_reels" || settings.platform === "linkedin"
+          ? " Sur cette plateforme, signale dans risks le risque d'appât à engagement."
+          : ""
       }`;
     default:
       return `CTA : ${CTA_LABELS[settings.cta].label}${detail ? ` — détail fourni : « ${detail} »` : ""}.`;

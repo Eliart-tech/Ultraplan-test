@@ -33,7 +33,8 @@ import type { SourceConnector, SourceContext, SourceFetchResult } from "@/lib/se
 import { resolveRssChannels } from "@/lib/server/sources/youtube-rss";
 import type { Signal, SourceId } from "@/lib/types";
 import { capitalize, frenchDateTime, snapshotLabel } from "./edition";
-import { firecrawlUnavailableReason, firecrawlUsable } from "./firecrawl";
+import { fetchLinkedinWeb } from "@/lib/server/sources/linkedin-web";
+import { firecrawlSearch, firecrawlUnavailableReason, firecrawlUsable } from "./firecrawl";
 import type { EditionSignal, SignalOrigin, Snapshot, SnapshotSource } from "./snapshot-types";
 
 const MAX_NEWS_KEYWORDS = 8;
@@ -283,8 +284,28 @@ export function createEditionConnectors(snapshot: Snapshot): Record<SourceId, So
     },
   };
 
+  // -------------------------------------------------------------------------
+  // LinkedIn: live web search through Firecrawl (no snapshot: keyword-driven)
+  // -------------------------------------------------------------------------
+
+  const linkedinWeb: SourceConnector = {
+    id: "linkedin_web",
+    meta: CONNECTORS.linkedin_web.meta,
+    isConfigured: () => true,
+    async fetch(ctx): Promise<SourceFetchResult> {
+      if (!(await firecrawlUsable())) {
+        throw new SourceError(`Publications LinkedIn indisponibles : ${withoutDot(await firecrawlUnavailableReason())}.`);
+      }
+      const result = await fetchLinkedinWeb(ctx, (query, { limit, tbs, location, signal }) =>
+        firecrawlSearch(query, { limit, tbs, location, signal }),
+      );
+      return { signals: tagSignals(result.signals, "live"), warning: result.warning };
+    },
+  };
+
   return {
     ...CONNECTORS,
+    linkedin_web: linkedinWeb,
     google_trends: googleTrends,
     google_news: googleNews,
     wikipedia,
