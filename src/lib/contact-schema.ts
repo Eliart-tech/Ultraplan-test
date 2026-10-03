@@ -23,7 +23,7 @@ export const contactSchema = z.object({
     .max(30, "Ce numéro est trop long.")
     .regex(/^[+()\d\s.-]*$/, "Ce numéro de téléphone ne semble pas valide.")
     .optional(),
-  subject: z.enum(["audit", "agents", "automatisation", "vocal", "autre"]),
+  subject: z.enum(["audit", "agents", "automatisation", "formation", "autre"]),
   message: z
     .string()
     .trim()
@@ -39,9 +39,9 @@ export const contactSchema = z.object({
 export type ContactInput = z.infer<typeof contactSchema>;
 
 export const subjectLabels: Record<ContactInput["subject"], string> = {
-  audit: "Réserver un audit gratuit",
-  agents: "Déployer un agent IA",
-  automatisation: "Automatiser un process",
-  vocal: "Mettre en place un assistant vocal",
+  audit: "Demander mon audit IA offert",
+  agents: "Obtenir mon agent IA",
+  automatisation: "Automatiser mon activité",
+  formation: "Réserver une formation IA générative",
   autre: "Autre demande",
 };

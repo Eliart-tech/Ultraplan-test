@@ -6,7 +6,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = {
   title: "Contact",
   description:
-    "Parlons de vos opérations : 30 minutes d'échange, un audit offert et au moins deux automatisations activables dans le mois.",
+    "Parlons de votre activité : réservez un appel et un audit IA offert pour identifier les agents et automatisations à fort impact.",
   alternates: { canonical: "/contact" },
 };
 
@@ -34,12 +34,13 @@ export default function ContactPage() {
         <div className="grid gap-14 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:gap-16">
           <div>
             <h1 className="text-[2.4rem] leading-[1.1] sm:text-[3.2rem]">
-              Parlons de ce qui peut tourner sans vous.
+              Devenons ensemble une entreprise AI-first.
             </h1>
             <p className="mt-6 text-base leading-relaxed text-ink-400">
               Décrivez-nous votre situation en quelques lignes. Nous revenons
-              vers vous sous 24 h ouvrées avec un créneau d&apos;audit et deux
-              premières pistes concrètes — sans engagement.
+              vers vous sous 24 h ouvrées avec un créneau d&apos;audit pour
+              identifier les agents IA et automatisations les plus utiles à
+              votre activité — sans engagement.
             </p>
 
             <ul className="mt-10 flex flex-col gap-5 border-t border-line pt-8">
