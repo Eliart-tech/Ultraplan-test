@@ -528,6 +528,15 @@ export interface CreatorStats {
   reachRate?: number;
   /** Posts at ≥ 2× the creator's own median on the ranking metric, best first. */
   outliers: { postId: string; ratio: number }[];
+  /**
+   * Views ÷ followers per post (when both are known), best first, top 10.
+   * A video watched far beyond the account's own audience reached
+   * non-followers: the best public proxy of the posts that bring new
+   * subscribers (no platform publishes follows per post for other accounts).
+   */
+  audienceMultipliers?: { postId: string; multiplier: number }[];
+  /** Median of (shares + saves) / views, in % — "send / save" signals that platforms reward. */
+  shareSaveRate?: number;
   /** Best 5 and worst 3 posts on the ranking metric. */
   topPostIds: string[];
   bottomPostIds: string[];
@@ -564,6 +573,12 @@ export interface CompetitorInsights {
   hookPatterns: { pattern: string; whyItWorks: string; examples: PostReference[] }[];
   whatWorks: { insight: string; evidence: string; postIds: string[] }[];
   whatFlops: { insight: string; evidence: string; postIds: string[] }[];
+  /**
+   * What most plausibly converts viewers into subscribers for this creator
+   * (series, promise of a follow-up, niche identity, value density, CTA…),
+   * grounded in the posts that reached far beyond their audience.
+   */
+  followDrivers?: { insight: string; evidence: string; postIds: string[] }[];
   ctaAndEngagement: string;
   /** Angles / topics / audiences the creator leaves uncovered. */
   gaps: { opportunity: string; why: string }[];
