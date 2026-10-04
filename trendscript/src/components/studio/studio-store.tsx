@@ -138,7 +138,7 @@ export interface AnalysisRun {
   error: string | null;
 }
 
-export type ScriptPhase = "research" | "writing" | "finalizing";
+export type ScriptPhase = "research" | "writing" | "review" | "finalizing";
 
 export interface ScriptRun {
   status: RunStatus;
@@ -511,6 +511,7 @@ function describeSourceDone(summary: SourceRunSummary): string {
 const PHASE_LABELS: Record<ScriptPhase, string> = {
   research: "Recherche des faits en cours",
   writing: "Écriture du script en cours",
+  review: "Relecture critique du script en cours",
   finalizing: "Finalisation du script",
 };
 

@@ -5,6 +5,7 @@
 
 import { z } from "zod";
 import {
+  CREATOR_PLATFORMS,
   ANGLE_TYPES,
   CTA_TYPES,
   DURATIONS,
@@ -131,6 +132,8 @@ export const scriptSettingsSchema = z.object({
   pace: z.enum(SPEAKING_PACES),
   sponsored: z.boolean(),
   aiVisuals: z.boolean(),
+  // Older clients (history, HTML edition caches) may omit it: default ON.
+  review: z.boolean().default(true),
 });
 
 export const creatorProfileSchema = z.object({
@@ -184,6 +187,18 @@ const scriptDraftSchema = z.object({
   sources: z.array(relatedLinkSchema),
 });
 
+const competitorBriefSchema = z.object({
+  platform: z.enum(CREATOR_PLATFORMS),
+  handle: shortText(100).min(1),
+  positioning: shortText(1000),
+  pillars: z.array(shortText(200)).max(10),
+  hookPatterns: z.array(shortText(300)).max(10),
+  overused: z.array(shortText(300)).max(10),
+  gaps: z.array(shortText(300)).max(10),
+  recentTitles: z.array(shortText(300)).max(15),
+  medianViews: z.number().optional(),
+});
+
 export const scriptRequestSchema = z.object({
   topic: topicSchema,
   signals: z.array(signalSchema).max(100),
@@ -193,6 +208,7 @@ export const scriptRequestSchema = z.object({
   refine: z
     .object({ previous: scriptDraftSchema, instruction: shortText(1000).min(3) })
     .optional(),
+  competitors: z.array(competitorBriefSchema).max(3).optional(),
   geo: z
     .string()
     .trim()
@@ -208,3 +224,25 @@ export function describeZodError(error: z.ZodError): string {
   const path = issue.path.join(".");
   return path ? `Champ « ${path} » invalide : ${issue.message}` : issue.message;
 }
+
+/** "@handle", "handle" or a profile URL → bare handle (validated per platform by the server). */
+const handleInput = z
+  .string()
+  .trim()
+  .min(2, "Indiquez le pseudo du créateur")
+  .max(300);
+
+export const competitorRequestSchema = z.object({
+  platform: z.enum(CREATOR_PLATFORMS),
+  handle: handleInput,
+  focus: shortText(300).optional(),
+  maxPosts: z.number().int().min(10).max(50).default(30),
+  profile: creatorProfileSchema,
+  language: z.string().trim().regex(/^[a-z]{2}$/).default("fr"),
+  geo: z
+    .string()
+    .trim()
+    .regex(/^[A-Za-z]{2}$/, "Code pays sur 2 lettres attendu")
+    .transform((value) => value.toUpperCase())
+    .default("FR"),
+});

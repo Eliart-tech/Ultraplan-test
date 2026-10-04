@@ -148,6 +148,7 @@ export function defaultScriptSettings(language = "fr"): ScriptSettings {
     pace: "normal",
     sponsored: false,
     aiVisuals: false,
+    review: true,
   };
 }
 

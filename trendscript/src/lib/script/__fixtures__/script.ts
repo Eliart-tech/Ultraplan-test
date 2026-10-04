@@ -99,6 +99,7 @@ export const fixtureSettings: ScriptSettings = {
   pace: "normal",
   sponsored: false,
   aiVisuals: false,
+  review: false,
 };
 
 export const fixtureProfile: CreatorProfile = {

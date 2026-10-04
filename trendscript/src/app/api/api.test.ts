@@ -82,6 +82,7 @@ const validScript: ScriptRequest = {
     pace: "normal",
     sponsored: false,
     aiVisuals: false,
+    review: false,
   },
   profile: { name: "", niche: "", audience: "", positioning: "", voice: "", avoid: "", defaultCta: "" },
 };
