@@ -52,7 +52,7 @@ function metricsOf(post: CreatorPost, followers: number | undefined): SignalMetr
 
 /** One competitor post as a script evidence signal (strength filled by `scoreSignals`). */
 export function postToSignal(report: CompetitorReport, post: CreatorPost): Signal {
-  const { account } = report.data;
+  const { account, ratiosAllowed } = report.data;
   const source = CREATOR_SOURCE_IDS[account.platform];
   const title = post.title.trim() || truncate(post.text, 120) || `Publication de ${accountLabel(account)}`;
   const text = truncate(post.text, 500);
@@ -66,7 +66,9 @@ export function postToSignal(report: CompetitorReport, post: CreatorPost): Signa
     url: post.url,
     author: clip(accountLabel(account), 200),
     ...(post.publishedAt ? { publishedAt: post.publishedAt } : {}),
-    metrics: metricsOf(post, account.followers),
+    // Without the follower count, scoring derives no views ÷ followers ratio
+    // (forbidden on YouTube data unless the derived-metrics amendment is accepted).
+    metrics: metricsOf(post, ratiosAllowed === false ? undefined : account.followers),
     tags: [...new Set(post.hashtags.map((tag) => clip(tag.replace(/^#+/, "").toLowerCase(), 100)).filter(Boolean))].slice(0, 50),
     related: [],
     strength: 0,
@@ -108,7 +110,8 @@ export function ideaToStudio(report: CompetitorReport, ideaIndex: number): Studi
     if (outlierIds.has(post.id)) signals[index].outlier = true;
   });
 
-  const ratios = performanceRatios(posts, report.stats.rankingMetric);
+  // YouTube API terms forbid derived metrics on other channels: raw counts only then.
+  const ratios = report.data.ratiosAllowed === false ? new Map<string, number>() : performanceRatios(posts, report.stats.rankingMetric);
   const fallbackTitle = `Idée inspirée de ${who}`;
   const title = clip(idea.title, 200).length >= 3 ? clip(idea.title, 200) : fallbackTitle;
   const id = `competitor-${shortHash(`${report.id}|${ideaIndex}|${idea.title}`)}`;

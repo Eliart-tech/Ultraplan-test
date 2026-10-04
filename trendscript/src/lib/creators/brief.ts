@@ -108,7 +108,11 @@ export function toCompetitorBrief(report: CompetitorReport): CompetitorBrief {
       .map((outlier) => ({ outlier, post: byId.get(outlier.postId) }))
       .filter((entry): entry is { outlier: (typeof stats.outliers)[number]; post: CreatorPost } => Boolean(entry.post?.title.trim()))
       .slice(0, STATS_HOOKS)
-      .map(({ outlier, post }) => `Accroche d'une publication à ${formatRatio(outlier.ratio)} sa médiane : « ${clip(post.title, 200)} »`),
+      .map(({ outlier, post }) =>
+        data.ratiosAllowed === false
+          ? `Accroche d'une de ses publications les plus vues : « ${clip(post.title, 200)} »`
+          : `Accroche d'une publication à ${formatRatio(outlier.ratio)} sa médiane : « ${clip(post.title, 200)} »`,
+      ),
     300,
   );
   const followDrivers = list(

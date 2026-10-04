@@ -12,6 +12,7 @@ import {
   Send,
   ShieldCheck,
   SearchCheck,
+  SpellCheck2,
   TriangleAlert,
   Type,
   Wand2,
@@ -189,6 +190,23 @@ export function ScriptResult({
               ))}
             </ul>
           </Alert>
+        ) : null}
+
+        {script.reviewNotes && script.reviewNotes.length > 0 ? (
+          <section
+            aria-labelledby={`${titleId}-relecture`}
+            className="mt-5 rounded-xl border border-success/25 bg-success-soft px-4 py-3.5"
+          >
+            <h3 id={`${titleId}-relecture`} className="flex items-center gap-2 text-sm font-semibold text-ink">
+              <SpellCheck2 aria-hidden className="size-4 text-success-ink" />
+              Ce que la relecture a amélioré
+            </h3>
+            <ul className="mt-1.5 list-disc space-y-1 pl-5 text-[0.8125rem] leading-relaxed text-ink/80">
+              {script.reviewNotes.map((note, index) => (
+                <li key={index}>{note}</li>
+              ))}
+            </ul>
+          </section>
         ) : null}
 
         <div className="mt-5 flex flex-wrap items-center gap-2 border-t border-line pt-5">

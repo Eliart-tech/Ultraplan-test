@@ -161,6 +161,8 @@ export interface ScriptRun {
   phase: ScriptPhase | null;
   message: string;
   chars: number;
+  /** Characters of the first draft, frozen when the review pass starts. */
+  draftChars?: number;
   brief: ResearchBrief | null;
   error: string | null;
 }
@@ -744,9 +746,10 @@ export function studioReducer(state: StudioState, action: StudioAction): StudioS
       if (run.status !== "running") return state;
       const { event } = action;
       if (event.type === "status") {
+        const draftChars = event.step === "review" && run.phase !== "review" ? run.chars : run.draftChars;
         return {
           ...state,
-          scriptRun: { ...run, phase: event.step, message: event.message },
+          scriptRun: { ...run, phase: event.step, message: event.message, ...(draftChars !== undefined ? { draftChars } : {}) },
           announcement: run.phase === event.step ? state.announcement : PHASE_LABELS[event.step],
         };
       }

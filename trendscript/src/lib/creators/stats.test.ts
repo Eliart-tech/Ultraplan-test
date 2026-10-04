@@ -362,6 +362,19 @@ describe("computeCreatorStats — edge cases", () => {
     expect(computeCreatorStats(data(posts), PARIS).hashtags).toEqual([{ label: "#budget", posts: 2, median: 2 }]);
   });
 
+  it("omits derived rates and multipliers when the source's terms forbid them (YouTube API)", () => {
+    const stats = computeCreatorStats({ ...fixtureCreator, ratiosAllowed: false }, PARIS);
+    expect(stats.engagementRate).toBeUndefined();
+    expect(stats.shareSaveRate).toBeUndefined();
+    expect(stats.reachRate).toBeUndefined();
+    expect(stats.audienceMultipliers).toBeUndefined();
+    // Rankings on raw counts remain.
+    expect(stats.medianViews).toBe(57_500);
+    expect(stats.topPostIds).toEqual(["t10", "t5", "t2", "t9", "t3"]);
+    expect(stats.outliers.map((o) => o.postId)).toEqual(["t10", "t5", "t2"]);
+    expect(computeCreatorStats({ ...fixtureCreator, ratiosAllowed: true }, PARIS)).toEqual(computeCreatorStats(fixtureCreator, PARIS));
+  });
+
   it("falls back to every dated post for the rhythm when only pinned posts are dated", () => {
     const posts = [
       simple("a", { views: 1 }, { publishedAt: "2026-09-01T00:00:00Z", pinned: true }),

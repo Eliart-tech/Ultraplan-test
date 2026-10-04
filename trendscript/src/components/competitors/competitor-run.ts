@@ -80,6 +80,21 @@ export function competitorRunReducer(run: CompetitorRun, action: CompetitorRunAc
   }
 }
 
+export type StepState = "done" | "current" | "upcoming" | "skipped";
+
+const STEP_ORDER: CompetitorStep[] = ["fetch", "stats", "analysis"];
+
+/** State of a step of the run; the analysis is "skipped" when Claude isn't configured. */
+export function competitorStepState(step: CompetitorStep, run: CompetitorRun, aiConfigured: boolean | null): StepState {
+  if (step === "analysis" && aiConfigured === false) return "skipped";
+  const current = run.step ?? "fetch";
+  const index = STEP_ORDER.indexOf(step);
+  const currentIndex = STEP_ORDER.indexOf(current);
+  if (index < currentIndex) return "done";
+  if (index === currentIndex) return "current";
+  return "upcoming";
+}
+
 // ---------------------------------------------------------------------------
 // Store
 // ---------------------------------------------------------------------------
@@ -142,6 +157,11 @@ export function cancelCompetitorRun(): void {
 /** Back to idle (dismiss a result, an error or a cancellation). */
 export function resetCompetitorRun(): void {
   dispatch({ type: "reset" });
+}
+
+/** The current run (outside React). */
+export function getCompetitorRun(): CompetitorRun {
+  return current;
 }
 
 /** The current run, live. */

@@ -230,7 +230,7 @@ function CompetitorsScreen({ selectedKey }: { selectedKey: string | null }) {
                 saveFailed ? (
                   <Alert tone="warning" size="sm">
                     Ce rapport n&apos;a pas pu être enregistré : le stockage de ce navigateur est plein ou désactivé.
-                    Supprimez d&apos;anciens concurrents ou scripts pour faire de la place.
+                    Supprime d&apos;anciens concurrents ou scripts pour faire de la place.
                   </Alert>
                 ) : null
               }
@@ -358,7 +358,7 @@ function CompetitorsScreen({ selectedKey }: { selectedKey: string | null }) {
       <ConfirmDialog
         open={pendingDelete !== null}
         title={`Supprimer l'analyse de @${pendingDelete?.data.account.handle ?? ""} ?`}
-        description="Le rapport est effacé de ce navigateur et ne servira plus à différencier vos scripts. Vous pourrez le ré-analyser à tout moment."
+        description="Le rapport est effacé de ce navigateur et ne servira plus à différencier tes scripts. Tu pourras le ré-analyser à tout moment."
         confirmLabel="Supprimer"
         onConfirm={confirmDelete}
         onCancel={() => setPendingDelete(null)}

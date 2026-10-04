@@ -16,7 +16,7 @@ import { YOUTUBE_CHANNEL_ID, normalizeHandle } from "./handles";
 import { fetchInstagramCreator, instagramSharesEnabled } from "./instagram";
 import { fetchLinkedinCreator } from "./linkedin";
 import { fetchTiktokCreator } from "./tiktok";
-import { fetchYoutubeCreator } from "./youtube";
+import { fetchYoutubeCreator, youtubeRatiosAllowed } from "./youtube";
 
 export { normalizeHandle, creatorProfileUrl } from "./handles";
 export { linkedinHitsToCreatorPosts, linkedinCreatorSearchQuery, fetchLinkedinCreatorWeb } from "./linkedin";
@@ -34,19 +34,22 @@ export function creatorCapabilities(env: Env): CreatorPlatformStatus[] {
   const youtubeKey = has(env, "YOUTUBE_API_KEY");
   const firecrawl = has(env, "FIRECRAWL_API_KEY");
 
+  const youtubeRatios = youtubeRatiosAllowed(env)
+    ? " Ratios vues ÷ abonnés activés (YT_DERIVED_METRICS_APPROVED=true : avenant « derived metrics » accepté)."
+    : " Ratios vues ÷ abonnés désactivés : les règles développeurs de YouTube les interdisent sans l'avenant « derived metrics » — renseignez YT_DERIVED_METRICS_APPROVED=true une fois cet avenant accepté.";
   const statuses: Record<CreatorPlatform, CreatorPlatformStatus> = {
     youtube: youtubeKey
       ? {
           platform: "youtube",
           available: true,
           via: "YouTube Data API (50 dernières vidéos)",
-          note: "Vues, likes, commentaires, durée de chaque vidéo et nombre d'abonnés (arrondi par YouTube). 3 unités de quota par analyse, sans recherche.",
+          note: `Vues, likes, commentaires, durée de chaque vidéo et nombre d'abonnés (arrondi par YouTube). 3 unités de quota par analyse, sans recherche.${youtubeRatios}`,
         }
       : {
           platform: "youtube",
           available: true,
           via: "Page publique + flux RSS officiel (15 dernières vidéos)",
-          note: "Gratuit et sans clé : vues et likes des 15 dernières vidéos, abonnés arrondis tels qu'affichés, mais ni commentaires ni durées. Ajoutez YOUTUBE_API_KEY (gratuite) pour analyser jusqu'à 50 vidéos avec toutes leurs statistiques.",
+          note: `Gratuit et sans clé : vues et likes des 15 dernières vidéos, abonnés arrondis tels qu'affichés, mais ni commentaires ni durées. Ajoutez YOUTUBE_API_KEY (gratuite) pour analyser jusqu'à 50 vidéos avec toutes leurs statistiques.${youtubeRatios}`,
         },
     instagram: meta
       ? {
@@ -115,7 +118,7 @@ export function creatorCapabilities(env: Env): CreatorPlatformStatus[] {
 function route(platform: CreatorPlatform, env: Env): string {
   switch (platform) {
     case "youtube":
-      return has(env, "YOUTUBE_API_KEY") ? "api" : "keyless";
+      return `${has(env, "YOUTUBE_API_KEY") ? "api" : "keyless"}${youtubeRatiosAllowed(env) ? "+ratios" : ""}`;
     case "instagram":
       return `${has(env, "INSTAGRAM_ACCESS_TOKEN") && has(env, "INSTAGRAM_USER_ID") ? "meta" : "apify"}${instagramSharesEnabled(env) ? "+shares" : ""}`;
     case "tiktok":

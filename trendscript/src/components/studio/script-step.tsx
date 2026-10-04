@@ -7,16 +7,18 @@ import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Skeleton, SkeletonText } from "@/components/ui/skeleton";
-import { getHistory, isProfileFilled, saveScriptToHistory, useProfile } from "@/lib/client/storage";
+import { defaultCompetitorKeys, selectReports } from "@/components/competitors/report-utils";
+import { getHistory, isProfileFilled, reportKey, saveScriptToHistory, useCompetitors, useProfile } from "@/lib/client/storage";
 import { useServerStatus } from "@/lib/client/use-server-status";
 import { cn } from "@/lib/cn";
+import { toCompetitorBrief } from "@/lib/creators/brief";
 import { applyGuardrails } from "@/lib/script/guardrails";
 import type { ScriptRequest } from "@/lib/types";
 import { applyHook } from "./apply-hook";
 import { ScriptProgress } from "./script-progress";
 import { ScriptResult } from "./script-result";
 import { ScriptSettingsPanel } from "./script-settings";
-import { useStudio } from "./studio-store";
+import { MAX_COMPETITORS, useStudio } from "./studio-store";
 import { cleanSettings, toScriptDraft } from "./studio-utils";
 import { TopicRecap } from "./topic-recap";
 
@@ -34,9 +36,14 @@ export function ScriptStep() {
   const { topic, angle, result } = draft;
   const { status } = useServerStatus();
   const { profile } = useProfile();
+  const { reports: competitors } = useCompetitors();
   const resultRef = useRef<HTMLDivElement>(null);
 
   if (!topic || !angle) return null;
+
+  // "Se différencier de": explicit choice, else the saved competitors of the script's platform.
+  const competitorKeys = draft.competitorKeys ?? defaultCompetitorKeys(competitors, draft.settings.platform, MAX_COMPETITORS);
+  const chosenCompetitors = selectReports(competitors, competitorKeys, MAX_COMPETITORS);
 
   const guard = applyGuardrails(topic, draft.settings);
   const aiConfigured = status?.ai.configured ?? null;
@@ -56,6 +63,7 @@ export function ScriptStep() {
     angle,
     profile,
     ...(draft.geo ? { geo: draft.geo } : {}),
+    ...(chosenCompetitors.length > 0 ? { competitors: chosenCompetitors.map(toCompetitorBrief) } : {}),
   };
 
   const generate = () => {
@@ -105,6 +113,10 @@ export function ScriptStep() {
           onGenerate={generate}
           busy={running}
           hasResult={result !== null}
+          competitors={competitors}
+          selectedCompetitors={chosenCompetitors.map(reportKey)}
+          competitorsAuto={draft.competitorKeys == null}
+          onCompetitorsChange={(keys) => dispatch({ type: "setCompetitors", keys })}
         />
 
         <div ref={resultRef} className="min-w-0 scroll-mt-4 space-y-5">

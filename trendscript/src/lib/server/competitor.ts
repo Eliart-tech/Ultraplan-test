@@ -82,7 +82,11 @@ export function sampleNotes(data: CreatorData, stats: CreatorStats): string[] {
       "Vues non publiques pour la plupart des publications : classement par score d'engagement (likes + 3 × commentaires + 5 × partages).",
     );
   }
-  if (data.account.followers === undefined) {
+  if (data.ratiosAllowed === false) {
+    notes.push(
+      "Conditions de l'API YouTube : pas de métriques dérivées (taux d'engagement, portée, vues ÷ abonnés) sur la chaîne d'un autre créateur ; seuls les chiffres bruts et les classements sont affichés et analysés.",
+    );
+  } else if (data.account.followers === undefined) {
     notes.push("Nombre d'abonnés non fourni par la source : portée et multiplicateurs d'audience non calculables.");
   }
   return notes;

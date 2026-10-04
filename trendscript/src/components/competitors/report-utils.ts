@@ -16,6 +16,7 @@ import type {
   CompetitorInsights,
   CompetitorReport,
   CreatorPlatform,
+  CreatorPlatformStatus,
   CreatorPost,
   CreatorStats,
   ScriptPlatform,
@@ -74,6 +75,22 @@ export function detectPlatformFromInput(input: string): CreatorPlatform | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Platform the form uses: the explicit choice, else the first available one
+ * (Instagram → TikTok → YouTube → LinkedIn), else Instagram while
+ * capabilities are unknown.
+ */
+export function effectivePlatform(
+  chosen: CreatorPlatform | null,
+  capabilities: CreatorPlatformStatus[] | null,
+): CreatorPlatform {
+  if (chosen) return chosen;
+  const available = CREATOR_PLATFORM_ORDER.find((platform) =>
+    capabilities?.some((status) => status.platform === platform && status.available),
+  );
+  return available ?? "instagram";
 }
 
 /**
@@ -145,6 +162,14 @@ export function rankingMedian(report: Pick<CompetitorReport, "data" | "stats">):
   const { stats } = report;
   if (stats.rankingMetric === "views" && isNumber(stats.medianViews)) return stats.medianViews;
   return statsRankingMedian(report.data.posts, stats.rankingMetric);
+}
+
+/**
+ * False when the source's terms forbid derived metrics (YouTube Data API):
+ * the UI then shows raw counts only and never computes a ratio itself.
+ */
+export function ratiosAllowed(report: Pick<CompetitorReport, "data">): boolean {
+  return report.data.ratiosAllowed !== false;
 }
 
 /** Post value ÷ creator's median on the ranking metric (undefined when unknown or median 0). */
@@ -227,7 +252,9 @@ export interface RankedPost {
   multiplier?: number;
 }
 
-function ranked(post: CreatorPost, report: CompetitorReport, medianValue: number | undefined): RankedPost {
+/** A post with its ratios — none when the source forbids derived metrics. */
+export function rankPost(post: CreatorPost, report: CompetitorReport, medianValue: number | undefined): RankedPost {
+  if (!ratiosAllowed(report)) return { post };
   return {
     post,
     ratio: postRatio(post, report.stats.rankingMetric, medianValue),
@@ -246,13 +273,15 @@ export function overperformers(report: CompetitorReport, max = 6): { items: Rank
   const outliers = report.stats.outliers
     .map(({ postId, ratio }): RankedPost | null => {
       const post = index.get(postId);
-      return post ? { ...ranked(post, report, medianValue), ratio } : null;
+      if (!post) return null;
+      const item = rankPost(post, report, medianValue);
+      return ratiosAllowed(report) ? { ...item, ratio } : item;
     })
     .filter((item): item is RankedPost => item !== null)
     .slice(0, max);
   if (outliers.length > 0) return { items: outliers, fallback: false };
   const top = resolvePosts(report.stats.topPostIds, index).slice(0, Math.min(max, 3));
-  return { items: top.map((post) => ranked(post, report, medianValue)), fallback: true };
+  return { items: top.map((post) => rankPost(post, report, medianValue)), fallback: true };
 }
 
 /** The 3 weakest posts of the stats (bottomPostIds). */
@@ -261,7 +290,7 @@ export function underperformers(report: CompetitorReport, max = 3): RankedPost[]
   const medianValue = rankingMedian(report);
   return resolvePosts(report.stats.bottomPostIds, index)
     .slice(0, max)
-    .map((post) => ranked(post, report, medianValue));
+    .map((post) => rankPost(post, report, medianValue));
 }
 
 /**
@@ -270,6 +299,7 @@ export function underperformers(report: CompetitorReport, max = 3): RankedPost[]
  * from the posts (older reports). Empty when followers or views are unknown.
  */
 export function audienceLeaders(report: CompetitorReport, max = 5): RankedPost[] {
+  if (!ratiosAllowed(report)) return [];
   const index = postIndex(report.data.posts);
   const medianValue = rankingMedian(report);
   const fromStats = report.stats.audienceMultipliers;
@@ -277,13 +307,13 @@ export function audienceLeaders(report: CompetitorReport, max = 5): RankedPost[]
     return fromStats
       .map(({ postId, multiplier }): RankedPost | null => {
         const post = index.get(postId);
-        return post ? { ...ranked(post, report, medianValue), multiplier } : null;
+        return post ? { ...rankPost(post, report, medianValue), multiplier } : null;
       })
       .filter((item): item is RankedPost => item !== null)
       .slice(0, max);
   }
   return report.data.posts
-    .map((post) => ranked(post, report, medianValue))
+    .map((post) => rankPost(post, report, medianValue))
     .filter((item) => isNumber(item.multiplier))
     .sort((a, b) => (b.multiplier ?? 0) - (a.multiplier ?? 0))
     .slice(0, max);
@@ -363,6 +393,7 @@ export function chartSeries(report: CompetitorReport): ChartSeries {
   const { stats } = report;
   const metric = stats.rankingMetric;
   const medianValue = rankingMedian(report);
+  const allowed = ratiosAllowed(report);
   const outliers = new Map(stats.outliers.map((item) => [item.postId, item.ratio]));
   const chronological = sortPosts(report.data.posts, "recent", metric).reverse();
   const bars: ChartBar[] = [];
@@ -379,7 +410,7 @@ export function chartSeries(report: CompetitorReport): ChartSeries {
       url: post.url,
       publishedAt: post.publishedAt,
       value,
-      ratio: outliers.get(post.id) ?? postRatio(post, metric, medianValue),
+      ratio: allowed ? (outliers.get(post.id) ?? postRatio(post, metric, medianValue)) : undefined,
       outlier: outliers.has(post.id),
     });
   }

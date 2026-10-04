@@ -113,14 +113,19 @@ function isOwnSound(music: ApifyTiktokProfileVideo["musicMeta"], author: ApifyTi
   return Boolean(by && names.includes(by)) || names.some((name) => title.endsWith(`- ${name}`));
 }
 
-/** Pure: profile video rows → posts (other authors and non-"videos" sections dropped). */
+/**
+ * Pure: profile video rows → posts (non-"videos" sections dropped; rows of
+ * other authors dropped unless no row matches the handle — a renamed
+ * account still answers under its new name).
+ */
 export function tiktokVideosToCreatorPosts(items: ApifyTiktokProfileVideo[], username: string): CreatorPost[] {
   const posts: CreatorPost[] = [];
+  const checkAuthor = items.some((item) => item.authorMeta?.name?.toLowerCase() === username);
   for (const item of items) {
     const url = item.webVideoUrl;
     if (!url?.startsWith("https://www.tiktok.com/")) continue;
     if (item.fromProfileSection && item.fromProfileSection !== "videos") continue;
-    if (item.authorMeta?.name && item.authorMeta.name.toLowerCase() !== username) continue;
+    if (checkAuthor && item.authorMeta?.name && item.authorMeta.name.toLowerCase() !== username) continue;
     const id = item.id ?? url.match(/\/(?:video|photo)\/(\d+)/)?.[1];
     if (!id) continue;
     const duration = toCount(item.videoMeta?.duration);

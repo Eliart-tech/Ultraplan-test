@@ -31,7 +31,7 @@ import {
 import type { ApifyLinkedinPost } from "../sources/linkedin-apify";
 import { firecrawlRestSearch, type LinkedinSearch } from "../sources/linkedin-web";
 import { captionTitle, errorMessage, extractHashtags, toCount, toIso } from "../sources/social-utils";
-import { BIO_MAX, CAPTION_MAX, buildCreatorData, captionParts, plural, type FetchCreatorOptions } from "./common";
+import { BIO_MAX, CAPTION_MAX, buildCreatorData, captionParts, noAudienceWarning, plural, type FetchCreatorOptions } from "./common";
 import { creatorProfileUrl, linkedinIdentity } from "./handles";
 
 export const LINKEDIN_PROFILE_POSTS_ACTOR = "harvestapi~linkedin-profile-posts";
@@ -87,12 +87,14 @@ export function linkedinPostsToCreatorPosts(items: ApifyLinkedinPost[], handle: 
   const posts: CreatorPost[] = [];
   let otherAuthors = 0;
   let author: ApifyLinkedinPost["author"];
+  // A renamed profile answers under its new identifier: only filter when some row matches.
+  const checkAuthor = items.some((item) => authorId(item) === wanted);
   for (const item of items) {
     if (item.type && item.type !== "post") continue;
     const url = linkedinPostUrl(item.linkedinUrl);
     if (!url) continue;
     const by = authorId(item);
-    if (by && by !== wanted) {
+    if (checkAuthor && by && by !== wanted) {
       otherAuthors++;
       continue;
     }
@@ -309,8 +311,8 @@ export async function fetchLinkedinCreatorWeb(
     now: options.now,
     maxPosts: options.maxPosts,
     warnings: [
-      `Publications trouvées par recherche web : seules celles indexées par le moteur sont visibles (${plural(posts.length, "publication")}), sans réactions, commentaires ni vues — les statistiques de performance ne sont pas calculables. Renseignez APIFY_TOKEN pour obtenir l'engagement réel.`,
-      LINKEDIN_NO_AUDIENCE,
+      `Publications trouvées par recherche web : seules celles indexées par le moteur sont visibles (${plural(Math.min(posts.length, options.maxPosts), "publication")}), sans réactions, commentaires ni vues — les statistiques de performance ne sont pas calculables. Renseignez APIFY_TOKEN pour obtenir l'engagement réel.`,
+      noAudienceWarning("LinkedIn ne fournit ni vues ni nombre d'abonnés"),
       "Textes issus des extraits du moteur de recherche (souvent tronqués).",
     ],
   });

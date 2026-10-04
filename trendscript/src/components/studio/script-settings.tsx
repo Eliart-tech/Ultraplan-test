@@ -1,6 +1,16 @@
 "use client";
 
-import { ChevronDown, KeyRound, Lightbulb, RefreshCw, ShieldCheck, SlidersHorizontal, Sparkles, UserRound } from "lucide-react";
+import {
+  ChevronDown,
+  KeyRound,
+  Lightbulb,
+  RefreshCw,
+  ShieldCheck,
+  SlidersHorizontal,
+  Sparkles,
+  Swords,
+  UserRound,
+} from "lucide-react";
 import Link from "next/link";
 import { useId, useState, type ReactNode } from "react";
 import { Alert } from "@/components/ui/alert";
@@ -8,13 +18,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button, ButtonLink } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Field } from "@/components/ui/field";
+import { Field, useField } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { PlatformIcon, platformLabel, scriptPlatformToPlatform } from "@/components/ui/platform-icon";
 import { Segmented } from "@/components/ui/segmented";
 import { Select } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import { reportKey } from "@/lib/client/storage";
 import { cn } from "@/lib/cn";
 import { MAX_SENSITIVE_VIRALITY, topicRisk } from "@/lib/script/guardrails";
 import {
@@ -31,6 +43,7 @@ import {
 } from "@/lib/script/levels";
 import { wordBudget } from "@/lib/script/metrics";
 import {
+  type CompetitorReport,
   CTA_TYPES,
   DURATIONS,
   HOOK_STYLES,
@@ -67,6 +80,14 @@ export interface ScriptSettingsPanelProps {
   onGenerate: () => void;
   busy: boolean;
   hasResult: boolean;
+  /** Saved competitor reports (newest first). */
+  competitors?: CompetitorReport[];
+  /** Keys (`competitorKey`) of the competitors sent with the request. */
+  selectedCompetitors?: string[];
+  /** The selection is the automatic one (same platform as the script). */
+  competitorsAuto?: boolean;
+  /** New explicit selection, or null to go back to the automatic one. */
+  onCompetitorsChange?: (keys: string[] | null) => void;
 }
 
 /** "Instagram Reels" → "Reels": the brand prefix is visually dropped so 4 platforms fit the segmented control. */
@@ -78,6 +99,56 @@ function PlatformName({ platform }: { platform: ScriptPlatform }) {
       <span className="sr-only">{brand} </span>
       {rest.join(" ")}
     </>
+  );
+}
+
+const MAX_COMPETITORS = 3;
+
+/** Checkboxes of the saved competitors, labelled by the surrounding Field. */
+function CompetitorChecklist({
+  competitors,
+  selected,
+  onChange,
+}: {
+  competitors: CompetitorReport[];
+  selected: string[];
+  onChange: (keys: string[]) => void;
+}) {
+  const field = useField();
+  const full = selected.length >= MAX_COMPETITORS;
+  return (
+    <div role="group" aria-labelledby={field?.labelId} aria-describedby={field?.describedBy} className="flex flex-col gap-3">
+      {competitors.map((report) => {
+        const key = reportKey(report);
+        const checked = selected.includes(key);
+        const { account } = report.data;
+        const details = [
+          account.displayName?.trim() && account.displayName.trim() !== account.handle ? account.displayName.trim() : null,
+          platformLabel(account.platform),
+          `${report.stats.postCount} publications`,
+          report.mode === "stats" ? "statistiques seules" : null,
+        ]
+          .filter(Boolean)
+          .join(" · ");
+        return (
+          <Checkbox
+            key={key}
+            checked={checked}
+            disabled={!checked && full}
+            onCheckedChange={(next) =>
+              onChange(next ? [...selected, key].slice(0, MAX_COMPETITORS) : selected.filter((item) => item !== key))
+            }
+            label={
+              <span className="inline-flex min-w-0 items-center gap-1.5">
+                <PlatformIcon platform={account.platform} size="xs" tile={false} decorative />
+                <span className="truncate">@{account.handle}</span>
+              </span>
+            }
+            description={details}
+          />
+        );
+      })}
+    </div>
   );
 }
 
@@ -111,6 +182,10 @@ export function ScriptSettingsPanel({
   onGenerate,
   busy,
   hasResult,
+  competitors = [],
+  selectedCompetitors = [],
+  competitorsAuto = true,
+  onCompetitorsChange,
 }: ScriptSettingsPanelProps) {
   const [mobileOpen, setMobileOpen] = useState(!hasResult);
   const bodyId = useId();
@@ -297,6 +372,60 @@ export function ScriptSettingsPanel({
             </div>
           </Section>
 
+          <Section title="Différenciation" icon={<Swords />}>
+            <Switch
+              checked={settings.review}
+              onCheckedChange={(review) => onChange({ review })}
+              label="Relecture critique (2e passe)"
+              description="Claude relit le brouillon en rédacteur en chef exigeant (accroche, rétention, différenciation) et l'améliore. Plus lent, meilleur."
+            />
+            <Field
+              label="Se différencier de"
+              group
+              labelAside={
+                competitors.length > 0 ? (
+                  <span className="tabular-nums">
+                    {selectedCompetitors.length}/{MAX_COMPETITORS}
+                  </span>
+                ) : null
+              }
+              hint={
+                competitors.length === 0
+                  ? undefined
+                  : selectedCompetitors.length === 0
+                    ? "Aucun concurrent sélectionné : le script ne tient pas compte de votre concurrence."
+                    : competitorsAuto
+                      ? `Par défaut : vos concurrents ${platformLabel(scriptPlatformToPlatform(settings.platform))}. Claude évite leurs accroches et angles, et exploite leurs angles morts.`
+                      : "Claude évite leurs accroches, titres et angles, et exploite leurs angles morts."
+              }
+            >
+              {competitors.length === 0 ? (
+                <p className="rounded-xl border border-dashed border-line-strong px-3.5 py-3 text-xs leading-relaxed text-muted">
+                  Aucun concurrent analysé.{" "}
+                  <Link href="/concurrents" className="font-medium text-accent-ink underline-offset-2 hover:underline">
+                    Analysez un créateur de votre niche
+                  </Link>{" "}
+                  pour que vos scripts s&apos;en démarquent.
+                </p>
+              ) : (
+                <CompetitorChecklist
+                  competitors={competitors}
+                  selected={selectedCompetitors}
+                  onChange={(keys) => onCompetitorsChange?.(keys)}
+                />
+              )}
+            </Field>
+            {!competitorsAuto && competitors.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => onCompetitorsChange?.(null)}
+                className="-mt-2 text-xs font-medium text-accent-ink underline-offset-2 hover:underline"
+              >
+                Revenir à la sélection automatique
+              </button>
+            ) : null}
+          </Section>
+
           <Section title="Options" icon={<ShieldCheck />}>
             <Switch
               checked={settings.research}
@@ -396,7 +525,8 @@ export function ScriptSettingsPanel({
           {hasResult ? "Régénérer avec ces réglages" : "Générer le script"}
         </Button>
         <p className="text-center text-xs text-faint">
-          {settings.research ? "Recherche web + écriture : 1 à 3 min." : "Écriture : 30 s à 1 min 30."}
+          {settings.research ? "Recherche web + écriture : 1 à 3 min" : "Écriture : 30 s à 1 min 30"}
+          {settings.review ? ", relecture critique comprise (+30 s à 1 min)." : "."}
         </p>
       </div>
     </Card>

@@ -31,13 +31,13 @@ import { PostChips, PostLink, PostList, PostRow, RatioBadge } from "./post-items
 import { ReportSection, SubHeading } from "./report-section";
 import {
   audienceLeaders,
-  audienceMultiplier,
   bestBucket,
   chartSeries,
   overperformers,
   postIndex,
-  postRatio,
+  rankPost,
   rankingMedian,
+  ratiosAllowed,
   resolvePosts,
   sortPosts,
   underperformers,
@@ -134,7 +134,12 @@ export function FollowersSection({ report, now, pending = false }: SectionProps)
       <div className={cn("grid gap-4", showDrivers && "xl:grid-cols-2")}>
         <Card className="px-5 py-4 sm:px-6">
           <SubHeading className="mb-3">Vues bien au-delà de ses abonnés</SubHeading>
-          {leaders.length > 0 ? (
+          {!ratiosAllowed(report) ? (
+            <p className="text-sm leading-relaxed text-muted">
+              Ratios désactivés pour {platform} (règles développeurs de {platform}) : le rapport vues ÷ abonnés
+              n&apos;est pas affiché. Repère les vidéos les plus vues dans « Ce qui surperforme ».
+            </p>
+          ) : leaders.length > 0 ? (
             <PostList label="Publications vues au-delà de son audience">
               {leaders.map((item, rank) => (
                 <PostRow key={item.post.id} {...item} now={now} rank={rank + 1} />
@@ -143,7 +148,7 @@ export function FollowersSection({ report, now, pending = false }: SectionProps)
           ) : (
             <p className="text-sm leading-relaxed text-muted">
               {followers === undefined
-                ? `${platform} ne fournit pas le nombre d'abonnés de ce compte : le multiplicateur d'audience n'est pas calculable. Fiez-vous à « Ce qui surperforme ».`
+                ? `${platform} ne fournit pas le nombre d'abonnés de ce compte : le multiplicateur d'audience n'est pas calculable. Fie-toi à « Ce qui surperforme ».`
                 : `${platform} ne fournit pas les vues de ces publications : le multiplicateur d'audience n'est pas calculable.`}
             </p>
           )}
@@ -328,7 +333,7 @@ export function HooksSection({ report, pending = false }: SectionProps) {
                         </blockquote>
                         {post ? (
                           <p className="mt-1.5 flex flex-wrap items-center gap-1.5 pl-5.5 text-xs text-muted">
-                            <RatioBadge ratio={postRatio(post, report.stats.rankingMetric, medianValue)} />
+                            <RatioBadge ratio={rankPost(post, report, medianValue).ratio} />
                             <PostLink post={post} className="min-w-0 truncate text-muted">
                               {post.title}
                             </PostLink>
@@ -531,7 +536,6 @@ export function PostsSection({ report, now }: SectionProps) {
   const medianValue = rankingMedian(report);
   const posts = sortPosts(report.data.posts, sort, metric);
   const shown = expanded ? posts : posts.slice(0, INITIAL_POSTS);
-  const followers = report.data.account.followers;
 
   return (
     <ReportSection
@@ -555,13 +559,7 @@ export function PostsSection({ report, now }: SectionProps) {
       <Card className="px-5 py-4 sm:px-6">
         <PostList label={`Publications analysées (${posts.length})`}>
           {shown.map((post) => (
-            <PostRow
-              key={post.id}
-              post={post}
-              ratio={postRatio(post, metric, medianValue)}
-              multiplier={audienceMultiplier(post, followers)}
-              now={now}
-            />
+            <PostRow key={post.id} {...rankPost(post, report, medianValue)} now={now} />
           ))}
         </PostList>
         {posts.length > INITIAL_POSTS ? (
@@ -599,7 +597,9 @@ export function MethodSection({ report }: SectionProps) {
           </li>
           <li>
             <span className="font-medium text-ink">Chiffres : </span>
-            médianes, ratios et multiplicateurs calculés dans le code à partir de ces publications, sans IA.
+            {ratiosAllowed(report)
+              ? "médianes, ratios et multiplicateurs calculés dans le code à partir de ces publications, sans IA."
+              : `médianes calculées dans le code à partir de ces publications, sans IA. Ratios (vues ÷ abonnés, engagement) désactivés : les règles développeurs de ${platformLabel(report.data.account.platform)} les interdisent pour les chaînes des autres.`}
           </li>
           <li>
             <span className="font-medium text-ink">Analyse : </span>
@@ -642,7 +642,7 @@ export function StatsOnlyAlert({ report, aiConfigured }: { report: CompetitorRep
     >
       {aiConfigured === false
         ? "Claude n'est pas configuré sur ce serveur (ANTHROPIC_API_KEY) : voici les publications et les statistiques réelles, sans interprétation, angles morts ni idées de vidéos."
-        : "Claude n'a pas pu analyser ce compte : voici les publications et les statistiques réelles, sans interprétation. Ré-analysez pour obtenir l'analyse complète."}
+        : "Claude n'a pas pu analyser ce compte : voici les publications et les statistiques réelles, sans interprétation. Ré-analyse pour obtenir l'analyse complète."}
       {report.notes.length > 0 ? <span className="mt-1 block text-xs">{report.notes[0]}</span> : null}
     </Alert>
   );

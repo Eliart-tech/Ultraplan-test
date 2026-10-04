@@ -3,7 +3,7 @@
  * playbook's own running example (the 25 October 2026 clock change).
  */
 
-import type { CreatorProfile, ScriptDraft, ScriptRequest, ScriptSettings, Signal, Topic } from "../../types";
+import type { CompetitorBrief, CreatorProfile, ScriptDraft, ScriptRequest, ScriptSettings, Signal, Topic } from "../../types";
 
 export const NOW = Date.parse("2026-10-02T15:00:00Z");
 
@@ -120,6 +120,32 @@ export const fixtureRequest: ScriptRequest = {
   profile: fixtureProfile,
   geo: "FR",
 };
+
+/** Two saved competitors, as `toCompetitorBrief` sends them. */
+export const fixtureCompetitors: CompetitorBrief[] = [
+  {
+    platform: "instagram",
+    handle: "sommeilfacile",
+    positioning: "Coach sommeil pour parents épuisés. Ton : bienveillant, vouvoiement.",
+    pillars: ["Routines du soir — 8 publications sur 20 (40 %)", "Bébés et sommeil"],
+    hookPatterns: ["Erreur courante + promesse de nuit complète — ex. « Arrêtez de coucher votre enfant à 20 h »"],
+    overused: ["Format récurrent : checklist du soir en voix off", "Signature à ne pas reprendre : « Bonne nuit les parents »"],
+    gaps: ["Jeunes actifs sans enfant — jamais adressés", "Pour te différencier : parle aux 22-35 ans — exemples de bureau"],
+    recentTitles: ["Changement d'heure : comment adapter le coucher de bébé", "3 rituels pour s'endormir en 10 minutes"],
+    medianViews: 42_000,
+    followDrivers: ["Série « 30 jours pour mieux dormir » qui donne une raison de revenir (hypothèse)"],
+  },
+  {
+    platform: "tiktok",
+    handle: "drdodo",
+    positioning: "Médecin du sommeil, vulgarisation scientifique.",
+    pillars: [],
+    hookPatterns: [],
+    overused: [],
+    gaps: [],
+    recentTitles: ["Ce que le changement d'heure fait vraiment à ton cerveau"],
+  },
+];
 
 const words = (n: number, word = "mot") => Array.from({ length: n }, () => word).join(" ");
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Globe, PenLine, ShieldCheck, Wand2, X } from "lucide-react";
+import { Check, Globe, PenLine, ShieldCheck, SpellCheck2, Wand2, X } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -12,10 +12,12 @@ import type { ScriptPhase, ScriptRun } from "./studio-store";
 
 type StepState = "done" | "current" | "upcoming" | "skipped";
 
-const ORDER: ScriptPhase[] = ["research", "writing", "finalizing"];
+const ORDER: ScriptPhase[] = ["research", "writing", "review", "finalizing"];
 
-function stepState(phase: ScriptPhase, run: ScriptRun): StepState {
+export function stepState(phase: ScriptPhase, run: ScriptRun): StepState {
   if (phase === "research" && !run.research) return "skipped";
+  // An unexpected review event (older client state) still shows as current.
+  if (phase === "review" && !run.review && run.phase !== "review") return "skipped";
   // Before the first status event, the first expected step is current.
   const current = run.phase ?? (run.research ? "research" : "writing");
   const index = ORDER.indexOf(phase);
@@ -71,12 +73,13 @@ export interface ScriptProgressProps {
 
 /**
  * Live panel of a generation: Recherche des faits → Écriture (n caractères)
- * → Finalisation, with a cancel button. The Studio's live region announces
- * each phase.
+ * → Relecture critique → Finalisation, with a cancel button. The Studio's
+ * live region announces each phase.
  */
 export function ScriptProgress({ run, onCancel }: ScriptProgressProps) {
   const research = stepState("research", run);
   const writing = stepState("writing", run);
+  const review = stepState("review", run);
   const finalizing = stepState("finalizing", run);
   const sources = run.brief?.sources.length ?? 0;
 
@@ -130,10 +133,26 @@ export function ScriptProgress({ run, onCancel }: ScriptProgressProps) {
                   ? `${formatNumber(run.chars)} caractères écrits`
                   : run.message || "Accroches, déroulé, légende…"
                 : writing === "done"
-                  ? `${formatNumber(run.chars)} caractères`
+                  ? `${formatNumber(run.draftChars ?? run.chars)} caractères`
                   : undefined
             }
           />
+          {run.kind === "generate" ? (
+            <StepRow
+              state={review}
+              icon={<SpellCheck2 />}
+              label="Relecture critique"
+              detail={
+                review === "skipped"
+                  ? "Seconde passe désactivée dans les réglages."
+                  : review === "current"
+                    ? run.message || "Claude relit le brouillon en rédacteur en chef exigeant…"
+                    : review === "upcoming"
+                      ? "Accroche, rétention, différenciation : Claude améliore son brouillon."
+                      : undefined
+              }
+            />
+          ) : null}
           <StepRow
             state={finalizing}
             icon={<ShieldCheck />}

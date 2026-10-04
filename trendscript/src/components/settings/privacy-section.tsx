@@ -37,8 +37,8 @@ export function PrivacySection() {
     <Card as="div" className="flex flex-col gap-6 px-5 py-5 sm:px-6 sm:py-6">
       <ul className="grid gap-6 md:grid-cols-2">
         <Item icon={<HardDrive />} title="Profil et historique : uniquement dans ce navigateur">
-          Votre profil créateur, vos scripts et vos analyses sont stockés dans le stockage local de ce navigateur,
-          jamais dans une base de données. Ils ne suivent pas d&apos;un appareil à l&apos;autre et disparaissent si vous
+          Votre profil créateur, vos scripts, vos analyses et vos concurrents suivis sont stockés dans le stockage
+          local de ce navigateur, jamais dans une base de données. Ils ne suivent pas d&apos;un appareil à l&apos;autre et disparaissent si vous
           effacez les données du site : exportez-les depuis l&apos;historique pour les garder. Le brouillon du Studio,
           lui, ne dure que le temps de l&apos;onglet.
           <span className="mt-2 block">
@@ -49,8 +49,10 @@ export function PrivacySection() {
         </Item>
         <Item icon={<Send />} title="Ce qui quitte votre navigateur">
           Une analyse envoie au serveur le pays, la langue, la niche et vos mots-clés, qui sont transmis aux sources
-          interrogées. Une génération envoie le sujet, ses preuves, vos réglages et votre profil au serveur, qui les
-          transmet à Claude (Anthropic) pour écrire le script. Le serveur ne garde qu&apos;un cache temporaire, en
+          interrogées. Une génération envoie le sujet, ses preuves, vos réglages, votre profil et le résumé de vos concurrents
+          sélectionnés au serveur, qui les transmet à Claude (Anthropic) pour écrire le script. L&apos;analyse
+          d&apos;un concurrent envoie son pseudo et votre profil ; ses publications publiques sont lues par la source
+          indiquée puis transmises à Claude. Le serveur ne garde qu&apos;un cache temporaire, en
           mémoire, des données de tendances.
         </Item>
         <Item icon={<Cookie />} title="Cookies">
@@ -63,7 +65,10 @@ export function PrivacySection() {
         </Item>
         <Item icon={<Play />} title="Statistiques YouTube : 30 jours maximum">
           Les règles de l&apos;API YouTube interdisent de conserver ses statistiques plus de 30 jours. Le serveur ne les
-          garde en cache que quelques heures ; supprimez de votre historique les analyses de plus de 30 jours.{" "}
+          garde en cache que quelques heures ; supprimez de votre historique les analyses de plus de 30 jours. Les
+          chiffres des concurrents YouTube suivis sont effacés automatiquement après 30 jours, et les ratios dérivés
+          (vues ÷ abonnés, engagement) des chaînes des autres ne s&apos;affichent que si votre accès à l&apos;API YouTube
+          l&apos;autorise.{" "}
           <ExternalAnchor href="https://developers.google.com/youtube/terms/developer-policies">
             Règles de l&apos;API YouTube
           </ExternalAnchor>

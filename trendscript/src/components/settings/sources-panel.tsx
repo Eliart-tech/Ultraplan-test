@@ -10,14 +10,16 @@ import { useServerStatus } from "@/lib/client/use-server-status";
 import type { SourceStatus } from "@/lib/types";
 import { AuthCard } from "./auth-card";
 import { ClaudeCard } from "./claude-card";
+import { CreatorsCard } from "./creators-card";
 import { missingEnvTemplate } from "./env-template";
 import { KeyHowTo } from "./key-howto";
 import { SourceCard } from "./source-card";
 
 /**
  * "Sources de données" — everything comes from GET /api/sources (shared
- * `useServerStatus` store): overview, Claude, each source (active ones
- * first), how to add a key, password protection.
+ * `useServerStatus` store): overview, Claude, competitor analysis per
+ * platform, each source (active ones first), how to add a key, password
+ * protection.
  */
 export function SourcesPanel() {
   const { status, error, loading, reload } = useServerStatus();
@@ -103,6 +105,8 @@ export function SourcesPanel() {
       </div>
 
       <ClaudeCard ai={status.ai} />
+
+      {status.creators?.length ? <CreatorsCard creators={status.creators} /> : null}
 
       <SourceGroup
         id="sources-actives"

@@ -367,22 +367,50 @@ async function googleGet<T>(url: string, label: string, signal: AbortSignal): Pr
   }
 }
 
-async function loadFeed(channelId: string, signal: AbortSignal): Promise<FeedVideo[]> {
-  const load = () =>
-    fetchText(feedUrl(channelId), "Flux RSS YouTube", {
-      signal,
-      timeoutMs: 15_000,
-      headers: { Accept: "application/atom+xml, application/xml;q=0.9" },
-    });
-  let xml: string;
-  try {
-    xml = await load();
-  } catch (error) {
-    // The feeds fail intermittently (404/5xx): one retry, unless cancelled.
-    if (signal.aborted) throw error;
-    xml = await load();
+/**
+ * Retry budget for the RSS feed. Measured live on 2026-10-04: the feed
+ * origin answers 404/500 for runs of up to ~10 s, then YouTube's edge keeps
+ * serving the 200 it finally got — so spaced retries on the *same* URL work
+ * (cache-busting parameters make it worse).
+ */
+export const FEED_RETRY_BUDGET_MS = 20_000;
+
+function wait(ms: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) return reject(new SourceError("Requête annulée"));
+    const timer = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      clearTimeout(timer);
+      reject(new SourceError("Requête annulée"));
+    };
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+/** Delay before retry n (1-based): 300, 500, 700, then 1 s. */
+export function feedRetryDelay(attempt: number): number {
+  return Math.min(1000, 100 + 200 * attempt);
+}
+
+async function loadFeed(channelId: string, signal: AbortSignal, budgetMs = FEED_RETRY_BUDGET_MS): Promise<FeedVideo[]> {
+  const deadline = Date.now() + budgetMs;
+  for (let attempt = 1; ; attempt++) {
+    try {
+      const xml = await fetchText(feedUrl(channelId), "Flux RSS YouTube", {
+        signal,
+        timeoutMs: 15_000,
+        headers: { Accept: "application/atom+xml, application/xml;q=0.9" },
+      });
+      return parseYoutubeFeed(xml);
+    } catch (error) {
+      const delay = feedRetryDelay(attempt);
+      if (signal.aborted || Date.now() + delay >= deadline) throw error;
+      await wait(delay, signal);
+    }
   }
-  return parseYoutubeFeed(xml);
 }
 
 async function loadChannelPage(handle: string, signal: AbortSignal): Promise<YoutubeChannelPage> {
@@ -430,7 +458,8 @@ async function fetchWithApi(handle: string, apiKey: string, options: FetchCreato
           throw error;
         })
       : Promise.resolve({ items: [] } as YoutubePlaylistItemsResponse),
-    loadFeed(channel.id, signal).catch(() => [] as FeedVideo[]),
+    // Only used for the exact Shorts flag: a short budget, then the duration rule.
+    loadFeed(channel.id, signal, 3_000).catch(() => [] as FeedVideo[]),
   ]);
 
   const ids = playlistVideoIds(playlist).slice(0, 50);
@@ -449,7 +478,9 @@ async function fetchWithApi(handle: string, apiKey: string, options: FetchCreato
     ratiosAllowed: youtubeRatiosAllowed(options.env),
     warnings: [
       policyWarning(options.env),
-      channel.statistics?.hiddenSubscriberCount && noAudienceWarning("Nombre d'abonnés masqué par la chaîne"),
+      channel.statistics?.hiddenSubscriberCount
+        ? noAudienceWarning("Nombre d'abonnés masqué par la chaîne")
+        : account.followers !== undefined && "Nombre d'abonnés arrondi par YouTube à 3 chiffres significatifs.",
       guessedFormat > 0 &&
         `Format Short ou vidéo longue déduit de la durée (≤ 3 min = Short) pour ${plural(guessedFormat, "vidéo")} absente(s) du flux RSS : une vidéo horizontale courte peut être comptée comme Short.`,
     ],
@@ -474,7 +505,12 @@ async function fetchKeyless(handle: string, options: FetchCreatorOptions): Promi
     videos = await loadFeed(page.channelId, signal);
   } catch (error) {
     if (signal.aborted) throw error;
-    throw new SourceError(`Flux RSS de la chaîne YouTube indisponible (${errorMessage(error)}) : réessayez plus tard.`, undefined, true);
+    const status = error instanceof SourceError ? error.status : undefined;
+    throw new SourceError(
+      `Le flux RSS de la chaîne YouTube ne répond pas${status ? ` (erreur ${status} répétée)` : ` (${errorMessage(error)})`} : réessayez dans quelques minutes, ou ajoutez YOUTUBE_API_KEY (gratuite) pour passer par l'API officielle.`,
+      undefined,
+      true,
+    );
   }
   const posts = feedVideosToCreatorPosts(videos);
   const account = pageToAccount(page, handle);

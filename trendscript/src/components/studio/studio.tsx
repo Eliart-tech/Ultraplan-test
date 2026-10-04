@@ -63,7 +63,7 @@ export function Studio() {
 /** The wizard itself (step bar, step title, current step); needs <StudioProvider>. */
 export function StudioShell() {
   const { state, dispatch } = useStudio();
-  const { draft, analysisRun, scriptRun, notice, announcement } = state;
+  const { draft, analysisRun, scriptRun, notice, noticeTone, announcement } = state;
   const step = draft.step;
   const headingRef = useRef<HTMLHeadingElement>(null);
   const previousStep = useRef(step);
@@ -96,7 +96,8 @@ export function StudioShell() {
 
   return (
     <>
-      <div className="z-30 border-b border-line glass sm:sticky sm:top-[4.0625rem]">
+      {/* Sticky under the one-row header (from md; below, the header has a second row of tabs). */}
+      <div className="z-30 border-b border-line glass md:sticky md:top-[4.0625rem]">
         <Container size="xl" className="flex min-h-[3.25rem] items-center justify-between gap-4 py-2">
           <Stepper
             steps={steps}
@@ -128,7 +129,7 @@ export function StudioShell() {
         </header>
 
         {notice ? (
-          <Alert tone="warning" className="mt-6" onDismiss={() => dispatch({ type: "dismissNotice" })}>
+          <Alert tone={noticeTone ?? "warning"} className="mt-6" onDismiss={() => dispatch({ type: "dismissNotice" })}>
             {notice}
           </Alert>
         ) : null}

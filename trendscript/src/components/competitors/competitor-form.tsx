@@ -15,7 +15,12 @@ import { Slider } from "@/components/ui/slider";
 import { Textarea } from "@/components/ui/textarea";
 import { COUNTRIES } from "@/components/studio/studio-options";
 import type { CreatorPlatform, CreatorPlatformStatus } from "@/lib/types";
-import { CREATOR_PLATFORM_ORDER, HANDLE_PLACEHOLDERS, detectPlatformFromInput } from "./report-utils";
+import {
+  CREATOR_PLATFORM_ORDER,
+  HANDLE_PLACEHOLDERS,
+  detectPlatformFromInput,
+  effectivePlatform,
+} from "./report-utils";
 
 export interface CompetitorFormValues {
   /** Explicit choice; null = first available platform. */
@@ -33,22 +38,6 @@ export const DEFAULT_FORM: CompetitorFormValues = {
   maxPosts: 30,
   geo: "FR",
 };
-
-/**
- * Platform the form uses: the explicit choice, else the first available one
- * (Instagram → TikTok → YouTube → LinkedIn), else Instagram while
- * capabilities are unknown.
- */
-export function effectivePlatform(
-  chosen: CreatorPlatform | null,
-  capabilities: CreatorPlatformStatus[] | null,
-): CreatorPlatform {
-  if (chosen) return chosen;
-  const available = CREATOR_PLATFORM_ORDER.find((platform) =>
-    capabilities?.some((status) => status.platform === platform && status.available),
-  );
-  return available ?? "instagram";
-}
 
 export interface CompetitorFormProps {
   values: CompetitorFormValues;
@@ -100,7 +89,7 @@ export function CompetitorForm({
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (values.handle.trim().replace(/^@+/, "").length < 2) {
-      setError("Indiquez le pseudo du créateur, ou collez le lien de son profil.");
+      setError("Indique le pseudo du créateur, ou colle le lien de son profil.");
       return;
     }
     onSubmit(platform);
@@ -267,7 +256,7 @@ export function CompetitorForm({
 
         {noneAvailable ? (
           <Alert tone="warning" size="sm" role="none" title="Aucune plateforme disponible">
-            Configurez au moins une source (voir Réglages) pour analyser un créateur.
+            Configure au moins une source (voir Réglages) pour analyser un créateur.
           </Alert>
         ) : null}
 

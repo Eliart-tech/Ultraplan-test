@@ -4,6 +4,8 @@
  * - `trendscript:history:v1` (localStorage) — up to 50 scripts + 10 analyses;
  * - `trendscript:competitors:v1` (localStorage) — up to 12 competitor reports,
  *   one per platform + handle (a re-analysis replaces the previous one);
+ *   YouTube statistics are erased after 30 days when the source forbids
+ *   keeping them (`ratiosAllowed === false`);
  * - `trendscript:studio:v1` (sessionStorage) — the Studio draft, so a refresh
  *   doesn't lose the current analysis;
  * - `trendscript:handoff:v1` (sessionStorage) — a one-shot hand-off to the
@@ -15,7 +17,7 @@
  * only re-read after our own writes or a `storage` event from another tab.
  */
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useSyncExternalStore } from "react";
 import {
   CREATOR_PLATFORMS,
   type Analysis,
@@ -45,6 +47,11 @@ export const MAX_SAVED_COMPETITORS = 12;
 export const STORED_POST_TEXT_MAX = 1000;
 /** A Studio hand-off older than this is ignored (the user moved on). */
 export const HANDOFF_TTL_MS = 30 * 60_000;
+/** YouTube developer policies: no storage of a channel's statistics beyond 30 days. */
+export const YOUTUBE_RETENTION_MS = 30 * 24 * 60 * 60_000;
+/** Note added to a report whose YouTube statistics were erased after 30 days. */
+export const RETENTION_NOTE =
+  "Statistiques YouTube effacées de ce navigateur après 30 jours (règles développeurs de YouTube) : relancez l'analyse pour des chiffres à jour.";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -494,8 +501,79 @@ export function trimCompetitorReport(report: CompetitorReport): CompetitorReport
   };
 }
 
+/**
+ * True for a YouTube report whose statistics must not be kept any more: the
+ * source forbids derived metrics (`ratiosAllowed === false`, YouTube Data API
+ * terms) and the data is older than 30 days.
+ */
+export function isRetentionExpired(report: CompetitorReport, now: number): boolean {
+  if (report.data.account.platform !== "youtube" || report.data.ratiosAllowed !== false) return false;
+  const fetched = Date.parse(report.data.fetchedAt);
+  const time = Number.isFinite(fetched) ? fetched : Date.parse(report.createdAt);
+  return Number.isFinite(time) && now - time > YOUTUBE_RETENTION_MS;
+}
+
+/** True once `stripReportMetrics` has been applied. */
+export function isMetricsStripped(report: CompetitorReport): boolean {
+  return report.notes.includes(RETENTION_NOTE);
+}
+
+const withoutMedian = (bucket: CompetitorReport["stats"]["weekdays"][number]) => ({ label: bucket.label, posts: bucket.posts });
+
+/**
+ * The report without any audience statistic (views, likes, comments,
+ * followers, medians, outliers…): what stays is the account, the posts'
+ * titles and links, and Claude's text. Idempotent.
+ */
+export function stripReportMetrics(report: CompetitorReport): CompetitorReport {
+  if (isMetricsStripped(report)) return report;
+  const { account } = report.data;
+  const { stats } = report;
+  return {
+    ...report,
+    data: {
+      ...report.data,
+      account: {
+        platform: account.platform,
+        handle: account.handle,
+        url: account.url,
+        ...(account.displayName !== undefined ? { displayName: account.displayName } : {}),
+        ...(account.bio !== undefined ? { bio: account.bio } : {}),
+        ...(account.verified !== undefined ? { verified: account.verified } : {}),
+      },
+      posts: report.data.posts.map((post) => ({ ...post, metrics: {} })),
+    },
+    stats: {
+      postCount: stats.postCount,
+      windowDays: stats.windowDays,
+      postsPerWeek: stats.postsPerWeek,
+      rankingMetric: stats.rankingMetric,
+      outliers: [],
+      topPostIds: [],
+      bottomPostIds: [],
+      weekdays: stats.weekdays.map(withoutMedian),
+      hours: stats.hours.map(withoutMedian),
+      durations: stats.durations.map(withoutMedian),
+      hashtags: stats.hashtags.map(withoutMedian),
+      medianCaptionLength: stats.medianCaptionLength,
+      ctaShare: stats.ctaShare,
+      questionShare: stats.questionShare,
+      seriesShare: stats.seriesShare,
+    },
+    notes: [RETENTION_NOTE, ...report.notes],
+  };
+}
+
+/** Reports with the expired YouTube statistics stripped (see `isRetentionExpired`). */
+export function applyRetention(reports: CompetitorReport[], now: number): CompetitorReport[] {
+  if (!reports.some((report) => isRetentionExpired(report, now) && !isMetricsStripped(report))) return reports;
+  return reports.map((report) =>
+    isRetentionExpired(report, now) && !isMetricsStripped(report) ? stripReportMetrics(report) : report,
+  );
+}
+
 const competitorsStore = createStore(STORAGE_KEYS.competitors, () =>
-  sanitizeCompetitors(readJson("local", STORAGE_KEYS.competitors)),
+  applyRetention(sanitizeCompetitors(readJson("local", STORAGE_KEYS.competitors)), Date.now()),
 );
 
 /** Saved competitor reports, newest first. */
@@ -545,6 +623,20 @@ export function removeCompetitorReport(key: string): SaveResult {
   return writeCompetitors(current.filter((item) => reportKey(item) !== key));
 }
 
+/**
+ * Rewrites storage without the expired YouTube statistics (30-day rule).
+ * Returns how many reports were stripped. Called from an effect of
+ * `useCompetitors`, never during render.
+ */
+export function purgeExpiredCompetitors(now: number = Date.now()): number {
+  const current = sanitizeCompetitors(readJson("local", STORAGE_KEYS.competitors));
+  const next = applyRetention(current, now);
+  if (next === current) return 0;
+  const stripped = next.filter((report, index) => report !== current[index]).length;
+  writeCompetitors(next);
+  return stripped;
+}
+
 /** Deletes every saved competitor report. */
 export function clearCompetitors(): void {
   removeKey("local", STORAGE_KEYS.competitors);
@@ -558,6 +650,10 @@ export function clearCompetitors(): void {
 export function useCompetitors(): { reports: CompetitorReport[]; hydrated: boolean } {
   const reports = useSyncExternalStore(competitorsStore.subscribe, competitorsStore.get, () => EMPTY_COMPETITORS);
   const hydrated = useHydrated();
+  // Reads already hide expired YouTube statistics; this erases them from storage too.
+  useEffect(() => {
+    purgeExpiredCompetitors();
+  }, []);
   return { reports, hydrated };
 }
 

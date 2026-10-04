@@ -70,7 +70,8 @@ export function competitorCoverage(topic: Topic, reports: readonly CompetitorRep
   const seen = new Set<string>();
   for (const report of reports) {
     const { account, posts } = report.data;
-    const ratios = performanceRatios(posts, report.stats.rankingMetric);
+    // YouTube API terms forbid derived metrics on other channels: no ratio then.
+    const ratios = report.data.ratiosAllowed === false ? new Map<string, number>() : performanceRatios(posts, report.stats.rankingMetric);
     for (const post of posts) {
       const key = `${account.platform}:${account.handle}:${post.id}`;
       if (seen.has(key) || !postTreatsTopic(post, matcher)) continue;

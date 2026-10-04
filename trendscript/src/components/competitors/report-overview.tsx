@@ -13,6 +13,7 @@ import {
   Percent,
   RefreshCw,
   Repeat2,
+  Scale,
   Send,
   Sparkles,
   Trash2,
@@ -29,7 +30,7 @@ import { Stat } from "@/components/ui/stat";
 import { safeHref } from "@/components/studio/studio-utils";
 import { formatCompact, formatCount, formatDateTime, formatRelative, pluralize } from "@/lib/client/format";
 import type { CompetitorReport } from "@/lib/types";
-import { formatDecimal, formatPct } from "./report-utils";
+import { formatDecimal, formatPct, ratiosAllowed } from "./report-utils";
 
 export interface ReportHeaderProps {
   report: CompetitorReport;
@@ -164,6 +165,16 @@ export function ReportHeader({
         </span>
       </div>
 
+      {!ratiosAllowed(report) ? (
+        <p className="-mt-2 flex items-start gap-2 text-xs leading-relaxed text-muted">
+          <Scale aria-hidden className="mt-px size-3.5 shrink-0 text-faint" />
+          <span>
+            Ratios désactivés pour {platformLabel(account.platform)} — règles développeurs de{" "}
+            {platformLabel(account.platform)} : chiffres bruts uniquement (vues, j&apos;aime, commentaires).
+          </span>
+        </p>
+      ) : null}
+
       {account.bio?.trim() || report.focus?.trim() ? (
         <div className="grid gap-3 md:grid-cols-2">
           {account.bio?.trim() ? (
@@ -174,7 +185,7 @@ export function ReportHeader({
           ) : null}
           {report.focus?.trim() ? (
             <p className="rounded-xl border border-accent/25 bg-accent-soft px-3.5 py-2.5 text-sm leading-relaxed text-ink/85">
-              <span className="font-medium text-ink">Votre question : </span>« {report.focus.trim()} »
+              <span className="font-medium text-ink">Ta question : </span>« {report.focus.trim()} »
             </p>
           ) : null}
         </div>
@@ -196,6 +207,8 @@ export function ReportKpis({ report }: { report: CompetitorReport }) {
   const { stats } = report;
   const platform = platformLabel(report.data.account.platform);
   const followers = report.data.account.followers;
+  const allowed = ratiosAllowed(report);
+  const disabled = `Désactivé : règles développeurs de ${platform}`;
   const tiles: ReactNode[] = [
     <Stat
       key="rhythm"
@@ -234,7 +247,13 @@ export function ReportKpis({ report }: { report: CompetitorReport }) {
       icon={<Percent />}
       label="Taux d'engagement"
       value={formatPct(stats.engagementRate)}
-      hint={stats.engagementRate !== undefined ? "(j'aime + comm. + partages) ÷ vues, médiane" : "Vues indisponibles : non calculable"}
+      hint={
+        !allowed
+          ? disabled
+          : stats.engagementRate !== undefined
+            ? "(j'aime + comm. + partages) ÷ vues, médiane"
+            : "Vues indisponibles : non calculable"
+      }
     />,
     <Stat
       key="reach"
@@ -242,14 +261,16 @@ export function ReportKpis({ report }: { report: CompetitorReport }) {
       label="Portée / abonnés"
       value={formatPct(stats.reachRate)}
       hint={
-        stats.reachRate !== undefined && followers !== undefined
-          ? `Vues médianes ÷ ${formatCompact(followers)} abonnés`
-          : `Abonnés ou vues non fournis par ${platform}`
+        !allowed
+          ? disabled
+          : stats.reachRate !== undefined && followers !== undefined
+            ? `Vues médianes ÷ ${formatCompact(followers)} abonnés`
+            : `Abonnés ou vues non fournis par ${platform}`
       }
       tone={stats.reachRate !== undefined && stats.reachRate >= 100 ? "accent" : "neutral"}
     />,
   ];
-  if (stats.shareSaveRate !== undefined) {
+  if (allowed && stats.shareSaveRate !== undefined) {
     tiles.push(
       <Stat
         key="share-save"
@@ -331,6 +352,8 @@ export function SignatureFacts({ report }: { report: CompetitorReport }) {
 export interface ReportSummaryProps {
   report: CompetitorReport;
   pending?: boolean;
+  /** Statistics erased (YouTube 30-day rule): no KPI row. */
+  hideNumbers?: boolean;
 }
 
 /**
@@ -338,7 +361,7 @@ export interface ReportSummaryProps {
  * KPI row, writing habits, and the two things to remember for the user,
  * linking to the ideas.
  */
-export function ReportSummary({ report, pending = false }: ReportSummaryProps) {
+export function ReportSummary({ report, pending = false, hideNumbers = false }: ReportSummaryProps) {
   const { insights } = report;
   const takeaways = [
     ...(insights?.followDrivers ?? []).slice(0, 1).map((driver) => ({
@@ -407,9 +430,11 @@ export function ReportSummary({ report, pending = false }: ReportSummaryProps) {
         </p>
       )}
 
-      <div className="mt-5">
-        <ReportKpis report={report} />
-      </div>
+      {hideNumbers ? null : (
+        <div className="mt-5">
+          <ReportKpis report={report} />
+        </div>
+      )}
       <div className="mt-4">
         <SignatureFacts report={report} />
       </div>

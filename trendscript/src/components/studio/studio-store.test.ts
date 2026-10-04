@@ -221,6 +221,78 @@ describe("studio store", () => {
   });
 });
 
+describe("competitor integration", () => {
+  const idea = {
+    topic: { ...fixtureTopic, id: "cmp-topic", angles: [] },
+    signals: fixtureSignals,
+    angle: { id: "cmp-angle", type: "custom" as const, title: "Le vrai coût", pitch: "Calcul en direct", hook: "Assieds-toi.", whyItWorks: "" },
+  };
+  const handoff = {
+    version: 1 as const,
+    createdAt: "2026-10-02T15:00:00Z",
+    ...idea,
+    competitorKey: "tiktok:budgetmalin",
+    scriptPlatform: "tiktok" as const,
+    label: "@budgetmalin",
+  };
+
+  it("opens the Script step with a competitor idea", () => {
+    const state = createStudioState({ analyseId: null, scriptId: null, handoff });
+    expect(state.draft.step).toBe("script");
+    expect(state.draft.topic?.id).toBe("cmp-topic");
+    expect(state.draft.evidence).toBe(fixtureSignals);
+    expect(state.draft.angle?.id).toBe("cmp-angle");
+    expect(state.draft.angleChoice).toBe("custom");
+    expect(state.draft.customAngle).toEqual({ title: "Le vrai coût", pitch: "Calcul en direct" });
+    expect(state.draft.settings.platform).toBe("tiktok");
+    expect(state.draft.competitorKeys).toEqual(["tiktok:budgetmalin"]);
+    expect(state.draft.result).toBeNull();
+    expect(state.noticeTone).toBe("info");
+    expect(state.notice).toContain("@budgetmalin");
+    expect(reachableSteps(state.draft).script).toBe(true);
+  });
+
+  it("lets history links win over a pending idea, and ignores malformed ones", () => {
+    const fromLink = createStudioState({ analyseId: "absent", scriptId: null, handoff });
+    expect(fromLink.draft.topic).toBeNull();
+    const broken = createStudioState({ analyseId: null, scriptId: null, handoff: { ...handoff, topic: {} as Topic } });
+    expect(broken.draft.step).toBe("radar");
+    expect(broken.notice).toBeNull();
+  });
+
+  it("stores an explicit competitor selection (max 3) or goes back to automatic", () => {
+    let state = run(fresh(), { type: "setCompetitors", keys: ["a", "b", "a", "c", "d"] });
+    expect(state.draft.competitorKeys).toEqual(["a", "b", "c"]);
+    state = run(state, { type: "setCompetitors", keys: null });
+    expect(state.draft.competitorKeys).toBeNull();
+  });
+
+  it("expects a review pass for generations only, and keeps the draft size", () => {
+    const angle = fixtureTopic.angles[0];
+    const base = run(
+      fresh(),
+      { type: "analysisDone", analysis },
+      { type: "selectTopic", topic: fixtureTopic, evidence: fixtureSignals },
+      { type: "commitAngle", angle },
+    );
+    let state = run(
+      base,
+      { type: "scriptStart", kind: "generate", instruction: null, research: false, review: true },
+      { type: "scriptEvent", event: { type: "status", step: "writing", message: "Écriture…" } },
+      { type: "scriptEvent", event: { type: "progress", chars: 2400 } },
+      { type: "scriptEvent", event: { type: "status", step: "review", message: "Relecture critique…" } },
+      { type: "scriptEvent", event: { type: "progress", chars: 300 } },
+    );
+    expect(state.scriptRun).toMatchObject({ review: true, phase: "review", draftChars: 2400, chars: 300 });
+    expect(state.announcement).toBe("Relecture critique du script en cours");
+
+    state = run(base, { type: "scriptStart", kind: "refine", instruction: "Plus court", research: false, review: true });
+    expect(state.scriptRun.review).toBe(false);
+    state = run(base, { type: "scriptStart", kind: "generate", instruction: null, research: false });
+    expect(state.scriptRun.review).toBe(false);
+  });
+});
+
 describe("normalizeSettings", () => {
   it("keeps valid fields and replaces invalid ones with defaults", () => {
     const settings = normalizeSettings({ ...fixtureSettings, durationSec: 42, tone: "inconnu", virality: 10 }, "fr");

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowRight, Check, ChevronDown, Clock3, Layers3, ShieldAlert, TrendingUp, Zap } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, Clock3, ExternalLink, Layers3, ShieldAlert, Swords, TrendingUp, Zap } from "lucide-react";
 import { useId, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,10 +10,68 @@ import { PlatformStack } from "@/components/ui/platform-icon";
 import { InfoPopover, Tooltip } from "@/components/ui/popover";
 import { ScoreRing } from "@/components/ui/score-ring";
 import { SCORE_EXPLANATION } from "@/lib/analysis/scoring";
+import { formatCompact, formatDateTime, formatRelative } from "@/lib/client/format";
 import { cn } from "@/lib/cn";
+import type { CoverageHit } from "@/lib/creators/coverage";
 import type { Signal, Topic } from "@/lib/types";
 import { EvidenceList } from "./evidence-list";
 import { LIFESPAN_META, SATURATION_META } from "./studio-options";
+import { safeHref } from "./studio-utils";
+
+/**
+ * "Déjà traité par @handle (12 k vues, il y a 3 j)": posts of the saved
+ * competitors that already cover the topic — a differentiation hint.
+ */
+export function CoverageLine({ hits, now, className }: { hits: CoverageHit[]; now: number; className?: string }) {
+  if (hits.length === 0) return null;
+  return (
+    <div className={cn("flex flex-wrap items-center gap-1.5 text-xs", className)}>
+      <span className="inline-flex items-center gap-1 font-medium text-muted">
+        <Swords aria-hidden className="size-3.5 text-faint" />
+        Déjà traité par
+      </span>
+      <ul className="contents" aria-label="Concurrents qui ont déjà traité ce sujet">
+        {hits.map((hit) => {
+          const details = [
+            hit.views !== undefined ? `${formatCompact(hit.views)} vues` : null,
+            hit.publishedAt ? formatRelative(hit.publishedAt, now) : null,
+          ].filter(Boolean);
+          const href = safeHref(hit.url);
+          const content = (
+            <>
+              <span className="truncate">@{hit.handle}</span>
+              {details.length > 0 ? <span className="shrink-0 font-normal text-muted">({details.join(", ")})</span> : null}
+              {href ? <ExternalLink aria-hidden className="size-3 shrink-0 text-faint" /> : null}
+            </>
+          );
+          const chip = "inline-flex h-6 max-w-full items-center gap-1 rounded-md border border-line bg-surface px-2 font-medium text-ink";
+          const title = `${hit.title}${hit.publishedAt ? ` — ${formatDateTime(hit.publishedAt)}` : ""}`;
+          return (
+            <li key={`${hit.platform}:${hit.handle}:${hit.postId}`} className="max-w-full">
+              {href ? (
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title={title}
+                  className={cn(chip, "transition-colors duration-150 hover:border-accent/50 hover:text-accent-ink")}
+                >
+                  {content}
+                  <span className="sr-only"> : « {hit.title} » (s&apos;ouvre dans un nouvel onglet)</span>
+                </a>
+              ) : (
+                <span className={chip} title={title}>
+                  {content}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      <span className="text-faint">— misez sur un angle qu&apos;ils n&apos;ont pas pris.</span>
+    </div>
+  );
+}
 
 /** Lifespan, saturation and sensitivity badges of a topic. */
 export function TopicBadges({ topic, className }: { topic: Topic; className?: string }) {
@@ -113,13 +171,15 @@ export interface TopicCardProps {
   onChoose: () => void;
   /** From `useNow()`. */
   now: number;
+  /** Posts of saved competitors that already treat this topic (`competitorCoverage`). */
+  coverage?: CoverageHit[];
 }
 
 /**
  * One topic proposal: rank, title, badges, why now, summary, score ring +
  * breakdown, expandable evidence and the "Choisir ce sujet" action.
  */
-export function TopicCard({ topic, rank, evidence, showNiche, selected, onChoose, now }: TopicCardProps) {
+export function TopicCard({ topic, rank, evidence, showNiche, selected, onChoose, now, coverage = [] }: TopicCardProps) {
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const titleId = useId();
@@ -158,6 +218,7 @@ export function TopicCard({ topic, rank, evidence, showNiche, selected, onChoose
             {topic.title}
           </h2>
           <TopicBadges topic={topic} className="mt-2.5" />
+          <CoverageLine hits={coverage} now={now} className="mt-2.5" />
 
           {topic.whyNow ? (
             <p className="mt-4 flex gap-2.5 text-[0.9375rem] font-medium leading-relaxed text-ink">

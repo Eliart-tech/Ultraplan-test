@@ -1,6 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { NOW, fixtureCreator, fixtureReport } from "@/lib/creators/__fixtures__/creator";
+import { computeCreatorStats } from "@/lib/creators/stats";
 import { fixtureDraft, fixtureSettings, fixtureSignals, fixtureTopic } from "@/lib/script/__fixtures__/script";
-import type { Analysis, GeneratedScript } from "@/lib/types";
+import type { Analysis, CompetitorReport, GeneratedScript } from "@/lib/types";
 
 /** In-memory Storage with an optional byte quota (UTF-16 length of all values). */
 class MemoryStorage implements Storage {
@@ -256,5 +258,173 @@ describe("without storage", () => {
     const mod = await import("./storage");
     expect(mod.getHistory()).toEqual({ scripts: [], analyses: [] });
     expect(mod.saveProfile(mod.EMPTY_PROFILE)).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Competitor reports
+// ---------------------------------------------------------------------------
+
+const creatorStats = computeCreatorStats(fixtureCreator, { now: NOW, timeZone: "Europe/Paris" });
+
+function competitor(handle: string, overrides: Partial<CompetitorReport> = {}): CompetitorReport {
+  const base = fixtureReport({ stats: creatorStats });
+  return {
+    ...base,
+    id: `report-${handle}`,
+    data: { ...base.data, account: { ...base.data.account, handle } },
+    ...overrides,
+  };
+}
+
+describe("competitor reports", () => {
+  it("keys accounts case-insensitively, without @", () => {
+    expect(storage.competitorKey("tiktok", "@BudgetMalin ")).toBe("tiktok:budgetmalin");
+    expect(storage.reportKey(competitor("Lea"))).toBe("tiktok:lea");
+  });
+
+  it("saves newest first, one report per platform + handle", () => {
+    storage.saveCompetitorReport(competitor("a"));
+    storage.saveCompetitorReport(competitor("b"));
+    const again = competitor("A", { id: "report-a2", createdAt: "2026-10-03T00:00:00Z" });
+    expect(storage.saveCompetitorReport(again)).toEqual({ ok: true, evicted: 0 });
+    expect(storage.getCompetitors().map((r) => r.id)).toEqual(["report-a2", "report-b"]);
+    expect(JSON.parse(local.getItem("trendscript:competitors:v1")!).version).toBe(1);
+    expect(storage.findCompetitor("tiktok:a")?.id).toBe("report-a2");
+  });
+
+  it("caps the list at 12", () => {
+    for (let i = 0; i < 14; i++) storage.saveCompetitorReport(competitor(`c${i}`));
+    const reports = storage.getCompetitors();
+    expect(reports).toHaveLength(storage.MAX_SAVED_COMPETITORS);
+    expect(reports[0].data.account.handle).toBe("c13");
+  });
+
+  it("trims long captions for storage", () => {
+    const long = competitor("long");
+    long.data = {
+      ...long.data,
+      posts: long.data.posts.map((post, index) => (index === 0 ? { ...post, text: "x".repeat(5000), transcript: "y".repeat(3000) } : post)),
+    };
+    storage.saveCompetitorReport(long);
+    const saved = storage.getCompetitors()[0].data.posts[0];
+    expect(saved.text).toHaveLength(storage.STORED_POST_TEXT_MAX);
+    expect(saved.text?.endsWith("…")).toBe(true);
+    expect(saved.transcript).toHaveLength(storage.STORED_POST_TEXT_MAX);
+    expect(storage.getCompetitors()[0].data.posts[1].text).toBe(fixtureCreator.posts[1].text);
+  });
+
+  it("removes and clears", () => {
+    storage.saveCompetitorReport(competitor("a"));
+    storage.saveCompetitorReport(competitor("b"));
+    storage.removeCompetitorReport("tiktok:a");
+    expect(storage.getCompetitors().map((r) => r.id)).toEqual(["report-b"]);
+    storage.clearCompetitors();
+    expect(local.getItem("trendscript:competitors:v1")).toBeNull();
+    expect(storage.getCompetitors()).toEqual([]);
+  });
+
+  it("drops malformed and duplicate entries when reading", async () => {
+    const dirty = new MemoryStorage();
+    dirty.setItem(
+      "trendscript:competitors:v1",
+      JSON.stringify({ version: 1, reports: [competitor("ok"), { id: "broken" }, competitor("OK", { id: "dup" }), null] }),
+    );
+    await setup(dirty);
+    expect(storage.getCompetitors().map((r) => r.id)).toEqual(["report-ok"]);
+    expect(storage.sanitizeCompetitors("nope")).toEqual([]);
+    expect(storage.sanitizeCompetitors([competitor("bare")]).map((r) => r.id)).toEqual(["report-bare"]);
+  });
+
+  it("evicts the oldest reports when the quota is exceeded", async () => {
+    const size = JSON.stringify(storage.trimCompetitorReport(competitor("x"))).length;
+    await setup(new MemoryStorage(2 * size + 300));
+    storage.saveCompetitorReport(competitor("a"));
+    storage.saveCompetitorReport(competitor("b"));
+    const result = storage.saveCompetitorReport(competitor("c"));
+    expect(result.ok).toBe(true);
+    expect(result.evicted).toBe(1);
+    expect(storage.getCompetitors().map((r) => r.data.account.handle)).toEqual(["c", "b"]);
+  });
+});
+
+describe("YouTube 30-day retention", () => {
+  const DAY = 24 * 60 * 60_000;
+  /** `null` = field absent (allowed). */
+  function youtube(fetchedAt: string, ratiosAllowed: boolean | null = false): CompetitorReport {
+    const base = competitor("chaine");
+    return {
+      ...base,
+      data: {
+        ...base.data,
+        fetchedAt,
+        ...(ratiosAllowed === null ? {} : { ratiosAllowed }),
+        account: { ...base.data.account, platform: "youtube" },
+      },
+    };
+  }
+
+  it("expires YouTube reports without derived-metrics approval after 30 days", () => {
+    const now = Date.parse("2026-11-10T00:00:00Z");
+    expect(storage.isRetentionExpired(youtube("2026-10-01T00:00:00Z"), now)).toBe(true);
+    expect(storage.isRetentionExpired(youtube("2026-10-20T00:00:00Z"), now)).toBe(false);
+    expect(storage.isRetentionExpired(youtube("2026-10-01T00:00:00Z", null), now)).toBe(false);
+    expect(storage.isRetentionExpired(youtube("2026-10-01T00:00:00Z", true), now)).toBe(false);
+    expect(storage.isRetentionExpired(competitor("tk"), now + 90 * DAY)).toBe(false);
+  });
+
+  it("strips every audience statistic, keeping the text", () => {
+    const stripped = storage.stripReportMetrics(youtube("2026-10-01T00:00:00Z"));
+    expect(stripped.data.account.followers).toBeUndefined();
+    expect(stripped.data.account.totalPosts).toBeUndefined();
+    expect(stripped.data.posts.every((post) => Object.keys(post.metrics).length === 0)).toBe(true);
+    expect(stripped.data.posts[0].title).toBe(fixtureCreator.posts[0].title);
+    expect(stripped.stats.medianViews).toBeUndefined();
+    expect(stripped.stats.outliers).toEqual([]);
+    expect(stripped.stats.weekdays.every((bucket) => bucket.median === undefined)).toBe(true);
+    expect(stripped.insights).toEqual(youtube("2026-10-01T00:00:00Z").insights);
+    expect(storage.isMetricsStripped(stripped)).toBe(true);
+    expect(storage.stripReportMetrics(stripped)).toBe(stripped);
+  });
+
+  it("hides expired statistics on read and erases them from storage", async () => {
+    const seeded = new MemoryStorage();
+    seeded.setItem(
+      "trendscript:competitors:v1",
+      JSON.stringify({ version: 1, reports: [youtube("2020-01-01T00:00:00Z"), competitor("fresh")] }),
+    );
+    await setup(seeded);
+    const [expired, fresh] = storage.getCompetitors();
+    expect(expired.data.posts[0].metrics).toEqual({});
+    expect(fresh.data.posts[0].metrics.views).toBe(fixtureCreator.posts[0].metrics.views);
+    // Still in storage until purged.
+    expect(JSON.parse(seeded.getItem("trendscript:competitors:v1")!).reports[0].data.posts[0].metrics.views).toBeDefined();
+    expect(storage.purgeExpiredCompetitors()).toBe(1);
+    expect(JSON.parse(seeded.getItem("trendscript:competitors:v1")!).reports[0].data.posts[0].metrics).toEqual({});
+    expect(storage.purgeExpiredCompetitors()).toBe(0);
+  });
+});
+
+describe("studio hand-off (sessionStorage)", () => {
+  const handoff = { topic: fixtureTopic, signals: fixtureSignals, angle: fixtureTopic.angles[0], competitorKey: "tiktok:a", label: "@a" };
+
+  it("is peeked without being consumed, then cleared", () => {
+    const now = Date.parse("2026-10-02T12:00:00Z");
+    expect(storage.peekStudioHandoff(now)).toBeNull();
+    expect(storage.saveStudioHandoff(handoff, now)).toBe(true);
+    expect(local.getItem("trendscript:handoff:v1")).toBeNull();
+    const first = storage.peekStudioHandoff(now + 1000);
+    expect(first).toMatchObject({ version: 1, competitorKey: "tiktok:a", topic: { id: fixtureTopic.id } });
+    expect(storage.peekStudioHandoff(now + 2000)).toEqual(first);
+    storage.clearStudioHandoff();
+    expect(storage.peekStudioHandoff(now)).toBeNull();
+  });
+
+  it("ignores stale or malformed hand-offs", () => {
+    const now = Date.parse("2026-10-02T12:00:00Z");
+    storage.saveStudioHandoff(handoff, now);
+    expect(storage.peekStudioHandoff(now + storage.HANDOFF_TTL_MS + 1)).toBeNull();
+    session.setItem("trendscript:handoff:v1", JSON.stringify({ version: 1, createdAt: new Date(now).toISOString(), topic: {} }));
+    expect(storage.peekStudioHandoff(now)).toBeNull();
   });
 });

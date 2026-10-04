@@ -24,8 +24,10 @@ import { Select } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/cn";
 import { formatDateTime, formatNumber, formatRelative, pluralize } from "@/lib/client/format";
+import { useCompetitors } from "@/lib/client/storage";
 import { useNow } from "@/lib/client/use-now";
 import { useServerStatus } from "@/lib/client/use-server-status";
+import { competitorCoverage } from "@/lib/creators/coverage";
 import type { Analysis, Platform, Signal, SourceStatus, Topic } from "@/lib/types";
 import { SourceSummaryList } from "./analysis-progress";
 import { SORT_LABELS, countryLabel, languageLabel, type TopicSort } from "./studio-options";
@@ -44,6 +46,7 @@ export function TopicsStep() {
   const { filters } = draft;
   const now = useNow();
   const { status } = useServerStatus();
+  const { reports: competitors } = useCompetitors();
 
   const signalMap = useMemo(
     () => new Map<string, Signal>((analysis?.signals ?? []).map((signal) => [signal.id, signal])),
@@ -147,6 +150,7 @@ export function TopicsStep() {
                   selected={draft.topic?.id === topic.id}
                   onChoose={() => choose(topic)}
                   now={now}
+                  coverage={competitors.length > 0 ? competitorCoverage(topic, competitors) : undefined}
                 />
               ))}
             </ol>

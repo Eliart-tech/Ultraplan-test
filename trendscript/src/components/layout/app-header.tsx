@@ -1,6 +1,6 @@
 "use client";
 
-import { History, LogOut, RotateCcw, Settings2, ShieldAlert, Sparkles, type LucideIcon } from "lucide-react";
+import { History, LogOut, RotateCcw, Settings2, ShieldAlert, Sparkles, Swords, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -20,6 +20,7 @@ interface NavItem {
 
 const NAV: NavItem[] = [
   { href: "/", label: "Studio", icon: Sparkles },
+  { href: "/concurrents", label: "Concurrents", icon: Swords },
   { href: "/historique", label: "Historique", icon: History },
   { href: "/reglages", label: "Réglages", icon: Settings2 },
 ];
@@ -29,9 +30,9 @@ function isActive(pathname: string, href: string): boolean {
 }
 
 /**
- * Sticky app header: wordmark, main navigation (inline from `sm`, a second
- * row of tabs on phones), server status pill and logout when the password
- * gate is on. On /login only the wordmark is shown (no status request).
+ * Sticky app header: wordmark, main navigation (inline from `md`, a second
+ * row of tabs below), server status pill and logout when the password gate
+ * is on. On /login only the wordmark is shown (no status request).
  */
 export function AppHeader() {
   const pathname = usePathname() ?? "/";
@@ -64,7 +65,7 @@ function FullHeader({ pathname }: { pathname: string }) {
           <Wordmark compact />
         </Link>
 
-        <nav aria-label="Navigation principale" className="ml-3 hidden sm:block">
+        <nav aria-label="Navigation principale" className="ml-3 hidden md:block">
           <ul className="flex items-center gap-1">
             {NAV.map((item) => (
               <li key={item.href}>
@@ -81,8 +82,8 @@ function FullHeader({ pathname }: { pathname: string }) {
         </div>
       </Container>
 
-      <nav aria-label="Navigation principale" className="border-t border-line sm:hidden">
-        <ul className="grid grid-cols-3">
+      <nav aria-label="Navigation principale" className="border-t border-line md:hidden">
+        <ul className="grid grid-cols-4">
           {NAV.map((item) => (
             <li key={item.href}>
               <MobileNavLink item={item} active={isActive(pathname, item.href)} />
@@ -105,7 +106,8 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
         active ? "bg-surface text-ink shadow-xs ring-1 ring-line" : "text-muted hover:bg-surface-2 hover:text-ink",
       )}
     >
-      <Icon aria-hidden className={cn("size-4", active ? "text-accent" : "text-faint")} />
+      {/* Icons from lg: four items + the status pill must fit at md. */}
+      <Icon aria-hidden className={cn("hidden size-4 lg:block", active ? "text-accent" : "text-faint")} />
       {item.label}
     </Link>
   );
@@ -118,13 +120,14 @@ function MobileNavLink({ item, active }: { item: NavItem; active: boolean }) {
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        "relative flex h-11 items-center justify-center gap-1.5 text-[0.8125rem] font-medium transition-colors duration-150",
+        // Stacked icon + label on phones (4 tabs in 375 px), inline from sm.
+        "relative flex h-12 flex-col items-center justify-center gap-0.5 text-[0.6875rem] font-medium transition-colors duration-150 sm:h-11 sm:flex-row sm:gap-1.5 sm:text-[0.8125rem]",
         active ? "text-ink" : "text-muted hover:text-ink",
       )}
     >
       <Icon aria-hidden className={cn("size-4", active ? "text-accent" : "text-faint")} />
       {item.label}
-      {active ? <span aria-hidden className="absolute inset-x-6 bottom-0 h-0.5 rounded-full bg-accent" /> : null}
+      {active ? <span aria-hidden className="absolute inset-x-4 bottom-0 h-0.5 rounded-full bg-accent sm:inset-x-6" /> : null}
     </Link>
   );
 }
@@ -184,8 +187,8 @@ function StatusPill({ status, error, loading, onRetry }: StatusPillProps) {
         <span className={cn("relative size-2 rounded-full", ai ? "bg-success" : "bg-warning")} />
       </span>
       <span className="truncate">{ai ? "IA active" : "Mode sans IA"}</span>
-      <span aria-hidden className="hidden h-3 w-px bg-line-strong sm:block" />
-      <span className="hidden whitespace-nowrap tabular-nums text-muted sm:inline">
+      <span aria-hidden className="hidden h-3 w-px bg-line-strong lg:block" />
+      <span className="hidden whitespace-nowrap tabular-nums text-muted lg:inline">
         {configured} source{configured > 1 ? "s" : ""}
       </span>
       {error ? <span className="sr-only">(statut peut-être obsolète : {error})</span> : null}
@@ -226,7 +229,7 @@ function LogoutButton() {
       aria-label="Se déconnecter"
       title="Se déconnecter"
     >
-      <span className="hidden sm:inline">Déconnexion</span>
+      <span className="hidden lg:inline">Déconnexion</span>
     </Button>
   );
 }

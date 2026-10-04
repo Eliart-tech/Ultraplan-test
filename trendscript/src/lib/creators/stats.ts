@@ -171,7 +171,7 @@ export function shareSaveRate(metrics: CreatorPostMetrics): number | undefined {
 }
 
 /** (likes + comments + shares) ÷ views in %, when views and likes are known. */
-function engagementRate(metrics: CreatorPostMetrics): number | undefined {
+export function engagementRate(metrics: CreatorPostMetrics): number | undefined {
   const { views, likes, comments, shares } = metrics;
   if (!isNumber(views) || views <= 0 || !isNumber(likes)) return undefined;
   return (100 * (likes + (comments ?? 0) + (shares ?? 0))) / views;

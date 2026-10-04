@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PlatformIcon, platformLabel } from "@/components/ui/platform-icon";
 import { formatCompact, formatDateTime, formatRelative, pluralize } from "@/lib/client/format";
-import { reportKey } from "@/lib/client/storage";
+import { isMetricsStripped, isRetentionExpired, reportKey } from "@/lib/client/storage";
 import type { CompetitorReport } from "@/lib/types";
 import { isStale, reportHref } from "./report-utils";
 
@@ -66,7 +66,8 @@ export function SavedCompetitors({ reports, now, busy, onReanalyse, onDelete }: 
             const key = reportKey(report);
             const { account } = report.data;
             const name = account.displayName?.trim() || `@${account.handle}`;
-            const stale = isStale(report, now);
+            const expired = isMetricsStripped(report) || isRetentionExpired(report, now);
+            const stale = !expired && isStale(report, now);
             const titleId = `suivi-${key.replace(/[^a-z0-9]/gi, "-")}`;
             return (
               <Card as="li" key={key} className="flex flex-col">
@@ -100,7 +101,11 @@ export function SavedCompetitors({ reports, now, busy, onReanalyse, onDelete }: 
                         {report.stats.outliers.length} {pluralize(report.stats.outliers.length, "carton", "cartons")}
                       </Badge>
                     ) : null}
-                    {stale ? (
+                    {expired ? (
+                      <Badge size="sm" tone="warning" dot title="Statistiques YouTube effacées après 30 jours">
+                        Chiffres expirés : à relancer
+                      </Badge>
+                    ) : stale ? (
                       <Badge size="sm" tone="warning" dot title="Plus de 30 jours : chiffres datés">
                         À actualiser
                       </Badge>

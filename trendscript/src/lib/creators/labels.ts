@@ -73,9 +73,13 @@ export function formatRankingValue(value: number, metric: CreatorStats["rankingM
   return metric === "views" ? `${formatCompactFr(value)} vues` : `score d'engagement ${formatCompactFr(value)}`;
 }
 
+/** Whitespace collapsed; when too long, cut at the last word boundary (if not too far) + "…". */
 export function clip(value: string, max: number): string {
   const clean = value.replace(/\s+/g, " ").trim();
-  return clean.length > max ? `${clean.slice(0, max - 1).trimEnd()}…` : clean;
+  if (clean.length <= max) return clean;
+  const cut = clean.slice(0, max - 1);
+  const space = cut.lastIndexOf(" ");
+  return `${(space >= max * 0.6 ? cut.slice(0, space) : cut).trimEnd()}…`;
 }
 
 /** "@handle" (LinkedIn profiles are named, handles there are URL slugs). */

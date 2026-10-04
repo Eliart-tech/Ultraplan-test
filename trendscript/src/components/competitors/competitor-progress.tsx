@@ -9,22 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Spinner } from "@/components/ui/spinner";
 import { formatCompact, formatNumber, pluralize } from "@/lib/client/format";
 import { cn } from "@/lib/cn";
-import type { CompetitorRun, CompetitorStep } from "./competitor-run";
-
-type StepState = "done" | "current" | "upcoming" | "skipped";
-
-const ORDER: CompetitorStep[] = ["fetch", "stats", "analysis"];
-
-/** State of a step of the run; the analysis is "skipped" when Claude isn't configured. */
-export function competitorStepState(step: CompetitorStep, run: CompetitorRun, aiConfigured: boolean | null): StepState {
-  if (step === "analysis" && aiConfigured === false) return "skipped";
-  const current = run.step ?? "fetch";
-  const index = ORDER.indexOf(step);
-  const currentIndex = ORDER.indexOf(current);
-  if (index < currentIndex) return "done";
-  if (index === currentIndex) return "current";
-  return "upcoming";
-}
+import { competitorStepState, type CompetitorRun, type StepState } from "./competitor-run";
 
 function StepRow({ state, icon, label, detail }: { state: StepState; icon: ReactNode; label: string; detail?: ReactNode }) {
   return (

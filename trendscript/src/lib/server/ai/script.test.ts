@@ -1,8 +1,9 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { scriptRequestSchema } from "../../schemas";
-import { fixtureDraft, fixtureRequest, fixtureSignals, NOW } from "../../script/__fixtures__/script";
+import { fixtureCompetitors, fixtureDraft, fixtureRequest, fixtureSignals, NOW } from "../../script/__fixtures__/script";
 import { checkScript } from "../../script/checks";
+import { REVIEW_INSTRUCTIONS } from "../../script/prompt";
 import { countWords, estimateDuration } from "../../script/metrics";
 import type { ResearchBrief, ScriptEvent, ScriptRequest, Signal, Topic } from "../../types";
 import type { RelatedQueries } from "../sources/serpapi-trends";
@@ -12,6 +13,8 @@ import {
   enrichmentQuery,
   generateScript,
   resolveGeo,
+  REVIEW_NO_CHANGE,
+  reviewOutputSchema,
   sanitizeDraft,
   type ScriptDeps,
   type ScriptOutput,
@@ -462,6 +465,142 @@ describe("generateScript", () => {
       // Links of the previous version stay valid.
       expect(script.sources.map((s) => s.url)).toEqual(["https://old.example/source"]);
       expect(script.warnings).toEqual([]);
+    });
+  });
+
+  describe("critical review pass", () => {
+    const reviewed = (overrides: Partial<ScriptOutput> = {}, changes = ["Hook : formule vague remplacée par la date sourcée [P1] → sujet clair en 1 s", "CTA déplacé après le payoff"]) => ({
+      changes,
+      ...output({ title: "Changement d'heure : le réglage que tout le monde oublie", ...overrides }),
+    });
+
+    it("rereads the draft as a demanding editor and returns the improved version with what changed", async () => {
+      const longDraft = output({ hashtags: ["#a", "#b", "#c", "#d", "#e", "#f"] });
+      const { script, events, calls } = await generate(withSettings({ review: true }), [jsonMessage(longDraft), jsonMessage(reviewed())]);
+
+      expect(statusSteps(events)).toEqual(["research", "writing", "review", "finalizing"]);
+      expect(events.find((e) => e.type === "status" && e.step === "review")).toEqual({ type: "status", step: "review", message: "Relecture critique…" });
+      expect(calls).toHaveLength(2);
+
+      const [writing, review] = calls.map((c) => c.params);
+      const writingSystem = writing.system as ReturnType<typeof cachedSystem>;
+      const reviewSystem = review.system as ReturnType<typeof cachedSystem>;
+      // Same cached prefix, then the editor's instructions.
+      expect(reviewSystem).toHaveLength(3);
+      expect(reviewSystem[0]).toEqual(writingSystem[0]);
+      expect(reviewSystem[1]).toEqual(writingSystem[1]);
+      expect(reviewSystem[2].text).toBe(REVIEW_INSTRUCTIONS);
+      expect(review).toMatchObject({ model: "claude-opus-5-5", output_config: { effort: "high", format: { type: "json_schema" } } });
+      const schema = (review.output_config?.format as unknown as { schema: { required: string[] } }).schema;
+      expect(schema.required[0]).toBe("changes");
+
+      const user = review.messages[0].content as string;
+      expect(user.startsWith(writing.messages[0].content as string)).toBe(true);
+      expect(user).toContain("<brouillon_a_relire>");
+      expect(user).toContain('"hashtags": [\n  "#a"');
+      // The code checks of the first draft are handed to the editor.
+      expect(user).toContain("<controles_automatiques>\n- Instagram limite à 5 hashtags (6 proposés) : gardez les 5 plus précis.");
+
+      expect(script.title).toBe("Changement d'heure : le réglage que tout le monde oublie");
+      expect(script.hashtags).toEqual(fixtureDraft().hashtags);
+      expect(script.reviewNotes).toEqual([
+        "Hook : formule vague remplacée par la date sourcée [P1] → sujet clair en 1 s",
+        "CTA déplacé après le payoff",
+      ]);
+      expect(script.warnings).toEqual([]);
+      expect(events.at(-1)).toEqual({ type: "result", script });
+    });
+
+    it("says so when the editor changed nothing", async () => {
+      const { script } = await generate(withSettings({ review: true }), [jsonMessage(output()), jsonMessage(reviewed({}, ["  "]))]);
+      expect(script.reviewNotes).toEqual([REVIEW_NO_CHANGE]);
+    });
+
+    it("keeps the first draft, with a warning, when the review fails", async () => {
+      const { script, events } = await generate(withSettings({ review: true }), [
+        jsonMessage(output()),
+        new Anthropic.InternalServerError(529, { type: "error" }, undefined, new Headers()),
+      ]);
+      expect(script).toMatchObject(fixtureDraft());
+      expect(script).not.toHaveProperty("reviewNotes");
+      expect(script.warnings).toEqual([
+        "Relecture critique indisponible (API Claude surchargée ou indisponible (529) : réessayez dans quelques instants.) : première version conservée.",
+      ]);
+      expect(statusSteps(events)).toEqual(["research", "writing", "review", "finalizing"]);
+    });
+
+    it("keeps the first draft when the review breaks the output contract", async () => {
+      const { script } = await generate(withSettings({ review: true }), [jsonMessage(output()), jsonMessage({ changes: ["x"], title: 3 })]);
+      expect(script.title).toBe(fixtureDraft().title);
+      expect(script.warnings[0]).toMatch(/^Relecture critique indisponible \(Réponse de Claude incomplète pendant la relecture critique du script/);
+    });
+
+    it("re-checks the links of the reviewed draft", async () => {
+      const invented = reviewed({ sources: [{ title: "Inventée", url: "https://invente.example/x", source: "X" }] });
+      const { script } = await generate(withSettings({ review: true }), [jsonMessage(output()), jsonMessage(invented)]);
+      expect(script.sources).toEqual([]);
+      expect(script.warnings[0]).toMatch(/^1 lien\(s\) cité\(s\) par Claude/);
+    });
+
+    it("reports a fallback during the review and credits the model that wrote the final text", async () => {
+      const answer = message([fallbackBlock("claude-opus-5-5", "claude-opus-5"), textBlock(JSON.stringify(reviewed()))], "end_turn", { model: "claude-opus-5" });
+      const { script } = await generate(withSettings({ review: true }), [jsonMessage(output()), answer]);
+      expect(script.model).toBe("claude-opus-5");
+      expect(script.warnings).toEqual(["Le modèle principal a décliné la relecture : relecture faite par claude-opus-5 (repli automatique)."]);
+    });
+
+    it("is skipped when refining (a targeted edit asked by the creator)", async () => {
+      const refine = { previous: fixtureDraft(), instruction: "Hook plus percutant" };
+      const { calls, events, script } = await generate(withSettings({ review: true }, { refine }), [jsonMessage(output())]);
+      expect(calls).toHaveLength(1);
+      expect(statusSteps(events)).toEqual(["writing", "finalizing"]);
+      expect(script).not.toHaveProperty("reviewNotes");
+    });
+
+    it("stops when the request is cancelled during the review", async () => {
+      const controller = new AbortController();
+      const { deps } = makeDeps([jsonMessage(output())]);
+      const fake = fakeClient([jsonMessage(output())]);
+      const client = {
+        beta: {
+          messages: {
+            stream: (params: Parameters<typeof fake.client.beta.messages.stream>[0], options?: { signal?: AbortSignal }) => {
+              if ((params.system as unknown[]).length === 3) {
+                controller.abort();
+                return { on() { return this; }, finalMessage: async () => { throw new Anthropic.APIUserAbortError(); } };
+              }
+              return fake.client.beta.messages.stream(params, options);
+            },
+          },
+        },
+      } as unknown as Anthropic;
+      const events: ScriptEvent[] = [];
+      await expect(
+        generateScript(withSettings({ review: true }), (e) => events.push(e), controller.signal, {}, { ...deps, client }),
+      ).rejects.toThrow(new AiError("Génération annulée."));
+      expect(events.some((e) => e.type === "result")).toBe(false);
+    });
+
+    it("validates the review contract: changes first, then the full draft", () => {
+      expect(Object.keys(reviewOutputSchema.shape)[0]).toBe("changes");
+      expect(reviewOutputSchema.safeParse(reviewed()).success).toBe(true);
+    });
+  });
+
+  describe("competitors", () => {
+    it("sends the competitive landscape and checks the draft does not reuse their titles", async () => {
+      const copied = output({ title: "3 rituels pour s'endormir en 10 minutes" });
+      const { calls, script } = await generate({ ...fixtureRequest, competitors: fixtureCompetitors }, [jsonMessage(copied)]);
+      expect(calls[0].params.messages[0].content as string).toContain("<paysage_concurrentiel>");
+      expect(script.warnings).toEqual([
+        "Titre très proche d'une publication de @sommeilfacile (« 3 rituels pour s'endormir en 10 minutes ») : reformulez pour vous démarquer.",
+      ]);
+    });
+
+    it("gives the overlap to the editor during the review", async () => {
+      const copied = output({ title: "3 rituels pour s'endormir en 10 minutes" });
+      const { calls } = await generate({ ...withSettings({ review: true }), competitors: fixtureCompetitors }, [jsonMessage(copied), jsonMessage({ changes: ["Titre changé"], ...output() })]);
+      expect(calls[1].params.messages[0].content as string).toContain("- Titre très proche d'une publication de @sommeilfacile");
     });
   });
 

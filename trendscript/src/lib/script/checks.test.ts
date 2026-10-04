@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { ScriptBeat, ScriptDraft, ScriptSettings } from "../types";
-import { fixtureDraft, fixtureSettings } from "./__fixtures__/script";
-import { checkScript } from "./checks";
+import { fixtureCompetitors, fixtureDraft, fixtureSettings } from "./__fixtures__/script";
+import { checkCompetitorOverlap, checkScript } from "./checks";
 import { wordBudget } from "./metrics";
 
 const BUDGET = wordBudget(fixtureSettings.durationSec, fixtureSettings.pace); // 101
@@ -281,5 +281,39 @@ describe("checkScript", () => {
       expect(check(thirty, { pedagogy: 79, durationSec: 30 }, 68)).toEqual([]);
       expect(check({}, { pedagogy: 100, durationSec: 45 })).toEqual([]);
     });
+  });
+});
+
+describe("checkCompetitorOverlap", () => {
+  const hooks = fixtureDraft().hooks;
+
+  it("returns nothing without competitors, or for an original draft", () => {
+    expect(checkCompetitorOverlap(fixtureDraft(), undefined)).toEqual([]);
+    expect(checkCompetitorOverlap(fixtureDraft(), [])).toEqual([]);
+    // Same topic words ("changement d'heure") are not a copy.
+    expect(checkCompetitorOverlap(fixtureDraft(), fixtureCompetitors)).toEqual([]);
+  });
+
+  it("flags a title or a spoken hook that reuses a competitor's title almost word for word", () => {
+    const draft = fixtureDraft({
+      title: "Changement d'heure : comment adapter le coucher de ton bébé",
+      hooks: [{ ...hooks[0], spoken: "3 rituels pour t'endormir en 10 minutes." }, hooks[1], hooks[2]],
+    });
+    expect(checkCompetitorOverlap(draft, fixtureCompetitors)).toEqual([
+      "Titre très proche d'une publication de @sommeilfacile (« Changement d'heure : comment adapter le coucher de bébé ») : reformulez pour vous démarquer.",
+      "Accroche 1 très proche d'une publication de @sommeilfacile (« 3 rituels pour s'endormir en 10 minutes ») : reformulez pour vous démarquer.",
+    ]);
+  });
+
+  it("also compares with the quoted examples of their hook patterns", () => {
+    const draft = fixtureDraft({ hooks: [hooks[0], { ...hooks[1], spoken: "Arrêtez de coucher votre enfant à 20 h !" }, hooks[2]] });
+    expect(checkCompetitorOverlap(draft, fixtureCompetitors)).toEqual([
+      "Accroche 2 très proche d'une publication de @sommeilfacile (« Arrêtez de coucher votre enfant à 20 h ») : reformulez pour vous démarquer.",
+    ]);
+  });
+
+  it("ignores very short titles (too few meaningful words to judge)", () => {
+    const short = [{ ...fixtureCompetitors[1], recentTitles: ["Sommeil"] }];
+    expect(checkCompetitorOverlap(fixtureDraft({ title: "Sommeil" }), short)).toEqual([]);
   });
 });
