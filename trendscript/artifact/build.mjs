@@ -342,6 +342,74 @@ const EDITION_PATCHES = [
     replace: "<EditionUi.ScriptTimingHint research={settings.research} review={settings.review} />",
     why: "Script : crédits Firecrawl d'une génération",
   },
+  // Concurrents
+  {
+    file: file("components", "competitors", "competitor-form.tsx"),
+    find: '{unavailable.length === 1 ? "Plateforme indisponible sur ce serveur" : "Plateformes indisponibles sur ce serveur"}',
+    replace: '{unavailable.length === 1 ? "Plateforme indisponible dans cette page" : "Plateformes indisponibles dans cette page"}',
+    why: "Concurrents : pas de serveur",
+  },
+  {
+    file: file("components", "competitors", "competitor-form.tsx"),
+    find: "              Configurer dans Réglages\n",
+    replace: "              Détails dans Réglages\n",
+    why: "Concurrents : rien à configurer ici",
+  },
+  {
+    file: file("components", "competitors", "competitor-form.tsx"),
+    find: 'Sans <code className="rounded bg-surface px-1 font-mono text-xs">ANTHROPIC_API_KEY</code>, vous obtenez les\n            publications et les chiffres réels, sans l&apos;analyse ni les idées de Claude.',
+    replace: '<EditionUi.StatsModeText rest="les publications et les chiffres réels, sans l\'analyse ni les idées de Claude." />',
+    why: "Concurrents : pas d'ANTHROPIC_API_KEY ici",
+  },
+  {
+    file: file("components", "competitors", "competitor-form.tsx"),
+    find: "Configurez au moins une source (voir Réglages) pour analyser un créateur.",
+    replace: "Connectez Firecrawl à votre compte claude.ai (YouTube, LinkedIn) pour analyser un créateur.",
+    why: "Concurrents : Firecrawl, pas de clés",
+  },
+  {
+    file: file("components", "competitors", "report-evidence.tsx"),
+    find: '"Claude n\'est pas configuré sur ce serveur (ANTHROPIC_API_KEY) : voici les publications et les statistiques réelles, sans interprétation, angles morts ni idées de vidéos."',
+    replace: '<EditionUi.StatsOnlyText rest="les publications et les statistiques réelles, sans interprétation, angles morts ni idées de vidéos." />',
+    why: "rapport concurrent : pas d'ANTHROPIC_API_KEY ici",
+  },
+  {
+    file: file("components", "competitors", "report-evidence.tsx"),
+    find: "            Configurer Claude dans Réglages\n",
+    replace: "            État de Claude dans Réglages\n",
+    why: "rapport concurrent : rien à configurer ici",
+  },
+  // Ce qui cartonne
+  {
+    file: file("components", "viral", "viral-form.tsx"),
+    find: 'Activer {unavailable.length > 1 ? "les autres plateformes" : platformLabel(unavailable[0].platform)} dans Réglages',
+    replace: 'Pourquoi {unavailable.length > 1 ? "ces plateformes sont indisponibles" : `${platformLabel(unavailable[0].platform)} est indisponible`} : voir Réglages',
+    why: "Ce qui cartonne : rien à activer ici",
+  },
+  {
+    file: file("components", "viral", "viral-form.tsx"),
+    find: 'Sans <code className="rounded bg-surface px-1 font-mono text-xs">ANTHROPIC_API_KEY</code>, vous obtenez les vidéos\n            et leurs chiffres réels, sans les recettes ni les idées de Claude.',
+    replace: '<EditionUi.StatsModeText rest="les vidéos et leurs chiffres réels, sans les recettes ni les idées de Claude." />',
+    why: "Ce qui cartonne : pas d'ANTHROPIC_API_KEY ici",
+  },
+  {
+    file: file("components", "viral", "viral-form.tsx"),
+    find: "Configurez au moins une source (voir Réglages) pour lancer l&apos;analyse.",
+    replace: "<EditionUi.ViralServerOnlyText />",
+    why: "Ce qui cartonne : version serveur uniquement",
+  },
+  {
+    file: file("components", "viral", "viral-report.tsx"),
+    find: '"Claude n\'est pas configuré sur ce serveur (ANTHROPIC_API_KEY) : voici les vidéos réelles et leurs chiffres, sans recettes, hooks ni idées."',
+    replace: '<EditionUi.StatsOnlyText rest="les vidéos réelles et leurs chiffres, sans recettes, hooks ni idées." />',
+    why: "rapport Ce qui cartonne : pas d'ANTHROPIC_API_KEY ici",
+  },
+  {
+    file: file("components", "viral", "viral-report.tsx"),
+    find: "            Configurer Claude dans Réglages\n",
+    replace: "            État de Claude dans Réglages\n",
+    why: "rapport Ce qui cartonne : rien à configurer ici",
+  },
   // Historique
   {
     file: file("components", "history", "history-view.tsx"),

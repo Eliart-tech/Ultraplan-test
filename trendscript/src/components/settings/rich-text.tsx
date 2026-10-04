@@ -23,7 +23,8 @@ export function ExternalAnchor({
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "inline font-medium text-accent-ink underline decoration-accent/30 underline-offset-2 transition-colors duration-150 [overflow-wrap:anywhere] hover:decoration-accent",
+        // relative: keeps the absolutely positioned sr-only hint inside a truncated link (no page overflow).
+        "relative inline font-medium text-accent-ink underline decoration-accent/30 underline-offset-2 transition-colors duration-150 [overflow-wrap:anywhere] hover:decoration-accent",
         className,
       )}
     >

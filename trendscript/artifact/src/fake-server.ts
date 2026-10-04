@@ -7,6 +7,7 @@
  *   POST /api/script       generateScript() streamed as SSE (sseResponse)
  *   POST /api/competitor   runCompetitorAnalysis() streamed as SSE, with the
  *                          edition's creator fetchers (./creators)
+ *   POST /api/viral        503 in French: the lab needs the server version
  *   POST /api/auth/logout  { ok: true } (no password gate in this edition)
  *
  * Bodies are validated with the real zod schemas (same JSON 400 errors as the
@@ -36,7 +37,7 @@ import type {
 } from "@/lib/types";
 import { capabilitiesWithin, getEditionState, resolveCapabilities } from "./capabilities";
 import { createEditionConnectors } from "./connectors";
-import { editionCreatorCapabilities, editionFetchCreator } from "./creators";
+import { editionCreatorCapabilities, editionFetchCreator, editionViralCapabilities } from "./creators";
 import { AI_MODEL_LABEL, EDITION_ENV, frenchDate, frenchDateTime, SERVER_ONLY_SENTENCE, STALE_AFTER_MS } from "./edition";
 import { claudeProblem, firecrawlMode } from "./edition-text";
 import { firecrawlFetchXml } from "./firecrawl";
@@ -260,6 +261,7 @@ export function installFakeServer(snapshot: Snapshot): void {
         ai: { configured: state.claude === "available", model: AI_MODEL_LABEL },
         auth: { enabled: false },
         creators: editionCreatorCapabilities(),
+        viral: editionViralCapabilities(),
       },
       { headers: { "Cache-Control": "no-store" } },
     );
@@ -389,6 +391,13 @@ export function installFakeServer(snapshot: Snapshot): void {
         return method === "POST" ? script(request) : jsonError("Méthode non autorisée.", 405);
       case "/api/competitor":
         return method === "POST" ? competitor(request) : jsonError("Méthode non autorisée.", 405);
+      case "/api/viral":
+        return method === "POST"
+          ? jsonError(
+              "« Ce qui cartonne » a besoin de la version serveur de TrendScript : les vidéos d'une niche et les abonnés de leurs auteurs se lisent via Apify et l'API YouTube, avec des clés absentes de cette page.",
+              503,
+            )
+          : jsonError("Méthode non autorisée.", 405);
       case "/api/auth/logout":
         return Response.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
       case "/api/auth/login":

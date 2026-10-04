@@ -7,12 +7,15 @@
  *   only, since each attempt costs a Firecrawl credit;
  * - linkedin: the server's web-search fetcher, on Firecrawl search;
  * - instagram, tiktok: server only (Apify), explained in French.
+ * The "Ce qui cartonne" lab is server only (editionViralCapabilities).
  */
 
 import { fetchCreator, fetchLinkedinCreatorWeb, normalizeHandle } from "@/lib/server/creators";
 import type { FetchCreatorOptions } from "@/lib/server/creators";
 import { SourceError } from "@/lib/server/http";
 import type { CreatorData, CreatorPlatform, CreatorPlatformStatus } from "@/lib/types";
+import { VIRAL_PLATFORMS } from "@/lib/types";
+import type { ViralPlatformStatus } from "@/lib/viral/labels";
 import { firecrawlMode } from "./edition-text";
 import { firecrawlSearch, firecrawlUnavailableReason, firecrawlUsable } from "./firecrawl";
 
@@ -82,4 +85,21 @@ export async function editionFetchCreator(platform: CreatorPlatform, handle: str
         `${platform === "instagram" ? "Instagram" : "TikTok"} n'est analysable que dans la version serveur de TrendScript (avec APIFY_TOKEN) : ses pages ne montrent pas les publications d'un compte sans connexion.`,
       );
   }
+}
+
+/**
+ * "Ce qui cartonne" in this view: nothing to read. The lab searches a niche's
+ * videos and their authors' follower counts through Apify (Instagram, TikTok)
+ * and the YouTube Data API — keys only the server version holds.
+ */
+export function editionViralCapabilities(): ViralPlatformStatus[] {
+  const notes: Record<(typeof VIRAL_PLATFORMS)[number], string> = {
+    instagram:
+      "Reels d'une niche et abonnés de leurs auteurs : Instagram n'offre aucune voie publique sans compte, la version serveur passe par Apify (APIFY_TOKEN).",
+    tiktok:
+      "Vidéos d'une niche avec vues, partages, enregistrements et abonnés des auteurs : la version serveur passe par Apify (APIFY_TOKEN).",
+    youtube:
+      "Recherche des vidéos les plus vues d'une niche : la version serveur passe par l'API officielle de YouTube (YOUTUBE_API_KEY, gratuite).",
+  };
+  return VIRAL_PLATFORMS.map((platform) => ({ platform, available: false, via: "Version serveur uniquement", note: notes[platform] }));
 }

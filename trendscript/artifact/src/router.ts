@@ -1,12 +1,12 @@
 /**
  * In-memory router of the HTML edition. Only a bare `#anchor` reaches the
  * page inside claude.ai, so pages map to hash routes — "#studio" (default),
- * "#concurrents", "#historique", "#reglages" — and query parameters
+ * "#ce-qui-cartonne", "#concurrents", "#historique", "#reglages" — and query parameters
  * (`/?script=…`, `/concurrents?rapport=…`) live in
  * memory only. Feeds the next/link and next/navigation shims.
  */
 
-export type RoutePath = "/" | "/concurrents" | "/historique" | "/reglages" | (string & {});
+export type RoutePath = "/" | "/ce-qui-cartonne" | "/concurrents" | "/historique" | "/reglages" | (string & {});
 
 export interface RouteState {
   path: RoutePath;
@@ -18,6 +18,7 @@ export interface RouteState {
 
 const HASH_BY_PATH: Record<string, string> = {
   "/": "#studio",
+  "/ce-qui-cartonne": "#ce-qui-cartonne",
   "/concurrents": "#concurrents",
   "/historique": "#historique",
   "/reglages": "#reglages",

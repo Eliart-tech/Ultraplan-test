@@ -69,6 +69,41 @@ export function ScriptUnavailableText() {
   return <>{claudeProblemSentence(state)} Le script est écrit par Claude avec votre compte claude.ai.</>;
 }
 
+// ---------------------------------------------------------------------------
+// Concurrents & Ce qui cartonne
+// ---------------------------------------------------------------------------
+
+/** Form notice without Claude, in place of "Sans ANTHROPIC_API_KEY, vous obtenez …". */
+export function StatsModeText({ rest }: { rest: string }) {
+  const state = useEditionState();
+  return (
+    <>
+      {claudeProblemSentence(state)} Vous obtenez {rest}
+    </>
+  );
+}
+
+/** Report notice without Claude, in place of "Claude n'est pas configuré sur ce serveur (ANTHROPIC_API_KEY) : voici …". */
+export function StatsOnlyText({ rest }: { rest: string }) {
+  const state = useEditionState();
+  return (
+    <>
+      {claudeProblemSentence(state)} Voici {rest}
+    </>
+  );
+}
+
+/** Lab form when no platform can be read: the lab is the server version's. */
+export function ViralServerOnlyText() {
+  return (
+    <>
+      Le laboratoire a besoin de la version serveur de TrendScript : les vidéos d&apos;une niche et le nombre
+      d&apos;abonnés de leurs auteurs se lisent via Apify (Instagram, TikTok) et l&apos;API officielle de YouTube, avec
+      des clés qui ne se saisissent pas dans cette page. Rien n&apos;est simulé ici.
+    </>
+  );
+}
+
 /** Hint under "Générer le script": duration, and the Firecrawl credits a script spends. */
 export function ScriptTimingHint({ research, review }: { research: boolean; review: boolean }) {
   const state = useEditionState();

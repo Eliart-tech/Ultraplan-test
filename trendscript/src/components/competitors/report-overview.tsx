@@ -214,8 +214,8 @@ export function ReportKpis({ report }: { report: CompetitorReport }) {
       key="rhythm"
       icon={<CalendarRange />}
       label="Publications / semaine"
-      value={formatDecimal(stats.postsPerWeek)}
-      hint={`${stats.postCount} publications sur ${stats.windowDays} j`}
+      value={stats.windowDays > 0 ? formatDecimal(stats.postsPerWeek) : "—"}
+      hint={stats.windowDays > 0 ? `${stats.postCount} publications sur ${stats.windowDays} j` : "Dates de publication non fournies par la source"}
     />,
     stats.medianViews !== undefined ? (
       <Stat
@@ -295,16 +295,27 @@ export function ReportKpis({ report }: { report: CompetitorReport }) {
 /** Deterministic writing habits ("42 % des légendes avec un appel à l'action"…). */
 export function SignatureFacts({ report }: { report: CompetitorReport }) {
   const { stats } = report;
+  // Without captions or descriptions (titles only), CTA share and caption length say nothing.
+  const captions = report.data.posts.some((post) => post.text?.trim());
+  const cta = {
+    icon: <Megaphone />,
+    text: (
+      <>
+        <strong className="font-semibold text-ink">{formatPct(stats.ctaShare)}</strong> des légendes avec un appel à
+        l&apos;action
+      </>
+    ),
+  };
+  const captionLength = {
+    icon: <Type />,
+    text: (
+      <>
+        Légende médiane : <strong className="font-semibold text-ink">{stats.medianCaptionLength}</strong> caractères
+      </>
+    ),
+  };
   const facts: { icon: ReactNode; text: ReactNode }[] = [
-    {
-      icon: <Megaphone />,
-      text: (
-        <>
-          <strong className="font-semibold text-ink">{formatPct(stats.ctaShare)}</strong> des légendes avec un appel à
-          l&apos;action
-        </>
-      ),
-    },
+    ...(captions ? [cta] : []),
     {
       icon: <MessageCircleQuestion />,
       text: (
@@ -323,14 +334,7 @@ export function SignatureFacts({ report }: { report: CompetitorReport }) {
         </>
       ),
     },
-    {
-      icon: <Type />,
-      text: (
-        <>
-          Légende médiane : <strong className="font-semibold text-ink">{stats.medianCaptionLength}</strong> caractères
-        </>
-      ),
-    },
+    ...(captions ? [captionLength] : []),
   ];
   return (
     <ul aria-label="Habitudes d'écriture" className="flex flex-wrap gap-2">

@@ -44,8 +44,9 @@ export function EditionBanner({ capturedAt }: { capturedAt: string }) {
           <span className="font-semibold text-ink">Édition HTML</span> — données réelles : instantané du{" "}
           {frenchDateTime(capturedAt)} (heure de Paris,{" "}
           <span className={cn(age > STALE_AFTER_MS && "font-medium text-warning-ink")}>{ageLabel(Math.max(0, age))}</span>){" "}
-          {liveBannerSentence(state)} · {claudeBannerSentence(state)} · Instagram, TikTok, YouTube, SerpApi et l&apos;engagement
-          LinkedIn nécessitent la version serveur (clés API).
+          {liveBannerSentence(state)} · {claudeBannerSentence(state)} · Concurrents : chaînes YouTube et profils LinkedIn
+          via Firecrawl · Instagram, TikTok, la recherche YouTube, SerpApi, l&apos;engagement LinkedIn et « Ce qui
+          cartonne » nécessitent la version serveur (clés API).
         </p>
         <button
           type="button"

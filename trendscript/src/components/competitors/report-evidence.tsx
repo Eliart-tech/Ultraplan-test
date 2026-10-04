@@ -81,7 +81,9 @@ export function OverperformersSection({ report, now }: SectionProps) {
       icon={<Flame />}
       title={fallback ? "Ses meilleures publications" : "Ce qui surperforme"}
       description={
-        fallback
+        fallback && !ratiosAllowed(report)
+          ? `Comparaison à sa médiane désactivée (règles développeurs de ${platformLabel(report.data.account.platform)}) : voici ses publications les plus vues.`
+          : fallback
           ? "Aucune publication ne dépasse 2× sa médiane : ses résultats sont réguliers. Voici ses meilleures."
           : `Publications à au moins 2× sa médiane de ${views ? "vues" : "engagement"} : ce que son audience — et l'algorithme — ont vraiment poussé.`
       }
