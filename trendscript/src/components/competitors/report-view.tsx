@@ -67,7 +67,7 @@ export function ReportView({ report, now, aiConfigured, onReanalyse, onDelete, o
         ]
       : []),
     ...(numbers ? [{ id: "rythme", label: "Quand publier" }] : []),
-    { id: "pour-toi", label: "Pour toi" },
+    { id: "pour-vous", label: "Pour vous" },
     { id: "idees", label: "Idées de vidéos" },
     ...(numbers ? [{ id: "publications", label: "Publications" }] : []),
     { id: "methode", label: "Sources et méthode" },

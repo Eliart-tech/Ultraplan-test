@@ -24,11 +24,11 @@ const HEIGHT = TOP + PLOT_HEIGHT + AXIS_BAND;
  * surface so it stays inside the validated lightness band (dataviz palette
  * check: accent + hot pass CVD, normal-vision and contrast in both modes).
  */
-const HOT_FILL = "fill-hot dark:fill-[color-mix(in_oklab,var(--ts-hot)_90%,var(--ts-surface))]";
-const HOT_SWATCH = "bg-hot dark:bg-[color-mix(in_oklab,var(--ts-hot)_90%,var(--ts-surface))]";
+export const HOT_FILL = "fill-hot dark:fill-[color-mix(in_oklab,var(--ts-hot)_90%,var(--ts-surface))]";
+export const HOT_SWATCH = "bg-hot dark:bg-[color-mix(in_oklab,var(--ts-hot)_90%,var(--ts-surface))]";
 
-/** Width of an element, measured with ResizeObserver (0 until measured). */
-function useMeasuredWidth<T extends HTMLElement>(): [(node: T | null) => (() => void) | undefined, number] {
+/** Width of an element, measured with ResizeObserver (0 until measured). Also used by the lab's scatter plot. */
+export function useMeasuredWidth<T extends HTMLElement>(): [(node: T | null) => (() => void) | undefined, number] {
   const [width, setWidth] = useState(0);
   const ref = useCallback((node: T | null) => {
     if (!node || typeof ResizeObserver === "undefined") return undefined;

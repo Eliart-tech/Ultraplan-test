@@ -185,7 +185,7 @@ export function ReportHeader({
           ) : null}
           {report.focus?.trim() ? (
             <p className="rounded-xl border border-accent/25 bg-accent-soft px-3.5 py-2.5 text-sm leading-relaxed text-ink/85">
-              <span className="font-medium text-ink">Ta question : </span>« {report.focus.trim()} »
+              <span className="font-medium text-ink">Votre question : </span>« {report.focus.trim()} »
             </p>
           ) : null}
         </div>
@@ -369,7 +369,7 @@ export function ReportSummary({ report, pending = false, hideNumbers = false }: 
       text: driver.insight,
     })),
     ...(insights?.differentiation ?? []).slice(0, 2).map((item) => ({
-      label: "Pour te différencier",
+      label: "Pour vous différencier",
       text: item.recommendation,
     })),
   ].slice(0, 3);
@@ -397,7 +397,7 @@ export function ReportSummary({ report, pending = false, hideNumbers = false }: 
           </div>
           {takeaways.length > 0 ? (
             <div className="rounded-xl border border-accent/25 bg-accent-soft/60 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.06em] text-accent-ink">À retenir pour toi</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.06em] text-accent-ink">À retenir pour vous</p>
               <ul className="mt-2 space-y-2">
                 {takeaways.map((item, index) => (
                   <li key={index} className="text-sm leading-relaxed text-ink">
@@ -412,8 +412,8 @@ export function ReportSummary({ report, pending = false, hideNumbers = false }: 
                   className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-accent-ink underline-offset-2 hover:underline"
                 >
                   {insights.ideas.length > 1
-                    ? `Voir les ${insights.ideas.length} idées de vidéos pour toi`
-                    : "Voir l'idée de vidéo pour toi"}
+                    ? `Voir les ${insights.ideas.length} idées de vidéos pour vous`
+                    : "Voir l'idée de vidéo pour vous"}
                   <ArrowDown aria-hidden className="size-4" />
                 </a>
               ) : null}

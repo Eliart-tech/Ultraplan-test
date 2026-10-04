@@ -7,6 +7,10 @@
  *   demanding editor, with the code checks, and returns an improved draft)
  *   → code checks → GeneratedScript.
  *
+ * Saved competitors (`request.competitors`) and the niche's winning recipes
+ * (`request.nicheRecipes`, "Ce qui cartonne") shape both calls through the
+ * prompt; code warns when the title or a hook copies their titles.
+ *
  * Enrichment failures never block the script: they become warnings. Links
  * Claude cites that were not in the material it was given are removed — the
  * creator must be able to trust every source shown.
@@ -27,6 +31,7 @@ import type {
   ScriptRequest,
   Signal,
 } from "../../types";
+import { checkNicheOverlap } from "../../viral/brief";
 import { searchGoogleNews } from "../sources/google-news";
 import { serpapiRelatedQueries } from "../sources/serpapi-trends";
 import type { Env } from "../sources/types";
@@ -415,6 +420,7 @@ async function run(
       : []),
     ...checkScript(draft, settings, budget),
     ...checkCompetitorOverlap(draft, guarded.competitors),
+    ...checkNicheOverlap(draft, guarded.nicheRecipes),
   ];
 
   const script: GeneratedScript = {
@@ -474,7 +480,11 @@ async function reviewDraft({
   send: (event: ScriptEvent) => void;
 }): Promise<ReviewResult> {
   send({ type: "status", step: "review", message: "Relecture critique…" });
-  const controls = [...checkScript(draft, request.settings, budget), ...checkCompetitorOverlap(draft, request.competitors)];
+  const controls = [
+    ...checkScript(draft, request.settings, budget),
+    ...checkCompetitorOverlap(draft, request.competitors),
+    ...checkNicheOverlap(draft, request.nicheRecipes),
+  ];
   try {
     const result = await callStructured({
       client,

@@ -18,6 +18,10 @@ import type {
   ScriptEvent,
   ScriptRequest,
   SourceStatus,
+  ViralEvent,
+  ViralPlatform,
+  ViralReport,
+  ViralRequest,
 } from "../types";
 
 /**
@@ -208,6 +212,38 @@ export async function streamCompetitor(
   );
 }
 
+/**
+ * POST /api/viral — "Ce qui cartonne": streams `platform_start` /
+ * `platform_done` (per platform), `status` (collect → enrich → analysis) and
+ * `progress` events to `onEvent`, and resolves with the ViralReport. Works
+ * without Claude (report in "stats" mode). Rejects with ApiError, or an
+ * AbortError when `signal` aborts.
+ */
+export async function streamViral(
+  body: ViralRequest,
+  onEvent: (event: ViralEvent) => void,
+  signal?: AbortSignal,
+): Promise<ViralReport> {
+  const response = await postJson("/api/viral", body, signal);
+  return consumeStream<ViralEvent, ViralReport>(
+    response,
+    onEvent,
+    (event) => (event.type === "result" ? event.report : undefined),
+    "l'analyse de ce qui cartonne",
+    signal,
+  );
+}
+
+/** Which platforms the "Ce qui cartonne" lab can read on this server, and through what. */
+export interface ViralCapability {
+  platform: ViralPlatform;
+  available: boolean;
+  /** French: the source used ("Apify · Instagram Hashtag Scraper + profils des auteurs"…). */
+  via: string;
+  /** French: what is missing or limited. */
+  note: string;
+}
+
 /** GET /api/sources payload. */
 export interface ServerStatus {
   sources: SourceStatus[];
@@ -215,6 +251,8 @@ export interface ServerStatus {
   auth: { enabled: boolean };
   /** Platforms the competitor analysis can read (absent on older servers). */
   creators?: CreatorPlatformStatus[];
+  /** Platforms the "Ce qui cartonne" lab can read (absent on older servers). */
+  viral?: ViralCapability[];
 }
 
 /** GET /api/sources — configured sources, Claude status, auth gate. */

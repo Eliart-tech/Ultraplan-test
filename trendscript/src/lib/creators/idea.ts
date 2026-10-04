@@ -9,7 +9,7 @@
 import { scoreSignals, scoreTopic } from "../analysis/scoring";
 import { detectSensitivity } from "../analysis/sensitivity";
 import { shortHash, truncate } from "../analysis/text";
-import type { Angle, CompetitorReport, CreatorPost, Signal, SignalMetrics, Topic } from "../types";
+import type { Angle, CompetitorReport, CreatorData, CreatorPost, Signal, SignalMetrics, Topic } from "../types";
 import {
   accountLabel,
   clip,
@@ -50,8 +50,12 @@ function metricsOf(post: CreatorPost, followers: number | undefined): SignalMetr
   return metrics;
 }
 
-/** One competitor post as a script evidence signal (strength filled by `scoreSignals`). */
-export function postToSignal(report: CompetitorReport, post: CreatorPost): Signal {
+/**
+ * One competitor post as a script evidence signal (strength filled by
+ * `scoreSignals`). Only the report's account and data policy are read, so any
+ * real post with a known author fits (the "Ce qui cartonne" lab reuses it).
+ */
+export function postToSignal(report: { data: Pick<CreatorData, "account" | "ratiosAllowed"> }, post: CreatorPost): Signal {
   const { account, ratiosAllowed } = report.data;
   const source = CREATOR_SOURCE_IDS[account.platform];
   const title = post.title.trim() || truncate(post.text, 120) || `Publication de ${accountLabel(account)}`;

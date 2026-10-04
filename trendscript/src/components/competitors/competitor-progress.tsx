@@ -116,7 +116,7 @@ export function CompetitorProgress({ run, aiConfigured, onCancel }: CompetitorPr
                 : analysis === "current"
                   ? run.chars > 0
                     ? `${formatNumber(run.chars)} caractères rédigés`
-                    : run.message || "Positionnement, hooks, angles morts, idées pour toi…"
+                    : run.message || "Positionnement, hooks, angles morts, idées pour vous…"
                   : undefined
             }
           />

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/cn";
-import type { CompetitorInsights, CompetitorReport } from "@/lib/types";
+import type { CompetitorInsights, CompetitorReport, CreatorPost } from "@/lib/types";
 import { PostChips } from "./post-items";
 import { ReportSection, SubHeading } from "./report-section";
 import { ideaFollowDriver, postIndex, resolvePosts, splitFollowSentences } from "./report-utils";
@@ -31,16 +31,16 @@ export function ForYouSection({ report, pending = false }: ForYouSectionProps) {
   const insights = report.insights;
   return (
     <ReportSection
-      id="pour-toi"
+      id="pour-vous"
       tone="foryou"
       icon={<Target />}
-      title="Ce que ça change pour toi"
-      description="Les angles qu'il laisse libres, comment te démarquer avec ton propre profil, et ce qu'il ne faut surtout pas reprendre."
+      title="Ce que ça change pour vous"
+      description="Les angles qu'il laisse libres, comment vous démarquer avec votre propre profil, et ce qu'il ne faut surtout pas reprendre."
     >
       {insights ? (
         <div className="grid gap-4 xl:grid-cols-2">
           <Card className="border-accent/40! px-5 py-4 sm:px-6 xl:col-span-2">
-            <SubHeading className="mb-3 text-accent-ink">Comment te différencier</SubHeading>
+            <SubHeading className="mb-3 text-accent-ink">Comment vous différencier</SubHeading>
             {insights.differentiation.length > 0 ? (
               <ol className="grid gap-4 md:grid-cols-2">
                 {insights.differentiation.map((item, rank) => (
@@ -110,20 +110,39 @@ export function ForYouSection({ report, pending = false }: ForYouSectionProps) {
 // ---------------------------------------------------------------------------
 
 type Idea = CompetitorInsights["ideas"][number];
+type FollowDriver = NonNullable<CompetitorInsights["followDrivers"]>[number];
 
-function IdeaCard({
+export interface IdeaCardProps<P extends CreatorPost> {
+  idea: Idea;
+  /** 1-based. */
+  rank: number;
+  /** Posts the idea can cite (`inspiredBy` ids). */
+  posts: Map<string, P>;
+  /** Follow drivers of the analysis; the one sharing the most evidence is shown. */
+  followDrivers?: FollowDriver[];
+  onWrite?: () => void;
+  /** Line above the inspiring posts (default "Mécanique inspirée de :"). */
+  inspiredLabel?: string;
+  /** Metric shown on each inspiring post chip (default: its views). */
+  chipMetric?: (post: P) => string | undefined;
+}
+
+/**
+ * One ready-to-script idea: format, title, angle, hook, why it fits the user
+ * (sentences about subscribers highlighted), the follow lever it relies on,
+ * the real posts it is inspired by, and "Écrire ce script". Shared by the
+ * competitor report and the "Ce qui cartonne" lab.
+ */
+export function IdeaCard<P extends CreatorPost>({
   idea,
   rank,
-  report,
+  posts,
+  followDrivers,
   onWrite,
-}: {
-  idea: Idea;
-  rank: number;
-  report: CompetitorReport;
-  onWrite?: () => void;
-}) {
-  const index = postIndex(report.data.posts);
-  const driver = ideaFollowDriver(idea, report.insights?.followDrivers);
+  inspiredLabel = "Mécanique inspirée de :",
+  chipMetric,
+}: IdeaCardProps<P>) {
+  const driver = ideaFollowDriver(idea, followDrivers);
   const sentences = splitFollowSentences(idea.whyForYou);
   const titleId = `idee-${rank}`;
   return (
@@ -157,7 +176,7 @@ function IdeaCard({
         ) : null}
         {idea.whyForYou ? (
           <div className="text-sm leading-relaxed">
-            <p className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">Pourquoi pour toi</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.06em] text-muted">Pourquoi pour vous</p>
             <p className="mt-1 text-muted">
               {sentences.map((sentence, sentenceIndex) => (
                 <span key={sentenceIndex}>
@@ -186,8 +205,13 @@ function IdeaCard({
         ) : null}
         {idea.inspiredBy.length > 0 ? (
           <div>
-            <p className="mb-1.5 text-xs text-muted">Mécanique inspirée de :</p>
-            <PostChips posts={resolvePosts(idea.inspiredBy, index)} max={2} label="Publications dont l'idée s'inspire" />
+            <p className="mb-1.5 text-xs text-muted">{inspiredLabel}</p>
+            <PostChips
+              posts={resolvePosts(idea.inspiredBy, posts)}
+              max={2}
+              label="Publications dont l'idée s'inspire"
+              metric={chipMetric}
+            />
           </div>
         ) : null}
       </div>
@@ -213,16 +237,17 @@ export interface IdeasSectionProps {
   onWriteIdea?: (ideaIndex: number) => void;
 }
 
-/** "Idées de vidéos pour toi": ready-to-script ideas, each sent to the Studio in one click. */
+/** "Idées de vidéos pour vous": ready-to-script ideas, each sent to the Studio in one click. */
 export function IdeasSection({ report, pending = false, onWriteIdea }: IdeasSectionProps) {
   const ideas = report.insights?.ideas ?? [];
+  const index = postIndex(report.data.posts);
   return (
     <ReportSection
       id="idees"
       tone="foryou"
       icon={<Lightbulb />}
-      title="Idées de vidéos pour toi"
-      description="Inspirées de ses mécaniques qui marchent, pas de ses contenus : à ta façon, sur ton terrain. « Écrire ce script » ouvre le Studio avec l'idée, ses preuves et ce concurrent à éviter."
+      title="Idées de vidéos pour vous"
+      description="Inspirées de ses mécaniques qui marchent, pas de ses contenus : à votre façon, sur votre terrain. « Écrire ce script » ouvre le Studio avec l'idée, ses preuves et ce concurrent à éviter."
       aside={
         ideas.length > 0 ? (
           <Badge tone="accent" icon={<Sparkles />}>
@@ -238,7 +263,8 @@ export function IdeasSection({ report, pending = false, onWriteIdea }: IdeasSect
               key={ideaIndex}
               idea={idea}
               rank={ideaIndex + 1}
-              report={report}
+              posts={index}
+              followDrivers={report.insights?.followDrivers}
               onWrite={onWriteIdea ? () => onWriteIdea(ideaIndex) : undefined}
             />
           ))}

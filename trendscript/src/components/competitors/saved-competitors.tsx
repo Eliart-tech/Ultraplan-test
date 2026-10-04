@@ -33,7 +33,7 @@ export function SavedCompetitors({ reports, now, busy, onReanalyse, onDelete }: 
             </span>
           </h2>
           <p className="mt-1 text-sm leading-relaxed text-muted">
-            Enregistrés dans ce navigateur. Le Studio s&apos;en sert pour que tes scripts s&apos;en démarquent.
+            Enregistrés dans ce navigateur. Le Studio s&apos;en sert pour que vos scripts s&apos;en démarquent.
           </p>
         </div>
       </div>
@@ -42,14 +42,14 @@ export function SavedCompetitors({ reports, now, busy, onReanalyse, onDelete }: 
         <EmptyState
           icon={<Users />}
           title="Aucun concurrent analysé pour l'instant"
-          description="Indique le pseudo d'un créateur de ta niche : TrendScript récupère ses dernières publications réelles, calcule ce qui surperforme et ce qui fait venir des abonnés, puis Claude en tire des angles morts et des idées de vidéos pour toi."
+          description="Indiquez le pseudo d'un créateur de votre niche : TrendScript récupère ses dernières publications réelles, calcule ce qui surperforme et ce qui fait venir des abonnés, puis Claude en tire des angles morts et des idées de vidéos pour vous."
         >
           <ul className="mt-3 grid w-full max-w-lg gap-2 text-left text-sm sm:grid-cols-2">
             {[
               { icon: <Flame />, text: "Ses publications qui surperforment, chiffres à l'appui" },
               { icon: <UserPlus />, text: "Ce qui fait venir des abonnés" },
               { icon: <Sparkles />, text: "Ses hooks, piliers et angles morts" },
-              { icon: <Lightbulb />, text: "Des idées de vidéos pour toi, à scripter en un clic" },
+              { icon: <Lightbulb />, text: "Des idées de vidéos pour vous, à scripter en un clic" },
             ].map((item) => (
               <li key={item.text} className="flex gap-2.5 rounded-xl border border-line bg-surface px-3 py-2.5">
                 <span aria-hidden className="mt-0.5 text-accent [&_svg]:size-4">

@@ -139,17 +139,20 @@ export function PostList({ children, label, className }: { children: ReactNode; 
 
 /**
  * Compact evidence links next to a claim: the posts it rests on (max
- * `max`, then "+n").
+ * `max`, then "+n"). Each chip shows the post's first metric (views), or
+ * what `metric` returns for it (e.g. "×12 son audience").
  */
-export function PostChips({
+export function PostChips<P extends CreatorPost>({
   posts,
   max = 3,
   label = "Publications citées",
+  metric,
   className,
 }: {
-  posts: CreatorPost[];
+  posts: P[];
   max?: number;
   label?: string;
+  metric?: (post: P) => string | undefined;
   className?: string;
 }) {
   if (posts.length === 0) return null;
@@ -158,12 +161,12 @@ export function PostChips({
   return (
     <ul aria-label={label} className={cn("flex flex-wrap gap-1.5", className)}>
       {shown.map((post) => {
-        const metric = postMetricLabels(post)[0];
+        const value = metric ? metric(post) : postMetricLabels(post)[0];
         const href = safeHref(post.url);
         const content = (
           <>
             <span className="min-w-0 truncate">{post.title || "Publication"}</span>
-            {metric ? <span className="shrink-0 tabular-nums text-faint">· {metric}</span> : null}
+            {value ? <span className="shrink-0 tabular-nums text-faint">· {value}</span> : null}
             {href ? <ExternalLink aria-hidden className="size-3 shrink-0 text-faint" /> : null}
           </>
         );

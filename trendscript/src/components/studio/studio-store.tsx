@@ -130,6 +130,13 @@ export interface StudioDraft {
    * competitors of the script's platform).
    */
   competitorKeys?: string[] | null;
+  /**
+   * "S'appuyer sur ce qui cartonne": key (`viralReportKey`) of the lab report
+   * sent with script requests as `nicheRecipes`, or "none" (VIRAL_NONE).
+   * null/absent = automatic (the most recent report matching the topic or
+   * the creator's niche).
+   */
+  viralKey?: string | null;
 }
 
 export type RunStatus = "idle" | "running" | "error" | "cancelled";
@@ -210,6 +217,7 @@ function initialDraft(): StudioDraft {
     settings: defaultScriptSettings("fr"),
     result: null,
     competitorKeys: null,
+    viralKey: null,
   };
 }
 
@@ -367,6 +375,7 @@ function normalizeDraft(value: unknown): StudioDraft | null {
     settings,
     result: topic ? normalizeResult(value.result, settings) : null,
     competitorKeys: normalizeCompetitorKeys(value.competitorKeys),
+    viralKey: isString(value.viralKey) && value.viralKey.length <= 400 ? value.viralKey : null,
   });
 }
 
@@ -405,8 +414,9 @@ export interface StudioEntry {
   analyseId: string | null;
   scriptId: string | null;
   /**
-   * Idea handed over by "Écrire ce script" on /concurrents (sessionStorage,
-   * read by the provider). Ignored when a history link is followed.
+   * Idea handed over by "Écrire ce script" on /concurrents or
+   * /ce-qui-cartonne (sessionStorage, read by the provider). Ignored when a
+   * history link is followed.
    */
   handoff?: PendingStudioHandoff | null;
 }
@@ -459,7 +469,10 @@ function draftFromSavedScript(draft: StudioDraft, saved: SavedScript, analyses: 
   };
 }
 
-/** Opens the Script step with a competitor idea (real topic + evidence + custom angle). */
+/**
+ * Opens the Script step with a competitor or lab idea (real topic + evidence
+ * + custom angle); its competitor / lab report is pre-selected.
+ */
 function draftFromHandoff(draft: StudioDraft, handoff: PendingStudioHandoff): StudioDraft {
   const { topic, angle } = handoff;
   const known = topic.angles.some((item) => item.id === angle.id);
@@ -481,6 +494,7 @@ function draftFromHandoff(draft: StudioDraft, handoff: PendingStudioHandoff): St
     settings: handoff.scriptPlatform ? { ...draft.settings, platform: handoff.scriptPlatform } : draft.settings,
     result: null,
     competitorKeys,
+    viralKey: handoff.viralKey ?? draft.viralKey ?? null,
   };
 }
 
@@ -511,7 +525,9 @@ export function createStudioState(entry: StudioEntry): StudioState {
   } else if (entry.handoff && isTopicLike(entry.handoff.topic) && isAngleLike(entry.handoff.angle)) {
     draft = draftFromHandoff(draft, entry.handoff);
     noticeTone = "info";
-    notice = `Idée importée${entry.handoff.label ? ` depuis l'analyse de ${entry.handoff.label}` : ""} : ses publications servent de preuves et ce concurrent est sélectionné dans « Se différencier de ». Ajustez les réglages puis générez le script.`;
+    notice = entry.handoff.viralKey
+      ? `Idée importée depuis « Ce qui cartonne »${entry.handoff.label ? ` (${entry.handoff.label})` : ""} : les vidéos qui l'inspirent servent de preuves et ce rapport est sélectionné dans « S'appuyer sur ce qui cartonne ». Ajustez les réglages puis générez le script.`
+      : `Idée importée${entry.handoff.label ? ` depuis l'analyse de ${entry.handoff.label}` : ""} : ses publications servent de preuves et ce concurrent est sélectionné dans « Se différencier de ». Ajustez les réglages puis générez le script.`;
   }
 
   return {
@@ -559,6 +575,7 @@ export type StudioAction =
   | { type: "scriptReset" }
   | { type: "selectHook"; index: number }
   | { type: "setCompetitors"; keys: string[] | null }
+  | { type: "setViralReport"; key: string | null }
   | { type: "dismissNotice" };
 
 function sourceLabel(id: SourceId): string {
@@ -797,6 +814,9 @@ export function studioReducer(state: StudioState, action: StudioAction): StudioS
       return patchDraft(state, {
         competitorKeys: action.keys === null ? null : Array.from(new Set(action.keys)).slice(0, MAX_COMPETITORS),
       });
+
+    case "setViralReport":
+      return patchDraft(state, { viralKey: action.key });
 
     case "dismissNotice":
       return { ...state, notice: null };

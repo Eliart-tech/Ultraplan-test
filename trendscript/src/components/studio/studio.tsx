@@ -96,8 +96,8 @@ export function StudioShell() {
 
   return (
     <>
-      {/* Sticky under the one-row header (from md; below, the header has a second row of tabs). */}
-      <div className="z-30 border-b border-line glass md:sticky md:top-[4.0625rem]">
+      {/* Sticky under the one-row header (from lg; below, the header has a second row of tabs). */}
+      <div className="z-30 border-b border-line glass lg:sticky lg:top-[4.0625rem]">
         <Container size="xl" className="flex min-h-[3.25rem] items-center justify-between gap-4 py-2">
           <Stepper
             steps={steps}

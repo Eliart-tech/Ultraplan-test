@@ -89,7 +89,7 @@ export function CompetitorForm({
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (values.handle.trim().replace(/^@+/, "").length < 2) {
-      setError("Indique le pseudo du créateur, ou colle le lien de son profil.");
+      setError("Indiquez le pseudo du créateur, ou collez le lien de son profil.");
       return;
     }
     onSubmit(platform);
@@ -104,7 +104,7 @@ export function CompetitorForm({
             Analyser un créateur
           </h2>
           <p className="mt-1 text-sm leading-relaxed text-muted">
-            Ses dernières publications réelles, ce qui marche chez lui, et comment t&apos;en démarquer.
+            Ses dernières publications réelles, ce qui marche chez lui, et comment vous en démarquer.
           </p>
         </div>
 
@@ -242,28 +242,28 @@ export function CompetitorForm({
             size="sm"
             role="none"
             icon={<UserRound />}
-            title="Des conseils calibrés sur ta niche"
+            title="Des conseils calibrés sur votre niche"
             action={
               <ButtonLink href="/reglages#profil" size="sm" variant="secondary">
                 Compléter mon profil
               </ButtonLink>
             }
           >
-            La différenciation et les idées de vidéos s&apos;appuient sur ton profil créateur (niche, audience,
+            La différenciation et les idées de vidéos s&apos;appuient sur votre profil créateur (niche, audience,
             positionnement).
           </Alert>
         ) : null}
 
         {aiConfigured === false ? (
           <Alert tone="warning" size="sm" role="none" title="Mode statistiques">
-            Sans <code className="rounded bg-surface px-1 font-mono text-xs">ANTHROPIC_API_KEY</code>, tu obtiens les
+            Sans <code className="rounded bg-surface px-1 font-mono text-xs">ANTHROPIC_API_KEY</code>, vous obtenez les
             publications et les chiffres réels, sans l&apos;analyse ni les idées de Claude.
           </Alert>
         ) : null}
 
         {noneAvailable ? (
           <Alert tone="warning" size="sm" role="none" title="Aucune plateforme disponible">
-            Configure au moins une source (voir Réglages) pour analyser un créateur.
+            Configurez au moins une source (voir Réglages) pour analyser un créateur.
           </Alert>
         ) : null}
 

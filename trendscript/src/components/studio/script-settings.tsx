@@ -2,6 +2,7 @@
 
 import {
   ChevronDown,
+  Flame,
   KeyRound,
   Lightbulb,
   RefreshCw,
@@ -26,7 +27,9 @@ import { Select } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { reportKey } from "@/lib/client/storage";
+import { VIRAL_NONE, tierCounts, viralReportTitle } from "@/components/viral/viral-utils";
+import { formatDate } from "@/lib/client/format";
+import { reportKey, viralReportKey } from "@/lib/client/storage";
 import { cn } from "@/lib/cn";
 import { MAX_SENSITIVE_VIRALITY, topicRisk } from "@/lib/script/guardrails";
 import {
@@ -61,6 +64,7 @@ import {
   type Tone,
   type Topic,
   type VideoFormat,
+  type ViralReport,
 } from "@/lib/types";
 import { CTA_DETAIL } from "./studio-options";
 
@@ -88,6 +92,14 @@ export interface ScriptSettingsPanelProps {
   competitorsAuto?: boolean;
   /** New explicit selection, or null to go back to the automatic one. */
   onCompetitorsChange?: (keys: string[] | null) => void;
+  /** Saved "Ce qui cartonne" lab reports (newest first). */
+  viralReports?: ViralReport[];
+  /** Key (`viralReportKey`) of the lab report sent as `nicheRecipes`; undefined = none. */
+  selectedViral?: string;
+  /** The lab report choice is the automatic one (topic / niche match). */
+  viralAuto?: boolean;
+  /** New explicit choice (a key or VIRAL_NONE), or null to go back to the automatic one. */
+  onViralChange?: (key: string | null) => void;
 }
 
 /** "Instagram Reels" → "Reels": the brand prefix is visually dropped so 4 platforms fit the segmented control. */
@@ -152,6 +164,20 @@ function CompetitorChecklist({
   );
 }
 
+/** "Budget malin · 14 cartons · 2 oct. 2026" — one saved lab report as a select option. */
+function viralOptionLabel(report: ViralReport): string {
+  const counts = tierCounts(report.posts);
+  const hits = counts.explose + counts.cartonne;
+  return [
+    viralReportTitle(report),
+    `${hits} ${hits > 1 ? "vidéos qui cartonnent" : "vidéo qui cartonne"}`,
+    formatDate(report.createdAt),
+    report.mode === "stats" ? "statistiques seules" : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
 function Section({ title, icon, children }: { title: string; icon: ReactNode; children: ReactNode }) {
   return (
     <section className="space-y-5 border-t border-line px-5 py-5 first:border-t-0 sm:px-6">
@@ -186,6 +212,10 @@ export function ScriptSettingsPanel({
   selectedCompetitors = [],
   competitorsAuto = true,
   onCompetitorsChange,
+  viralReports = [],
+  selectedViral,
+  viralAuto = true,
+  onViralChange,
 }: ScriptSettingsPanelProps) {
   const [mobileOpen, setMobileOpen] = useState(!hasResult);
   const bodyId = useId();
@@ -198,6 +228,19 @@ export function ScriptSettingsPanel({
   const ctaDetail = CTA_DETAIL[settings.cta];
   const aiMissing = aiConfigured === false;
   const viralityCapped = sensitive && settings.virality > MAX_SENSITIVE_VIRALITY;
+  const viralReport = selectedViral ? viralReports.find((report) => viralReportKey(report) === selectedViral) : undefined;
+  const viralHint =
+    viralReports.length === 0
+      ? undefined
+      : viralReport
+        ? `${viralAuto ? "Par défaut : votre analyse la plus récente proche de ce sujet ou de votre niche. " : ""}${
+            viralReport.mode === "stats"
+              ? "Statistiques seules : Claude s'appuie sur les titres des vidéos qui marchent, sans recettes."
+              : "Claude bâtit le script sur la recette gagnante la plus adaptée (levier vues + levier abonnés), sans copier titres ni accroches."
+          }`
+        : viralAuto
+          ? "Aucune analyse ne correspond à ce sujet ou à votre niche : choisissez-en une si elle s'applique."
+          : "Aucune : le script ne s'appuie pas sur ce qui cartonne dans votre niche.";
 
   return (
     <Card
@@ -372,13 +415,46 @@ export function ScriptSettingsPanel({
             </div>
           </Section>
 
-          <Section title="Différenciation" icon={<Swords />}>
+          <Section title="Niche et différenciation" icon={<Swords />}>
             <Switch
               checked={settings.review}
               onCheckedChange={(review) => onChange({ review })}
               label="Relecture critique (2e passe)"
               description="Claude relit le brouillon en rédacteur en chef exigeant (accroche, rétention, différenciation) et l'améliore. Plus lent, meilleur."
             />
+            <Field
+              label="S'appuyer sur ce qui cartonne"
+              hint={viralHint}
+              labelAside={<Flame aria-hidden className="size-3.5 text-hot" />}
+            >
+              {viralReports.length === 0 ? (
+                <p className="rounded-xl border border-dashed border-line-strong px-3.5 py-3 text-xs leading-relaxed text-muted">
+                  Aucune analyse de votre niche.{" "}
+                  <Link href="/ce-qui-cartonne" className="font-medium text-accent-ink underline-offset-2 hover:underline">
+                    Lancez « Ce qui cartonne »
+                  </Link>{" "}
+                  pour bâtir vos scripts sur les recettes qui font des vues et des abonnés.
+                </p>
+              ) : (
+                <Select
+                  value={selectedViral ?? VIRAL_NONE}
+                  onChange={(event) => onViralChange?.(event.target.value)}
+                  options={[
+                    { value: VIRAL_NONE, label: "Aucune analyse" },
+                    ...viralReports.map((report) => ({ value: viralReportKey(report), label: viralOptionLabel(report) })),
+                  ]}
+                />
+              )}
+            </Field>
+            {!viralAuto && viralReports.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => onViralChange?.(null)}
+                className="-mt-2 text-xs font-medium text-accent-ink underline-offset-2 hover:underline"
+              >
+                Revenir au choix automatique
+              </button>
+            ) : null}
             <Field
               label="Se différencier de"
               group

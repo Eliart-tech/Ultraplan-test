@@ -137,7 +137,7 @@ export function FollowersSection({ report, now, pending = false }: SectionProps)
           {!ratiosAllowed(report) ? (
             <p className="text-sm leading-relaxed text-muted">
               Ratios désactivés pour {platform} (règles développeurs de {platform}) : le rapport vues ÷ abonnés
-              n&apos;est pas affiché. Repère les vidéos les plus vues dans « Ce qui surperforme ».
+              n&apos;est pas affiché. Repérez les vidéos les plus vues dans « Ce qui surperforme ».
             </p>
           ) : leaders.length > 0 ? (
             <PostList label="Publications vues au-delà de son audience">
@@ -150,7 +150,7 @@ export function FollowersSection({ report, now, pending = false }: SectionProps)
               {followers !== undefined && report.data.posts.some((post) => post.metrics.views !== undefined)
                 ? "Aucune publication analysée n'a fait plus de vues qu'il n'a d'abonnés : ses vues viennent surtout de son audience existante, peu de nouveaux publics touchés."
                 : followers === undefined
-                ? `${platform} ne fournit pas le nombre d'abonnés de ce compte : le multiplicateur d'audience n'est pas calculable. Fie-toi à « Ce qui surperforme ».`
+                ? `${platform} ne fournit pas le nombre d'abonnés de ce compte : le multiplicateur d'audience n'est pas calculable. Fiez-vous à « Ce qui surperforme ».`
                 : `${platform} ne fournit pas les vues de ces publications : le multiplicateur d'audience n'est pas calculable.`}
             </p>
           )}
@@ -650,7 +650,7 @@ export function StatsOnlyAlert({ report, aiConfigured }: { report: CompetitorRep
     >
       {aiConfigured === false
         ? "Claude n'est pas configuré sur ce serveur (ANTHROPIC_API_KEY) : voici les publications et les statistiques réelles, sans interprétation, angles morts ni idées de vidéos."
-        : "Claude n'a pas pu analyser ce compte : voici les publications et les statistiques réelles, sans interprétation. Ré-analyse pour obtenir l'analyse complète."}
+        : "Claude n'a pas pu analyser ce compte : voici les publications et les statistiques réelles, sans interprétation. Relancez l'analyse pour obtenir l'analyse complète."}
       {/* The server's reason (Claude error, timeout…); redundant when Claude simply isn't configured. */}
       {aiConfigured !== false && report.notes.length > 0 ? (
         <span className="mt-1 block text-xs">{report.notes[0]}</span>

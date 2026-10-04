@@ -1,6 +1,6 @@
 "use client";
 
-import { History, LogOut, RotateCcw, Settings2, ShieldAlert, Sparkles, Swords, type LucideIcon } from "lucide-react";
+import { Flame, History, LogOut, RotateCcw, Settings2, ShieldAlert, Sparkles, Swords, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
@@ -15,11 +15,14 @@ import { Wordmark } from "./logo";
 interface NavItem {
   href: string;
   label: string;
+  /** Label of the phone tab bar when `label` is too long for a fifth of 360 px. */
+  short?: string;
   icon: LucideIcon;
 }
 
 const NAV: NavItem[] = [
   { href: "/", label: "Studio", icon: Sparkles },
+  { href: "/ce-qui-cartonne", label: "Ce qui cartonne", short: "Cartonne", icon: Flame },
   { href: "/concurrents", label: "Concurrents", icon: Swords },
   { href: "/historique", label: "Historique", icon: History },
   { href: "/reglages", label: "Réglages", icon: Settings2 },
@@ -30,9 +33,9 @@ function isActive(pathname: string, href: string): boolean {
 }
 
 /**
- * Sticky app header: wordmark, main navigation (inline from `md`, a second
- * row of tabs below), server status pill and logout when the password gate
- * is on. On /login only the wordmark is shown (no status request).
+ * Sticky app header: wordmark, main navigation (inline from `lg`, a second
+ * row of five tabs below), server status pill and logout when the password
+ * gate is on. On /login only the wordmark is shown (no status request).
  */
 export function AppHeader() {
   const pathname = usePathname() ?? "/";
@@ -65,7 +68,7 @@ function FullHeader({ pathname }: { pathname: string }) {
           <Wordmark compact />
         </Link>
 
-        <nav aria-label="Navigation principale" className="ml-3 hidden md:block">
+        <nav aria-label="Navigation principale" className="ml-3 hidden lg:block">
           <ul className="flex items-center gap-1">
             {NAV.map((item) => (
               <li key={item.href}>
@@ -82,8 +85,8 @@ function FullHeader({ pathname }: { pathname: string }) {
         </div>
       </Container>
 
-      <nav aria-label="Navigation principale" className="border-t border-line md:hidden">
-        <ul className="grid grid-cols-4">
+      <nav aria-label="Navigation principale" className="border-t border-line lg:hidden">
+        <ul className="grid grid-cols-5">
           {NAV.map((item) => (
             <li key={item.href}>
               <MobileNavLink item={item} active={isActive(pathname, item.href)} />
@@ -106,8 +109,8 @@ function NavLink({ item, active }: { item: NavItem; active: boolean }) {
         active ? "bg-surface text-ink shadow-xs ring-1 ring-line" : "text-muted hover:bg-surface-2 hover:text-ink",
       )}
     >
-      {/* Icons from lg: four items + the status pill must fit at md. */}
-      <Icon aria-hidden className={cn("hidden size-4 lg:block", active ? "text-accent" : "text-faint")} />
+      {/* Icons from xl: five items + the status pill must fit at lg. */}
+      <Icon aria-hidden className={cn("hidden size-4 xl:block", active ? "text-accent" : "text-faint")} />
       {item.label}
     </Link>
   );
@@ -120,14 +123,24 @@ function MobileNavLink({ item, active }: { item: NavItem; active: boolean }) {
       href={item.href}
       aria-current={active ? "page" : undefined}
       className={cn(
-        // Stacked icon + label on phones (4 tabs in 375 px), inline from sm.
-        "relative flex h-12 flex-col items-center justify-center gap-0.5 text-[0.6875rem] font-medium transition-colors duration-150 sm:h-11 sm:flex-row sm:gap-1.5 sm:text-[0.8125rem]",
+        // Stacked icon + label on phones (5 tabs in 360 px), inline from sm.
+        "relative flex h-12 flex-col items-center justify-center gap-0.5 whitespace-nowrap text-[0.6875rem] font-medium transition-colors duration-150 sm:h-11 sm:flex-row sm:gap-1.5 sm:text-[0.8125rem]",
         active ? "text-ink" : "text-muted hover:text-ink",
       )}
     >
-      <Icon aria-hidden className={cn("size-4", active ? "text-accent" : "text-faint")} />
-      {item.label}
-      {active ? <span aria-hidden className="absolute inset-x-4 bottom-0 h-0.5 rounded-full bg-accent sm:inset-x-6" /> : null}
+      <Icon aria-hidden className={cn("size-4 shrink-0", active ? "text-accent" : "text-faint")} />
+      {item.short ? (
+        <>
+          {/* The short label is a visible abbreviation; the accessible name stays the full one. */}
+          <span aria-hidden className="sm:hidden">
+            {item.short}
+          </span>
+          <span className="sr-only sm:not-sr-only">{item.label}</span>
+        </>
+      ) : (
+        item.label
+      )}
+      {active ? <span aria-hidden className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-accent sm:inset-x-6" /> : null}
     </Link>
   );
 }

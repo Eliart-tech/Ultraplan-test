@@ -6,10 +6,14 @@
  *   one per platform + handle (a re-analysis replaces the previous one);
  *   YouTube statistics are erased after 30 days when the source forbids
  *   keeping them (`ratiosAllowed === false`);
+ * - `trendscript:viral:v1` (localStorage) — up to 6 "Ce qui cartonne" lab
+ *   reports, one per keywords + platforms (a re-run replaces the previous
+ *   one); statistics of YouTube videos are erased after 30 days when the
+ *   source forbids keeping them (`ratiosAllowed === false`);
  * - `trendscript:studio:v1` (sessionStorage) — the Studio draft, so a refresh
  *   doesn't lose the current analysis;
  * - `trendscript:handoff:v1` (sessionStorage) — a one-shot hand-off to the
- *   Studio ("Écrire ce script" from a competitor idea), read once.
+ *   Studio ("Écrire ce script" from a competitor or lab idea), read once.
  *
  * Every access is wrapped in try/catch (private mode, disabled storage,
  * quota). React reads go through `useSyncExternalStore` with a server
@@ -18,8 +22,10 @@
  */
 
 import { useEffect, useSyncExternalStore } from "react";
+import { stripAccents } from "../analysis/text";
 import {
   CREATOR_PLATFORMS,
+  VIRAL_PLATFORMS,
   type Analysis,
   type Angle,
   type CompetitorReport,
@@ -30,12 +36,16 @@ import {
   type ScriptSettings,
   type Signal,
   type Topic,
+  type ViralPlatform,
+  type ViralPost,
+  type ViralReport,
 } from "../types";
 
 export const STORAGE_KEYS = {
   profile: "trendscript:profile:v1",
   history: "trendscript:history:v1",
   competitors: "trendscript:competitors:v1",
+  viral: "trendscript:viral:v1",
   studio: "trendscript:studio:v1",
   handoff: "trendscript:handoff:v1",
 } as const;
@@ -43,6 +53,7 @@ export const STORAGE_KEYS = {
 export const MAX_SAVED_SCRIPTS = 50;
 export const MAX_SAVED_ANALYSES = 10;
 export const MAX_SAVED_COMPETITORS = 12;
+export const MAX_SAVED_VIRAL = 6;
 /** Captions / transcripts are cut to this length in storage (the report keeps its meaning, the quota breathes). */
 export const STORED_POST_TEXT_MAX = 1000;
 /** A Studio hand-off older than this is ignored (the user moved on). */
@@ -100,6 +111,7 @@ export const EMPTY_PROFILE: CreatorProfile = Object.freeze({
 
 const EMPTY_HISTORY: HistoryData = Object.freeze({ scripts: [], analyses: [] }) as unknown as HistoryData;
 const EMPTY_COMPETITORS: CompetitorReport[] = Object.freeze([]) as unknown as CompetitorReport[];
+const EMPTY_VIRAL: ViralReport[] = Object.freeze([]) as unknown as ViralReport[];
 
 // ---------------------------------------------------------------------------
 // Low-level access
@@ -658,6 +670,262 @@ export function useCompetitors(): { reports: CompetitorReport[]; hydrated: boole
 }
 
 // ---------------------------------------------------------------------------
+// "Ce qui cartonne" lab reports (localStorage)
+// ---------------------------------------------------------------------------
+
+/** Note added to a lab report whose YouTube statistics were erased after 30 days. */
+export const VIRAL_RETENTION_NOTE =
+  "Statistiques des vidéos YouTube effacées de ce navigateur après 30 jours (règles développeurs de YouTube) : relancez l'analyse pour des chiffres à jour.";
+
+const normalizeKeyword = (keyword: string) =>
+  stripAccents(keyword).replace(/^#+/, "").replace(/\s+/g, " ").trim().toLowerCase();
+
+/**
+ * "instagram+tiktok:budget|epargne" — one saved lab report per set of
+ * platforms and keywords (order, case, accents and "#" ignored).
+ */
+export function viralKey(keywords: readonly string[], platforms: readonly ViralPlatform[]): string {
+  const words = [...new Set(keywords.map(normalizeKeyword).filter(Boolean))].sort();
+  const sources = [...new Set(platforms)].sort();
+  return `${sources.join("+")}:${words.join("|")}`;
+}
+
+/** Key of a lab report (see `viralKey`). */
+export function viralReportKey(report: ViralReport): string {
+  return viralKey(report.request.keywords, report.request.platforms);
+}
+
+const isViralPlatform = (value: unknown): value is ViralPlatform =>
+  (VIRAL_PLATFORMS as readonly unknown[]).includes(value);
+
+function isViralPost(value: unknown): value is ViralPost {
+  return (
+    isRecord(value) &&
+    typeof value.id === "string" &&
+    typeof value.url === "string" &&
+    typeof value.title === "string" &&
+    isViralPlatform(value.platform) &&
+    isRecord(value.metrics) &&
+    isRecord(value.author) &&
+    typeof value.author.handle === "string" &&
+    typeof value.tier === "string" &&
+    Array.isArray(value.hashtags)
+  );
+}
+
+function isViralReport(value: unknown): value is ViralReport {
+  if (!isRecord(value) || typeof value.id !== "string" || typeof value.createdAt !== "string") return false;
+  if (value.mode !== "ai" && value.mode !== "stats") return false;
+  const { request } = value;
+  if (!isRecord(request) || !Array.isArray(request.keywords) || !Array.isArray(request.platforms)) return false;
+  if (!request.keywords.every((keyword) => typeof keyword === "string")) return false;
+  if (!request.platforms.every(isViralPlatform)) return false;
+  return (
+    Array.isArray(value.posts) &&
+    value.posts.every(isViralPost) &&
+    Array.isArray(value.platforms) &&
+    value.platforms.every((summary) => isRecord(summary) && isViralPlatform(summary.platform)) &&
+    Array.isArray(value.notes) &&
+    (value.patterns === undefined || isRecord(value.patterns))
+  );
+}
+
+/**
+ * Valid lab reports, newest first, one per keywords + platforms (the first —
+ * newest — wins), capped at MAX_SAVED_VIRAL. Accepts the stored envelope
+ * `{ version, reports }` or a bare array.
+ */
+export function sanitizeViralReports(value: unknown): ViralReport[] {
+  const list = Array.isArray(value) ? value : isRecord(value) && Array.isArray(value.reports) ? value.reports : null;
+  if (!list) return EMPTY_VIRAL;
+  const seen = new Set<string>();
+  const reports: ViralReport[] = [];
+  for (const entry of list) {
+    if (!isViralReport(entry)) continue;
+    const key = viralReportKey(entry);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    reports.push(entry);
+    if (reports.length >= MAX_SAVED_VIRAL) break;
+  }
+  return reports.length > 0 ? reports : EMPTY_VIRAL;
+}
+
+/** Lab report with long captions / transcripts shortened for storage. */
+export function trimViralReport(report: ViralReport): ViralReport {
+  const cut = (text: string | undefined) =>
+    text && text.length > STORED_POST_TEXT_MAX ? `${text.slice(0, STORED_POST_TEXT_MAX - 1)}…` : text;
+  return {
+    ...report,
+    posts: report.posts.map((post) => {
+      const next = { ...post };
+      if (post.text !== undefined) next.text = cut(post.text);
+      if (post.transcript !== undefined) next.transcript = cut(post.transcript);
+      return next;
+    }),
+  };
+}
+
+/** YouTube statistics in this report come from the Data API without the derived-metrics amendment. */
+function hasRestrictedYoutube(report: ViralReport): boolean {
+  const summary = report.platforms.find((item) => item.platform === "youtube");
+  if (summary) return summary.ratiosAllowed === false;
+  return false;
+}
+
+/**
+ * True for a lab report holding YouTube statistics that must not be kept any
+ * more: the source forbids derived metrics (`ratiosAllowed === false` on the
+ * YouTube summary) and the report is older than 30 days.
+ */
+export function isViralRetentionExpired(report: ViralReport, now: number): boolean {
+  if (!hasRestrictedYoutube(report) || !report.posts.some((post) => post.platform === "youtube")) return false;
+  const time = Date.parse(report.createdAt);
+  return Number.isFinite(time) && now - time > YOUTUBE_RETENTION_MS;
+}
+
+/** True once `stripViralYoutubeMetrics` has been applied. */
+export function isViralMetricsStripped(report: ViralReport): boolean {
+  return report.notes.includes(VIRAL_RETENTION_NOTE);
+}
+
+/**
+ * The report without any YouTube audience statistic (views, likes, comments,
+ * subscribers, velocity, ranking): YouTube videos keep their title, link and
+ * author; the other platforms are untouched. Idempotent.
+ */
+export function stripViralYoutubeMetrics(report: ViralReport): ViralReport {
+  if (isViralMetricsStripped(report)) return report;
+  return {
+    ...report,
+    posts: report.posts.map((post): ViralPost => {
+      if (post.platform !== "youtube") return post;
+      const { author } = post;
+      return {
+        id: post.id,
+        url: post.url,
+        title: post.title,
+        ...(post.text !== undefined ? { text: post.text } : {}),
+        ...(post.publishedAt !== undefined ? { publishedAt: post.publishedAt } : {}),
+        kind: post.kind,
+        ...(post.durationSec !== undefined ? { durationSec: post.durationSec } : {}),
+        metrics: {},
+        hashtags: post.hashtags,
+        platform: post.platform,
+        author: {
+          handle: author.handle,
+          ...(author.displayName !== undefined ? { displayName: author.displayName } : {}),
+          ...(author.url !== undefined ? { url: author.url } : {}),
+        },
+        ...(post.query !== undefined ? { query: post.query } : {}),
+        tier: "normal",
+      };
+    }),
+    platforms: report.platforms.map((summary) => {
+      if (summary.platform !== "youtube") return summary;
+      const next = { ...summary };
+      delete next.medianViews;
+      delete next.medianMultiplier;
+      return next;
+    }),
+    notes: [VIRAL_RETENTION_NOTE, ...report.notes],
+  };
+}
+
+/** Reports with the expired YouTube statistics stripped (see `isViralRetentionExpired`). */
+export function applyViralRetention(reports: ViralReport[], now: number): ViralReport[] {
+  if (!reports.some((report) => isViralRetentionExpired(report, now) && !isViralMetricsStripped(report))) return reports;
+  return reports.map((report) =>
+    isViralRetentionExpired(report, now) && !isViralMetricsStripped(report) ? stripViralYoutubeMetrics(report) : report,
+  );
+}
+
+const viralStore = createStore(STORAGE_KEYS.viral, () =>
+  applyViralRetention(sanitizeViralReports(readJson("local", STORAGE_KEYS.viral)), Date.now()),
+);
+
+/** Saved lab reports, newest first. */
+export function getViralReports(): ViralReport[] {
+  return viralStore.get();
+}
+
+/** The saved lab report with this key (`viralReportKey`), if any. */
+export function findViralReport(key: string): ViralReport | undefined {
+  return getViralReports().find((report) => viralReportKey(report) === key);
+}
+
+/** Writes the list; when the quota is exceeded, drops the oldest reports until it fits (the first one is kept). */
+function writeViralReports(reports: ViralReport[]): SaveResult {
+  const list = [...reports];
+  let evicted = 0;
+  for (;;) {
+    if (writeJson("local", STORAGE_KEYS.viral, { version: 1, reports: list })) {
+      viralStore.invalidate();
+      return { ok: true, evicted };
+    }
+    if (!getStorage("local") || list.length <= 1) break;
+    list.pop();
+    evicted++;
+  }
+  viralStore.invalidate();
+  return { ok: false, evicted };
+}
+
+/**
+ * Saves a lab report at the top of the list, replacing the previous report
+ * with the same keywords + platforms. Captions are trimmed (`trimViralReport`).
+ */
+export function saveViralReport(report: ViralReport): SaveResult {
+  const key = viralReportKey(report);
+  const current = sanitizeViralReports(readJson("local", STORAGE_KEYS.viral));
+  const reports = [trimViralReport(report), ...current.filter((item) => viralReportKey(item) !== key)].slice(
+    0,
+    MAX_SAVED_VIRAL,
+  );
+  return writeViralReports(reports);
+}
+
+/** Removes the saved lab report with this key (`viralReportKey`). */
+export function removeViralReport(key: string): SaveResult {
+  const current = sanitizeViralReports(readJson("local", STORAGE_KEYS.viral));
+  return writeViralReports(current.filter((item) => viralReportKey(item) !== key));
+}
+
+/**
+ * Rewrites storage without the expired YouTube statistics (30-day rule).
+ * Returns how many reports were stripped. Called from an effect of
+ * `useViralReports`, never during render.
+ */
+export function purgeExpiredViralReports(now: number = Date.now()): number {
+  const current = sanitizeViralReports(readJson("local", STORAGE_KEYS.viral));
+  const next = applyViralRetention(current, now);
+  if (next === current) return 0;
+  const stripped = next.filter((report, index) => report !== current[index]).length;
+  writeViralReports(next);
+  return stripped;
+}
+
+/** Deletes every saved lab report. */
+export function clearViralReports(): void {
+  removeKey("local", STORAGE_KEYS.viral);
+  viralStore.invalidate();
+}
+
+/**
+ * Saved lab reports, live (updates after saves, deletions and from other
+ * tabs). `hydrated` is false during the server render and hydration.
+ */
+export function useViralReports(): { reports: ViralReport[]; hydrated: boolean } {
+  const reports = useSyncExternalStore(viralStore.subscribe, viralStore.get, () => EMPTY_VIRAL);
+  const hydrated = useHydrated();
+  // Reads already hide expired YouTube statistics; this erases them from storage too.
+  useEffect(() => {
+    purgeExpiredViralReports();
+  }, []);
+  return { reports, hydrated };
+}
+
+// ---------------------------------------------------------------------------
 // Studio hand-off (sessionStorage, read once by the Studio)
 // ---------------------------------------------------------------------------
 
@@ -671,9 +939,11 @@ export interface PendingStudioHandoff {
   angle: Angle;
   /** Competitor the idea comes from (`competitorKey`), pre-selected in "Se différencier de". */
   competitorKey?: string;
+  /** Lab report the idea comes from (`viralReportKey`), pre-selected in "S'appuyer sur ce qui cartonne". */
+  viralKey?: string;
   /** Script platform to preselect (the competitor's platform). */
   scriptPlatform?: ScriptPlatform;
-  /** "@handle" shown in the Studio notice. */
+  /** "@handle" (or the lab's niche) shown in the Studio notice. */
   label?: string;
 }
 

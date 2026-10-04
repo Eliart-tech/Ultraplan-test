@@ -193,9 +193,9 @@ export function postIndex(posts: CreatorPost[]): Map<string, CreatorPost> {
 }
 
 /** Posts referenced by ids, in order, unknown ids and duplicates skipped. */
-export function resolvePosts(ids: string[] | undefined, index: Map<string, CreatorPost>): CreatorPost[] {
+export function resolvePosts<P extends CreatorPost>(ids: readonly string[] | undefined, index: Map<string, P>): P[] {
   const seen = new Set<string>();
-  const posts: CreatorPost[] = [];
+  const posts: P[] = [];
   for (const id of ids ?? []) {
     const post = index.get(id);
     if (post && !seen.has(id)) {
