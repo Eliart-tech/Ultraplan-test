@@ -147,7 +147,9 @@ export function FollowersSection({ report, now, pending = false }: SectionProps)
             </PostList>
           ) : (
             <p className="text-sm leading-relaxed text-muted">
-              {followers === undefined
+              {followers !== undefined && report.data.posts.some((post) => post.metrics.views !== undefined)
+                ? "Aucune publication analysée n'a fait plus de vues qu'il n'a d'abonnés : ses vues viennent surtout de son audience existante, peu de nouveaux publics touchés."
+                : followers === undefined
                 ? `${platform} ne fournit pas le nombre d'abonnés de ce compte : le multiplicateur d'audience n'est pas calculable. Fie-toi à « Ce qui surperforme ».`
                 : `${platform} ne fournit pas les vues de ces publications : le multiplicateur d'audience n'est pas calculable.`}
             </p>
@@ -289,7 +291,7 @@ export function WorksFlopsSection({ report, now, pending = false }: SectionProps
               </p>
               <PostList label="Publications les moins performantes">
                 {bottom.map((item) => (
-                  <PostRow key={item.post.id} {...item} now={now} />
+                  <PostRow key={item.post.id} {...item} now={now} audienceMin={1} />
                 ))}
               </PostList>
             </div>
@@ -433,7 +435,9 @@ function BucketTable({
 }) {
   const rows = buckets.filter((bucket) => bucket.posts > 0);
   const best = bestBucket(rows);
-  const max = rows.reduce((value, bucket) => Math.max(value, bucket.median ?? 0), 0);
+  // Scale on the buckets with ≥ 2 posts: one viral post must not flatten the others.
+  const robust = rows.filter((bucket) => bucket.posts >= 2);
+  const max = (robust.length > 0 ? robust : rows).reduce((value, bucket) => Math.max(value, bucket.median ?? 0), 0);
   return (
     <Card className="min-w-0 px-5 py-4">
       <table className="w-full text-sm">
@@ -455,6 +459,7 @@ function BucketTable({
           ) : (
             rows.map((bucket) => {
               const isBest = best?.label === bucket.label;
+              const thin = bucket.posts < 2;
               return (
                 <tr key={bucket.label} className="border-t border-line first:border-t-0">
                   <th scope="row" className="py-1.5 pr-3 text-left font-medium text-ink">
@@ -474,11 +479,14 @@ function BucketTable({
                     <span className="flex items-center gap-2">
                       <span aria-hidden className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-surface-3">
                         <span
-                          className="block h-full rounded-full bg-accent"
-                          style={{ width: `${max > 0 ? ((bucket.median ?? 0) / max) * 100 : 0}%` }}
+                          className={cn("block h-full rounded-full", thin ? "bg-faint/50" : "bg-accent")}
+                          style={{ width: `${max > 0 ? Math.min(100, ((bucket.median ?? 0) / max) * 100) : 0}%` }}
                         />
                       </span>
-                      <span className="w-12 shrink-0 text-right text-xs font-medium tabular-nums text-ink">
+                      <span
+                        className={cn("w-12 shrink-0 text-right text-xs font-medium tabular-nums", thin ? "text-muted" : "text-ink")}
+                        title={thin ? "Une seule publication : peu fiable" : undefined}
+                      >
                         {formatCompact(bucket.median)}
                       </span>
                     </span>
@@ -501,7 +509,7 @@ export function RhythmSection({ report }: SectionProps) {
       id="rythme"
       icon={<CalendarClock />}
       title="Quand et sous quelle forme"
-      description={`Nombre de publications et médiane (${unit}) par jour, heure (fuseau du marché), durée et hashtag. Sur ${stats.postCount} publications : à lire comme des tendances, pas comme des règles.`}
+      description={`Nombre de publications et médiane (${unit}) par jour, heure (fuseau du marché), durée et hashtag. Sur ${stats.postCount} publications : à lire comme des tendances, pas comme des règles (en gris, une seule publication).`}
     >
       <div className="grid gap-4 md:grid-cols-2">
         <BucketTable title="Jour de publication" labelHeader="Jour" buckets={stats.weekdays} unit={unit} />
@@ -559,7 +567,7 @@ export function PostsSection({ report, now }: SectionProps) {
       <Card className="px-5 py-4 sm:px-6">
         <PostList label={`Publications analysées (${posts.length})`}>
           {shown.map((post) => (
-            <PostRow key={post.id} {...rankPost(post, report, medianValue)} now={now} />
+            <PostRow key={post.id} {...rankPost(post, report, medianValue)} now={now} audienceMin={1} />
           ))}
         </PostList>
         {posts.length > INITIAL_POSTS ? (

@@ -114,7 +114,9 @@ export function SavedCompetitors({ reports, now, busy, onReanalyse, onDelete }: 
                   <p className="text-xs text-muted">
                     {report.stats.postCount} publications
                     {report.stats.medianViews !== undefined ? ` · médiane ${formatCompact(report.stats.medianViews)} vues` : ""}
-                    {report.insights?.ideas.length ? ` · ${report.insights.ideas.length} idées de vidéos` : ""}
+                    {report.insights?.ideas.length
+                      ? ` · ${report.insights.ideas.length} ${pluralize(report.insights.ideas.length, "idée de vidéo", "idées de vidéos")}`
+                      : ""}
                     <br />
                     Analysé{" "}
                     <time dateTime={report.createdAt} title={formatDateTime(report.createdAt)}>

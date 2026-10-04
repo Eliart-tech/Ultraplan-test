@@ -39,7 +39,7 @@ export function ForYouSection({ report, pending = false }: ForYouSectionProps) {
     >
       {insights ? (
         <div className="grid gap-4 xl:grid-cols-2">
-          <Card className="border-accent/30 px-5 py-4 sm:px-6 xl:col-span-2">
+          <Card className="border-accent/40! px-5 py-4 sm:px-6 xl:col-span-2">
             <SubHeading className="mb-3 text-accent-ink">Comment te différencier</SubHeading>
             {insights.differentiation.length > 0 ? (
               <ol className="grid gap-4 md:grid-cols-2">

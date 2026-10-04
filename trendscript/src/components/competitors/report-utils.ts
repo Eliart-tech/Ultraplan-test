@@ -134,6 +134,14 @@ export function formatRatio(ratio: number): string {
   return `×${ratio >= 10 ? integer.format(Math.round(ratio)) : decimal.format(Math.round(ratio * 10) / 10)}`;
 }
 
+/** Views ÷ followers: 4.23 → "×4,2", 0.042 → "×0,04" (2 decimals below 1). */
+export function formatMultiplier(multiplier: number): string {
+  if (!isNumber(multiplier)) return "—";
+  if (multiplier >= 1) return formatRatio(multiplier);
+  const precise = new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+  return `×${precise.format(Math.round(multiplier * 100) / 100)}`;
+}
+
 /** Percentage already in % units: 4.236 → "4,2 %", 37.4 → "37 %". */
 export function formatPct(value: number | undefined): string {
   if (!isNumber(value)) return "—";
@@ -294,11 +302,12 @@ export function underperformers(report: CompetitorReport, max = 3): RankedPost[]
 }
 
 /**
- * Posts watched furthest beyond the account's audience (views ÷ followers),
- * best first: the stats' `audienceMultipliers` when present, else computed
- * from the posts (older reports). Empty when followers or views are unknown.
+ * Posts watched beyond the account's audience (views ÷ followers ≥ `min`,
+ * default 1), best first: the stats' `audienceMultipliers` when present,
+ * else computed from the posts (older reports). Empty when followers or
+ * views are unknown, or when the source forbids derived metrics.
  */
-export function audienceLeaders(report: CompetitorReport, max = 5): RankedPost[] {
+export function audienceLeaders(report: CompetitorReport, max = 5, min = 1): RankedPost[] {
   if (!ratiosAllowed(report)) return [];
   const index = postIndex(report.data.posts);
   const medianValue = rankingMedian(report);
@@ -307,14 +316,14 @@ export function audienceLeaders(report: CompetitorReport, max = 5): RankedPost[]
     return fromStats
       .map(({ postId, multiplier }): RankedPost | null => {
         const post = index.get(postId);
-        return post ? { ...rankPost(post, report, medianValue), multiplier } : null;
+        return post && multiplier >= min ? { ...rankPost(post, report, medianValue), multiplier } : null;
       })
       .filter((item): item is RankedPost => item !== null)
       .slice(0, max);
   }
   return report.data.posts
     .map((post) => rankPost(post, report, medianValue))
-    .filter((item) => isNumber(item.multiplier))
+    .filter((item) => isNumber(item.multiplier) && item.multiplier >= min)
     .sort((a, b) => (b.multiplier ?? 0) - (a.multiplier ?? 0))
     .slice(0, max);
 }

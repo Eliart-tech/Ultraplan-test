@@ -131,8 +131,15 @@ export function CompetitorForm({
               const status = statusOf(option);
               return {
                 value: option,
-                label: platformLabel(option),
-                icon: <PlatformIcon platform={option} size="xs" tile={false} decorative />,
+                // Icons only where the four labels have room (the single wide column between sm and lg).
+                label: (
+                  <span className="inline-flex items-center gap-1.5">
+                    <span aria-hidden className="hidden sm:inline-flex lg:hidden">
+                      <PlatformIcon platform={option} size="xs" tile={false} decorative />
+                    </span>
+                    {platformLabel(option)}
+                  </span>
+                ),
                 disabled: status ? !status.available : false,
                 description: status ? (status.available ? status.via : `Indisponible : ${status.note}`) : undefined,
               };

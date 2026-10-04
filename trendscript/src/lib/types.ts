@@ -412,6 +412,8 @@ export interface ScriptRequest {
   refine?: { previous: ScriptDraft; instruction: string };
   /** Competitors to stand out from (saved competitor analyses, max 3). */
   competitors?: CompetitorBrief[];
+  /** What currently wins views and followers in the niche ("Ce qui cartonne"). */
+  nicheRecipes?: ViralBrief;
   /**
    * Country of the analysis (ISO 3166-1 alpha-2) — locale of the web research
    * and of the Google News enrichment. Optional: derived from the language
@@ -671,4 +673,121 @@ export type CompetitorEvent =
   | { type: "data"; data: CreatorData; stats: CreatorStats }
   | { type: "progress"; chars: number }
   | { type: "result"; report: CompetitorReport }
+  | { type: "error"; message: string };
+
+// ---------------------------------------------------------------------------
+// "Ce qui cartonne" — niche-wide videos that reach far beyond their audience
+// ---------------------------------------------------------------------------
+
+export const VIRAL_PLATFORMS = ["instagram", "tiktok", "youtube"] as const;
+export type ViralPlatform = (typeof VIRAL_PLATFORMS)[number];
+
+/** How far a video went beyond its creator's audience. */
+export type ViralTier = "explose" | "cartonne" | "bon" | "normal";
+
+/** A real recent video of the niche, with its author's audience. */
+export interface ViralPost extends CreatorPost {
+  platform: ViralPlatform;
+  author: { handle: string; displayName?: string; followers?: number; url?: string };
+  /** The niche keyword that surfaced it. */
+  query?: string;
+  /** views ÷ max(followers, 1 000) — undefined when followers unknown or ratios not allowed (YouTube). */
+  multiplier?: number;
+  /** Follower band of the author: "< 10 k", "10–100 k", "100 k–1 M", "> 1 M". */
+  band?: string;
+  /** multiplier ÷ median multiplier of the same platform and band (≥ 8 videos), when computable. */
+  vsBand?: number;
+  /** Views per day since publication. */
+  viewsPerDay?: number;
+  /** (shares + saves) ÷ views, in %. */
+  shareSaveRate?: number;
+  tier: ViralTier;
+}
+
+export interface ViralPlatformSummary {
+  platform: ViralPlatform;
+  /** Videos analysed on this platform. */
+  count: number;
+  /** Videos whose author's followers are known. */
+  withFollowers: number;
+  medianViews?: number;
+  medianMultiplier?: number;
+  /** False on YouTube unless YT_DERIVED_METRICS_APPROVED=true (no ratios then). */
+  ratiosAllowed: boolean;
+  source: string;
+  warning?: string;
+  error?: string;
+}
+
+/** Claude's cross-video analysis of what wins views and followers in the niche. */
+export interface ViralPatterns {
+  /** 3–5 sentences: what is winning right now in this niche and why. */
+  summary: string;
+  /** Repeatable recipes (topic × hook × format × structure), each grounded in several videos. */
+  recipes: {
+    name: string;
+    description: string;
+    /** Why it wins views (distribution mechanics). */
+    viewsLever: string;
+    /** Why it plausibly converts viewers into followers (hypothesis from public signals). */
+    followLever: string;
+    examples: PostReference[];
+    postIds: string[];
+  }[];
+  hookPatterns: { pattern: string; whyItWorks: string; examples: PostReference[] }[];
+  formats: { name: string; description: string; postIds: string[] }[];
+  /** Duration / rhythm findings, e.g. "les 20–35 s dominent sur TikTok". */
+  durations: string;
+  /** Topics that are pulling views right now. */
+  topics: { topic: string; evidence: string; postIds: string[] }[];
+  followDrivers: { insight: string; evidence: string; postIds: string[] }[];
+  /** Saturated or risky patterns to avoid. */
+  avoid: string[];
+  /** Ideas for the user, designed for views AND followers, tailored to their profile. */
+  ideas: { title: string; angle: string; hook: string; format: string; whyForYou: string; inspiredBy: string[] }[];
+}
+
+export interface ViralRequest {
+  platforms: ViralPlatform[];
+  /** Niche keywords / hashtags (1–5). */
+  keywords: string[];
+  niche: string;
+  /** Look-back window. */
+  periodDays: 7 | 30;
+  geo: string;
+  language: string;
+  profile: CreatorProfile;
+}
+
+export interface ViralReport {
+  id: string;
+  createdAt: string;
+  request: ViralRequest;
+  mode: "ai" | "stats";
+  model?: string;
+  /** Best first (tier, then multiplier / views). */
+  posts: ViralPost[];
+  platforms: ViralPlatformSummary[];
+  patterns?: ViralPatterns;
+  notes: string[];
+}
+
+/** Compact "what works in my niche" context sent with a script request. */
+export interface ViralBrief {
+  niche: string;
+  keywords: string[];
+  recipes: { name: string; description: string; viewsLever: string; followLever: string }[];
+  hookPatterns: string[];
+  followDrivers: string[];
+  avoid: string[];
+  /** Titles of the best videos (max 10) — never to be copied. */
+  topTitles: string[];
+}
+
+export type ViralEvent =
+  | { type: "platform_start"; platform: ViralPlatform }
+  | { type: "platform_done"; summary: ViralPlatformSummary }
+  | { type: "status"; step: "collect" | "enrich" | "analysis"; message: string }
+  | { type: "progress"; chars: number }
+  | { type: "result"; report: ViralReport }
   | { type: "error"; message: string };

@@ -8,7 +8,7 @@ import { safeHref } from "@/components/studio/studio-utils";
 import { formatDateTime, formatRelative } from "@/lib/client/format";
 import { cn } from "@/lib/cn";
 import type { CreatorPost } from "@/lib/types";
-import { formatRatio, postKindLabel, postMetricLabels, type RankedPost } from "./report-utils";
+import { formatMultiplier, formatRatio, postKindLabel, postMetricLabels, type RankedPost } from "./report-utils";
 
 /** "×3,4 sa médiane" — hot when the post is an outlier (≥ 2×). */
 export function RatioBadge({ ratio, size = "sm" }: { ratio: number | undefined; size?: "sm" | "md" }) {
@@ -31,8 +31,8 @@ export function AudienceBadge({ multiplier, size = "sm" }: { multiplier: number 
   return (
     <Tooltip content="Vues ÷ abonnés du compte">
       <Badge size={size} tone={strong ? "accent" : "neutral"} icon={<UsersRound />}>
-        {formatRatio(multiplier)} son audience
-        <span className="sr-only"> (vues égales à {formatRatio(multiplier).replace("×", "")} fois ses abonnés)</span>
+        {formatMultiplier(multiplier)} son audience
+        <span className="sr-only"> (vues égales à {formatMultiplier(multiplier).replace("×", "")} fois ses abonnés)</span>
       </Badge>
     </Tooltip>
   );
@@ -75,15 +75,17 @@ export interface PostRowProps extends RankedPost {
   now: number;
   /** Optional 1-based rank shown in a small tile. */
   rank?: number;
-  /** Show the badges even when the ratio is unremarkable (< 2). */
+  /** Show the "× sa médiane" badge (default true). */
   showRatio?: boolean;
+  /** Hide the "× son audience" badge below this multiplier (default 0: always shown). */
+  audienceMin?: number;
 }
 
 /**
  * One real post: badges (× median, × audience), linked title, kind, date and
  * metrics. Used by every evidence list of the report.
  */
-export function PostRow({ post, ratio, multiplier, now, rank, showRatio = true }: PostRowProps) {
+export function PostRow({ post, ratio, multiplier, now, rank, showRatio = true, audienceMin = 0 }: PostRowProps) {
   const metrics = postMetricLabels(post);
   const relative = post.publishedAt ? formatRelative(post.publishedAt, now) : "";
   return (
@@ -99,7 +101,7 @@ export function PostRow({ post, ratio, multiplier, now, rank, showRatio = true }
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-1.5">
           {showRatio ? <RatioBadge ratio={ratio} /> : null}
-          <AudienceBadge multiplier={multiplier} />
+          <AudienceBadge multiplier={multiplier !== undefined && multiplier >= audienceMin ? multiplier : undefined} />
           {post.pinned ? (
             <Badge size="sm" tone="neutral" icon={<Pin />}>
               Épinglée
@@ -109,23 +111,18 @@ export function PostRow({ post, ratio, multiplier, now, rank, showRatio = true }
         <p className="mt-1.5 text-sm font-medium leading-snug">
           <PostLink post={post} className="break-words" />
         </p>
-        <p className="mt-1 flex flex-wrap gap-x-1.5 text-xs text-muted">
-          <span>{postKindLabel(post)}</span>
+        <p className="mt-1 text-xs text-muted">
+          {postKindLabel(post)}
           {relative ? (
             <>
-              <span aria-hidden>·</span>
+              {" · "}
               <time dateTime={post.publishedAt} title={formatDateTime(post.publishedAt)}>
                 {relative}
               </time>
             </>
           ) : null}
-          {metrics.length > 0 ? (
-            <>
-              <span aria-hidden>·</span>
-              <span className="tabular-nums">{metrics.join(" · ")}</span>
-            </>
-          ) : null}
         </p>
+        {metrics.length > 0 ? <p className="mt-0.5 text-xs tabular-nums text-ink/75">{metrics.join(" · ")}</p> : null}
       </div>
     </li>
   );

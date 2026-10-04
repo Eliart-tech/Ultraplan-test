@@ -411,7 +411,9 @@ export function ReportSummary({ report, pending = false, hideNumbers = false }: 
                   href="#idees"
                   className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-accent-ink underline-offset-2 hover:underline"
                 >
-                  Voir les {insights.ideas.length} idées de vidéos pour toi
+                  {insights.ideas.length > 1
+                    ? `Voir les ${insights.ideas.length} idées de vidéos pour toi`
+                    : "Voir l'idée de vidéo pour toi"}
                   <ArrowDown aria-hidden className="size-4" />
                 </a>
               ) : null}

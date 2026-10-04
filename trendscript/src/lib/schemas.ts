@@ -6,6 +6,7 @@
 import { z } from "zod";
 import {
   CREATOR_PLATFORMS,
+  VIRAL_PLATFORMS,
   ANGLE_TYPES,
   CTA_TYPES,
   DURATIONS,
@@ -210,6 +211,26 @@ export const scriptRequestSchema = z.object({
     .object({ previous: scriptDraftSchema, instruction: shortText(1000).min(3) })
     .optional(),
   competitors: z.array(competitorBriefSchema).max(3).optional(),
+  nicheRecipes: z
+    .object({
+      niche: shortText(300),
+      keywords: z.array(shortText(60)).max(8),
+      recipes: z
+        .array(
+          z.object({
+            name: shortText(200),
+            description: shortText(600),
+            viewsLever: shortText(400),
+            followLever: shortText(400),
+          }),
+        )
+        .max(8),
+      hookPatterns: z.array(shortText(300)).max(10),
+      followDrivers: z.array(shortText(300)).max(10),
+      avoid: z.array(shortText(300)).max(10),
+      topTitles: z.array(shortText(300)).max(10),
+    })
+    .optional(),
   geo: z
     .string()
     .trim()
@@ -246,4 +267,29 @@ export const competitorRequestSchema = z.object({
     .regex(/^[A-Za-z]{2}$/, "Code pays sur 2 lettres attendu")
     .transform((value) => value.toUpperCase())
     .default("FR"),
+});
+
+export const viralRequestSchema = z.object({
+  platforms: z.array(z.enum(VIRAL_PLATFORMS)).min(1, "Choisissez au moins une plateforme"),
+  keywords: z
+    .array(
+      z
+        .string()
+        .trim()
+        .min(2)
+        .max(60)
+        .transform((value) => value.replace(/^#/, "")),
+    )
+    .min(1, "Indiquez au moins un mot-clé de niche")
+    .max(5, "5 mots-clés maximum"),
+  niche: shortText(300).default(""),
+  periodDays: z.union([z.literal(7), z.literal(30)]).default(30),
+  geo: z
+    .string()
+    .trim()
+    .regex(/^[A-Za-z]{2}$/, "Code pays sur 2 lettres attendu")
+    .transform((value) => value.toUpperCase())
+    .default("FR"),
+  language: z.string().trim().regex(/^[a-z]{2}$/).default("fr"),
+  profile: creatorProfileSchema,
 });

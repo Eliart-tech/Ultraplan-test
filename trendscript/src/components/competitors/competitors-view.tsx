@@ -277,7 +277,7 @@ function CompetitorsScreen({ selectedKey }: { selectedKey: string | null }) {
             </Alert>
           ) : null}
 
-          <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:items-start xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
+          <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] lg:items-start xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
             <CompetitorForm
               values={form}
               onChange={(patch) => setForm((previous) => ({ ...previous, ...patch }))}

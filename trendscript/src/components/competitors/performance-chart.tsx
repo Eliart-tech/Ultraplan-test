@@ -232,7 +232,9 @@ export function PerformanceChart({ series, tableId, className }: PerformanceChar
                     x={geometry.x + geometry.width / 2}
                     y={geometry.y - 5}
                     textAnchor="middle"
-                    className="fill-ink text-[10px] font-semibold tabular-nums"
+                    className="fill-ink stroke-surface text-[10px] font-semibold tabular-nums"
+                    strokeWidth={3}
+                    paintOrder="stroke"
                   >
                     {bars[index].ratio !== undefined ? formatRatio(bars[index].ratio) : ""}
                   </text>
@@ -256,7 +258,9 @@ export function PerformanceChart({ series, tableId, className }: PerformanceChar
                   x={width - RIGHT}
                   y={y(series.median) - 4}
                   textAnchor="end"
-                  className="fill-muted text-[10px] font-medium"
+                  className="fill-muted stroke-surface text-[10px] font-medium"
+                  strokeWidth={3}
+                  paintOrder="stroke"
                 >
                   médiane {formatCompact(series.median)}
                 </text>

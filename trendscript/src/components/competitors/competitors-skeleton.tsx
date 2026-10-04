@@ -9,7 +9,7 @@ export function CompetitorsSkeleton() {
         <Skeleton className="h-3 w-36" />
         <Skeleton className="mt-3 h-8 w-64 max-w-full" />
         <Skeleton className="mt-3 h-4 w-[34rem] max-w-full" />
-        <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
+        <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,24rem)_minmax(0,1fr)] xl:grid-cols-[minmax(0,26rem)_minmax(0,1fr)]">
           <div className="rounded-2xl border border-line bg-surface p-6 shadow-card">
             <Skeleton className="h-4 w-40" />
             <SkeletonText lines={2} className="mt-3" />
