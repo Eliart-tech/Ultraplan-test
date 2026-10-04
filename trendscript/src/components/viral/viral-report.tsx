@@ -4,7 +4,6 @@ import {
   ArrowDown,
   BarChart3,
   CalendarRange,
-  Database,
   Eye,
   Flame,
   Info,
@@ -39,7 +38,15 @@ import {
   ViralIdeasSection,
 } from "./viral-patterns";
 import { VideosSection } from "./viral-videos";
-import { TIER_META, VIRAL_PLATFORM_ORDER, keywordsLabel, tierCounts, viralReportTitle } from "./viral-utils";
+import {
+  TIER_META,
+  VIRAL_PLATFORM_ORDER,
+  isExpiredPost,
+  keywordsLabel,
+  ratiosAllowedFor,
+  tierCounts,
+  viralReportTitle,
+} from "./viral-utils";
 
 // ---------------------------------------------------------------------------
 // How to read "× son audience"
@@ -59,9 +66,9 @@ export function AudienceExplainer({ className }: { className?: string }) {
     >
       <UsersRound aria-hidden className="mt-0.5 size-4 shrink-0 text-accent" />
       <p className="min-w-0 flex-1">
-        <span className="font-semibold text-ink">« ×10 son audience »</span> = la vidéo a fait 10 fois plus de vues que son
-        créateur n&apos;a d&apos;abonnés : l&apos;algorithme l&apos;a poussée à des inconnus, là où se gagnent les abonnés.
-        Aucune plateforme ne publie les abonnements gagnés par vidéo : ce multiplicateur est le meilleur signal public.
+        <span className="font-semibold text-ink">« ×10 son audience »</span> = 10 fois plus de vues que son créateur
+        n&apos;a d&apos;abonnés : la vidéo a été poussée à des inconnus, là où se gagnent les abonnés. Les abonnements
+        gagnés par vidéo ne sont publiés nulle part : c&apos;est le meilleur signal public.
       </p>
       <InfoPopover label="Comment sont classées les vidéos" title="Comment sont classées les vidéos" align="end" panelClassName="w-80">
         <div className="space-y-2 text-xs leading-relaxed">
@@ -229,7 +236,10 @@ function PlatformSummaryCard({ summary, stripped }: { summary: ViralPlatformSumm
  */
 export function ViralSummary({ report }: { report: ViralReport }) {
   const counts = tierCounts(report.posts);
-  const withFollowers = report.posts.filter((post) => post.author.followers !== undefined).length;
+  // Videos whose × audience can be measured: author's followers known and ratios allowed on the platform.
+  const measurable = report.posts.filter(
+    (post) => post.author.followers !== undefined && ratiosAllowedFor(report, post.platform) && !isExpiredPost(report, post),
+  ).length;
   const patterns = report.patterns;
   const recipe = patterns?.recipes[0];
   const stripped = isViralMetricsStripped(report);
@@ -240,7 +250,7 @@ export function ViralSummary({ report }: { report: ViralReport }) {
   return (
     <Card className="p-5 sm:p-6">
       {patterns ? (
-        <div className={cn("grid gap-5", recipe && "lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]")}>
+        <div className={cn("grid grid-cols-1 gap-5", recipe && "lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]")}>
           <p className="whitespace-pre-line text-[0.9375rem] font-medium leading-relaxed text-ink">{patterns.summary}</p>
           {recipe ? (
             <div className="rounded-xl border border-accent/25 bg-accent-soft/60 p-4">
@@ -274,7 +284,7 @@ export function ViralSummary({ report }: { report: ViralReport }) {
         </p>
       )}
 
-      <div className="mt-5 grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className="mt-5 grid grid-cols-2 gap-3 xl:grid-cols-4">
         <Stat
           icon={<Flame />}
           label="Explosent"
@@ -297,21 +307,21 @@ export function ViralSummary({ report }: { report: ViralReport }) {
         />
         <Stat
           icon={<UsersRound />}
-          label="Audience de l'auteur connue"
+          label="× audience mesurable"
           value={
             <>
-              {withFollowers}
+              {measurable}
               <span className="text-base font-medium text-muted">/{report.posts.length}</span>
             </>
           }
-          hint="vidéos où le ratio est possible"
+          hint="abonnés de l'auteur connus, ratio autorisé"
         />
       </div>
 
       {summaries.length > 0 ? (
         <div className="mt-5">
           <SubHeading className="mb-2">Par plateforme</SubHeading>
-          <ul className="grid gap-3 md:grid-cols-2 xl:grid-cols-3" aria-label="Résultats par plateforme">
+          <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3" aria-label="Résultats par plateforme">
             {summaries.map((summary) => (
               <PlatformSummaryCard key={summary.platform} summary={summary} stripped={stripped} />
             ))}

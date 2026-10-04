@@ -164,11 +164,6 @@ export function ViralForm({ values, onChange, onSubmit, capabilities, aiConfigur
           required
           error={error}
           hint={`Ce que votre public tape ou suit. Entrée ou virgule pour ajouter, ${MAX_VIRAL_KEYWORDS} maximum.`}
-          labelAside={
-            <span className="tabular-nums">
-              {values.keywords.length}/{MAX_VIRAL_KEYWORDS}
-            </span>
-          }
         >
           <ChipInput
             value={values.keywords}
@@ -217,8 +212,8 @@ export function ViralForm({ values, onChange, onSubmit, capabilities, aiConfigur
               value={String(values.periodDays) as "7" | "30"}
               onValueChange={(value) => onChange({ periodDays: value === "7" ? 7 : 30 })}
               options={[
-                { value: "7", label: "7 derniers jours" },
-                { value: "30", label: "30 derniers jours" },
+                { value: "7", label: "7 jours", description: "Les 7 derniers jours" },
+                { value: "30", label: "30 jours", description: "Les 30 derniers jours" },
               ]}
             />
           </Field>

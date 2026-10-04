@@ -19,10 +19,10 @@ import type {
   ScriptRequest,
   SourceStatus,
   ViralEvent,
-  ViralPlatform,
   ViralReport,
   ViralRequest,
 } from "../types";
+import type { ViralPlatformStatus } from "../viral/labels";
 
 /**
  * API failure with a French, user-facing message.
@@ -235,14 +235,7 @@ export async function streamViral(
 }
 
 /** Which platforms the "Ce qui cartonne" lab can read on this server, and through what. */
-export interface ViralCapability {
-  platform: ViralPlatform;
-  available: boolean;
-  /** French: the source used ("Apify · Instagram Hashtag Scraper + profils des auteurs"…). */
-  via: string;
-  /** French: what is missing or limited. */
-  note: string;
-}
+export type ViralCapability = ViralPlatformStatus;
 
 /** GET /api/sources payload. */
 export interface ServerStatus {

@@ -5,7 +5,7 @@ import { fixtureCompetitors, fixtureDraft, fixtureRequest, fixtureSignals, NOW }
 import { checkScript } from "../../script/checks";
 import { REVIEW_INSTRUCTIONS } from "../../script/prompt";
 import { countWords, estimateDuration } from "../../script/metrics";
-import type { ResearchBrief, ScriptEvent, ScriptRequest, Signal, Topic } from "../../types";
+import type { ResearchBrief, ScriptEvent, ScriptRequest, Signal, Topic, ViralBrief } from "../../types";
 import type { RelatedQueries } from "../sources/serpapi-trends";
 import { fakeClient, fallbackBlock, jsonMessage, message, refusalMessage, textBlock, textMessage } from "./__fixtures__/anthropic";
 import { AiError, cachedSystem } from "./client";
@@ -601,6 +601,51 @@ describe("generateScript", () => {
       const copied = output({ title: "3 rituels pour s'endormir en 10 minutes" });
       const { calls } = await generate({ ...withSettings({ review: true }), competitors: fixtureCompetitors }, [jsonMessage(copied), jsonMessage({ changes: ["Titre changé"], ...output() })]);
       expect(calls[1].params.messages[0].content as string).toContain("- Titre très proche d'une publication de @sommeilfacile");
+    });
+  });
+
+  describe("what wins in the niche (Ce qui cartonne)", () => {
+    const nicheRecipes: ViralBrief = {
+      niche: "sommeil et productivité",
+      keywords: ["sommeil"],
+      recipes: [
+        {
+          name: "Liste d'erreurs + promesse pour ce soir",
+          description: "3 erreurs concrètes puis le geste du soir.",
+          viewsLever: "On se reconnaît et on l'envoie.",
+          followLever: "Suite annoncée (hypothèse).",
+        },
+      ],
+      hookPatterns: [],
+      followDrivers: [],
+      avoid: [],
+      topTitles: ["Changement d'heure : les 3 réglages avant dimanche"],
+    };
+
+    it("sends the niche's recipes with the request and validates them with the request schema", async () => {
+      expect(scriptRequestSchema.safeParse({ ...fixtureRequest, nicheRecipes }).success).toBe(true);
+      const { calls, script } = await generate({ ...fixtureRequest, nicheRecipes }, [jsonMessage(output())]);
+      const user = calls[0].params.messages[0].content as string;
+      expect(user).toContain("<ce_qui_cartonne>\n## Ce qui cartonne dans ta niche");
+      expect(user).toContain("1. Liste d'erreurs + promesse pour ce soir — 3 erreurs concrètes puis le geste du soir.");
+      expect(user).toContain("dont un qui commence par « Recette : » et un par « Abonnement : »");
+      // The fixture title "Changement d'heure : 3 réglages avant dimanche" is a near copy of the top title.
+      expect(script.warnings).toEqual([
+        "Titre très proche d'une vidéo qui cartonne dans votre niche (« Changement d'heure : les 3 réglages avant dimanche ») : reformulez pour ne pas la copier.",
+      ]);
+    });
+
+    it("has the editor check the recipe, the follow lever and the copy during the review", async () => {
+      const { calls, script } = await generate({ ...withSettings({ review: true }), nicheRecipes }, [
+        jsonMessage(output()),
+        jsonMessage({ changes: ["Titre reformulé"], ...output({ title: "Ton réveil va te mentir dimanche : 3 réglages" }) }),
+      ]);
+      const reviewUser = calls[1].params.messages[0].content as string;
+      expect(reviewUser).toContain("<ce_qui_cartonne>");
+      expect(reviewUser).toContain("<controles_automatiques>\n- Titre très proche d'une vidéo qui cartonne dans votre niche");
+      expect((calls[1].params.system as { text: string }[])[2].text).toContain("Si <ce_qui_cartonne> est présent");
+      expect(script.warnings).toEqual([]);
+      expect(script.reviewNotes).toEqual(["Titre reformulé"]);
     });
   });
 

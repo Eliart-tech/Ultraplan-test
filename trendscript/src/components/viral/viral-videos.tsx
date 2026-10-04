@@ -70,9 +70,9 @@ export function VideosSection({ report, now }: VideosSectionProps) {
       title="Les vidéos qui explosent"
       description="Classées par niveau : combien de fois l'audience de leur créateur elles ont fait en vues. Plus un point est haut au-dessus des diagonales, plus la vidéo a été poussée à des non-abonnés — ceux qui peuvent s'abonner."
     >
-      <div className="mb-4 grid grid-cols-2 items-end gap-3 sm:flex sm:flex-wrap">
+      <div className="mb-4 grid grid-cols-1 items-start gap-3 sm:flex sm:flex-wrap">
         {platforms.length > 1 ? (
-          <Field label="Plateforme" group className="col-span-2 sm:col-span-1">
+          <Field label="Plateforme" group>
             <Segmented
               size="sm"
               fullWidth
@@ -87,15 +87,13 @@ export function VideosSection({ report, now }: VideosSectionProps) {
         ) : null}
         <Field label="Niveau" className="min-w-0 sm:w-56">
           <Select
-            size="sm"
             value={filters.tier}
             onChange={(event) => update({ tier: event.target.value as TierFilter })}
             options={tierOptions}
           />
         </Field>
-        <Field label="Trier par" className="min-w-0 sm:w-60">
+        <Field label="Trier par" className="min-w-0 sm:w-56">
           <Select
-            size="sm"
             value={filters.sort}
             onChange={(event) => update({ sort: event.target.value as ViralSort })}
             options={(Object.keys(SORT_LABELS) as ViralSort[]).map((value) => ({ value, label: SORT_LABELS[value] }))}

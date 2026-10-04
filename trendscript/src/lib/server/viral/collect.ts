@@ -152,15 +152,15 @@ function plural(count: number, singular: string, pluralForm = `${singular}s`): s
   return `${count} ${count > 1 ? pluralForm : singular}`;
 }
 
-/** French notices about what the filters removed. */
-export function droppedWarnings(dropped: DroppedCounts, unit: [string, string]): string[] {
-  const [one, many] = unit;
-  const count = (n: number) => plural(n, one, many);
+/** French notices about what the filters removed (`unit`: singular, plural, feminine). */
+export function droppedWarnings(dropped: DroppedCounts, [one, many, feminine]: [string, string, boolean]): string[] {
+  const agree = (n: number, word: string) => `${word}${feminine ? "e" : ""}${n > 1 ? "s" : ""}`;
+  const line = (n: number, text: (n: number) => string) => (n > 0 ? `${plural(n, one, many)} ${text(n)}.` : "");
   return [
-    dropped.paid > 0 ? `${count(dropped.paid)} sponsorisé(e)s ou en partenariat rémunéré exclu(e)s (vues en partie payées).` : "",
-    dropped.pinned > 0 ? `${count(dropped.pinned)} épinglé(e)s exclu(e)s.` : "",
-    dropped.otherLanguage > 0 ? `${count(dropped.otherLanguage)} dans une autre langue exclu(e)s.` : "",
-    dropped.noViews > 0 ? `${count(dropped.noViews)} sans vues publiques exclu(e)s.` : "",
+    line(dropped.paid, (n) => `${agree(n, "sponsorisé")} ou en partenariat rémunéré ${agree(n, "exclu")} (vues en partie payées)`),
+    line(dropped.pinned, (n) => `${agree(n, "épinglé")} ${agree(n, "exclu")}`),
+    line(dropped.otherLanguage, (n) => `dans une autre langue ${agree(n, "exclu")}`),
+    line(dropped.noViews, (n) => `sans vues publiques ${agree(n, "exclu")}`),
   ].filter(Boolean);
 }
 
@@ -452,7 +452,7 @@ async function collectInstagram(ctx: CollectContext): Promise<PlatformCollection
     ratiosAllowed: true,
     warnings: [
       posts.length === 0 ? `Aucun reel de moins de ${ctx.periodDays} jours trouvé pour ${tags}.` : "",
-      ...droppedWarnings(dropped, ["reel", "reels"]),
+      ...droppedWarnings(dropped, ["reel", "reels", false]),
       errorRowsWarning(errorRows) ?? "",
       "Reels récents des hashtags (Instagram ne publie aucun classement de tendance) ; abonnés lus ensuite pour les auteurs des reels les plus vus.",
     ].filter(Boolean),
@@ -478,7 +478,7 @@ async function collectTiktok(ctx: CollectContext): Promise<PlatformCollection> {
     ratiosAllowed: true,
     warnings: [
       posts.length === 0 ? `Aucune vidéo TikTok de moins de ${ctx.periodDays} jours trouvée pour ${input.searchQueries.join(", ")}.` : "",
-      ...droppedWarnings(dropped, ["vidéo", "vidéos"]),
+      ...droppedWarnings(dropped, ["vidéo", "vidéos", true]),
       errorRowsWarning(errorRows) ?? "",
       unknown > 0 ? `Abonnés de l'auteur non fournis par TikTok pour ${plural(unknown, "vidéo")}.` : "",
       "Vidéos les plus likées de la période pour chaque mot-clé : un échantillon des succès de la niche, pas toute la niche. Abonnés arrondis par TikTok.",
@@ -510,7 +510,7 @@ async function collectYoutube(ctx: CollectContext): Promise<PlatformCollection> 
     ratiosAllowed,
     warnings: [
       posts.length === 0 ? `Aucune vidéo YouTube de moins de ${ctx.periodDays} jours trouvée pour vos mots-clés.` : "",
-      ...droppedWarnings(dropped, ["vidéo", "vidéos"]),
+      ...droppedWarnings(dropped, ["vidéo", "vidéos", true]),
       ratiosAllowed ? "" : VIRAL_YOUTUBE_RATIOS_NOTE,
     ].filter(Boolean),
   };

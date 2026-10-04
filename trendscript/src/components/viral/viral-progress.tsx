@@ -56,17 +56,17 @@ function StepRow({
   );
 }
 
-function platformDetail(progress: PlatformProgress | undefined): { text: string; tone: "muted" | "warning" | "danger" } {
-  if (!progress || progress.state === "pending") return { text: "en attente", tone: "muted" };
-  if (progress.state === "running") return { text: "recherche des vidéos…", tone: "muted" };
+function platformDetail(progress: PlatformProgress | undefined): { text: string; warning?: string; error?: string } {
+  if (!progress || progress.state === "pending") return { text: "en attente" };
+  if (progress.state === "running") return { text: "recherche des vidéos…" };
   const summary = progress.summary;
-  if (!summary) return { text: "terminé", tone: "muted" };
-  if (summary.error) return { text: summary.error, tone: "danger" };
+  if (!summary) return { text: "terminé" };
+  if (summary.error) return { text: "", error: summary.error };
   const parts = [`${summary.count} ${pluralize(summary.count, "vidéo", "vidéos")}`];
   if (summary.medianViews !== undefined) parts.push(`médiane ${formatCompact(summary.medianViews)} vues`);
   if (!summary.ratiosAllowed) parts.push("ratios désactivés");
   else if (summary.medianMultiplier !== undefined) parts.push(`médiane ${formatMultiplier(summary.medianMultiplier)} son audience`);
-  return { text: parts.join(" · ") + (summary.warning ? ` — ${summary.warning}` : ""), tone: summary.warning ? "warning" : "muted" };
+  return { text: parts.join(" · "), ...(summary.warning ? { warning: summary.warning } : {}) };
 }
 
 export interface ViralProgressProps {
@@ -139,13 +139,9 @@ export function ViralProgress({ run, aiConfigured, onCancel }: ViralProgressProp
                       <PlatformIcon platform={platform} size="xs" tile={false} decorative className="mt-px" />
                       <span className="min-w-0">
                         <span className="font-medium text-ink">{platformLabel(platform)} : </span>
-                        <span
-                          className={cn(
-                            detail.tone === "danger" ? "text-danger-ink" : detail.tone === "warning" ? "text-warning-ink" : "text-muted",
-                          )}
-                        >
-                          {detail.text}
-                        </span>
+                        {detail.error ? <span className="text-danger-ink">{detail.error}</span> : null}
+                        {detail.text ? <span className="text-muted">{detail.text}</span> : null}
+                        {detail.warning ? <span className="text-warning-ink"> — {detail.warning}</span> : null}
                       </span>
                     </li>
                   );

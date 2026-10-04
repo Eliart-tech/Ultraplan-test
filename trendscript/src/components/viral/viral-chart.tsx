@@ -110,12 +110,12 @@ export function ViralScatter({ points, excluded, tableId, className }: ViralScat
   const explose = points.filter((point) => point.tier === "explose").length;
   const cartonne = points.filter((point) => point.tier === "cartonne").length;
   const best = order.length > 0 ? points[order[0]] : undefined;
-  const summary = `Nuage de ${points.length} ${pluralize(points.length, "vidéo", "vidéos")} : vues selon les abonnés de leur auteur, échelles logarithmiques, avec les diagonales ×1, ×3 et ×10. ${explose} ${pluralize(explose, "explose", "explosent")}, ${cartonne} ${pluralize(cartonne, "cartonne", "cartonnent")}.${best ? ` La plus forte : ${formatMultiplier(best.multiplier)} son audience (@${best.handle}).` : ""}`;
+  const summary = `Nuage de ${points.length} ${pluralize(points.length, "vidéo", "vidéos")} : vues selon les abonnés de leur auteur, échelles logarithmiques, avec les diagonales ×1, ×3 et ×10. ${explose} ${pluralize(explose, "explose", "explosent")}, ${cartonne} ${pluralize(cartonne, "cartonne", "cartonnent")}.${best ? ` La plus forte : ${formatMultiplier(best.multiplier)} son audience (${best.author}).` : ""}`;
 
   function describe(index: number): string {
     const point = points[index];
     if (!point) return "";
-    return `${formatNumber(point.views)} vues, ${formatMultiplier(point.multiplier)} son audience, @${point.handle} (${formatNumber(point.followers)} abonnés, ${platformLabel(point.platform)}). ${point.title}`;
+    return `${formatNumber(point.views)} vues, ${formatMultiplier(point.multiplier)} son audience, ${point.author} (${formatNumber(point.followers)} abonnés, ${platformLabel(point.platform)}). ${point.title}`;
   }
 
   function onPointerMove(event: PointerEvent<SVGSVGElement>) {
@@ -352,7 +352,7 @@ export function ViralScatter({ points, excluded, tableId, className }: ViralScat
                 {formatCompact(activePoint.views)} vues
               </span>
               <span>
-                · @{activePoint.handle} ({formatCompact(activePoint.followers)}
+                · {activePoint.author} ({formatCompact(activePoint.followers)}
                 {activePoint.followers <= FOLLOWER_FLOOR ? " ou moins" : ""} abonnés)
               </span>
             </p>

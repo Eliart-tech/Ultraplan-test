@@ -14,11 +14,12 @@ import { CreatorsCard } from "./creators-card";
 import { missingEnvTemplate } from "./env-template";
 import { KeyHowTo } from "./key-howto";
 import { SourceCard } from "./source-card";
+import { ViralCard } from "./viral-card";
 
 /**
  * "Sources de données" — everything comes from GET /api/sources (shared
- * `useServerStatus` store): overview, Claude, competitor analysis per
- * platform, each source (active ones first), how to add a key, password
+ * `useServerStatus` store): overview, Claude, the "Ce qui cartonne" lab and
+ * the competitor analysis per platform, each source (active ones first), how to add a key, password
  * protection.
  */
 export function SourcesPanel() {
@@ -105,6 +106,8 @@ export function SourcesPanel() {
       </div>
 
       <ClaudeCard ai={status.ai} />
+
+      {status.viral?.length ? <ViralCard capabilities={status.viral} /> : null}
 
       {status.creators?.length ? <CreatorsCard creators={status.creators} /> : null}
 

@@ -10,8 +10,9 @@
  * - `systemSettings`: the ONE virality row, ONE pedagogy row, ONE tone, the
  *   format and the platform block for this request.
  * - `user`: the volatile data — date, topic, evidence, research, angle,
- *   creator profile, word budget, output rules (and the previous draft when
- *   refining).
+ *   creator profile, saved competitors ("Paysage concurrentiel"), the niche's
+ *   winning recipes ("Ce qui cartonne dans ta niche"), word budget, output
+ *   rules (and the previous draft when refining).
  */
 
 import { CREATOR_PLATFORM_LABELS } from "../creators/labels";

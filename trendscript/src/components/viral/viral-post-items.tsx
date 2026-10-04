@@ -10,6 +10,7 @@ import { safeHref } from "@/components/studio/studio-utils";
 import { formatCompact, formatCount, formatDateTime, formatRelative, pluralize } from "@/lib/client/format";
 import { cn } from "@/lib/cn";
 import type { ViralPost, ViralReport } from "@/lib/types";
+import { viralAuthorLabel } from "@/lib/viral/labels";
 import { TIER_META, isExpiredPost, ratiosAllowedFor } from "./viral-utils";
 
 const isNumber = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
@@ -67,9 +68,14 @@ export function MultiplierBadge({ post, report, size = "md", className }: ViralB
   );
 }
 
+/** True when the "vs comptes de sa taille" comparison can be shown. */
+function hasBand(post: ViralPost, report: ViralReport): post is ViralPost & { vsBand: number } {
+  return isNumber(post.vsBand) && ratiosAllowedFor(report, post.platform) && !isExpiredPost(report, post);
+}
+
 /** "×2,3 vs comptes 10–100 k" — the multiplier against the median of creators of the same size. */
 export function BandBadge({ post, report, size = "md", className }: ViralBadgeProps) {
-  if (!isNumber(post.vsBand) || !ratiosAllowedFor(report, post.platform) || isExpiredPost(report, post)) return null;
+  if (!hasBand(post, report)) return null;
   return (
     <Tooltip content="× son audience comparé à la médiane des comptes de même taille, même plateforme">
       <Badge size={size} tone={post.vsBand >= 3 ? "accent" : "neutral"} variant="outline" icon={<Scale />} className={className}>
@@ -92,7 +98,7 @@ export function viralChipMetric(report: ViralReport): (post: ViralPost) => strin
 export function AuthorLine({ post, report, className }: { post: ViralPost; report: ViralReport; className?: string }) {
   const { author } = post;
   const href = author.url ? safeHref(author.url) : null;
-  const handle = `@${author.handle.replace(/^@+/, "")}`;
+  const handle = viralAuthorLabel(post);
   const expired = isExpiredPost(report, post);
   const followers = !expired && isNumber(author.followers) ? author.followers : undefined;
   return (
@@ -111,7 +117,7 @@ export function AuthorLine({ post, report, className }: { post: ViralPost; repor
       ) : (
         <span className="min-w-0 truncate font-medium text-ink">{handle}</span>
       )}
-      {author.displayName && author.displayName.trim() && author.displayName.trim() !== author.handle ? (
+      {author.displayName && author.displayName.trim() && author.displayName.trim() !== author.handle && !handle.includes(author.displayName.trim()) ? (
         <span className="hidden min-w-0 truncate sm:inline">({author.displayName.trim()})</span>
       ) : null}
       <span aria-hidden>·</span>
@@ -142,6 +148,45 @@ export function viralMetricLabels(post: ViralPost, report: ViralReport): string[
   return parts;
 }
 
+/**
+ * The left column of a video row (from `sm`): the headline number big —
+ * × its creator's audience, or raw views where ratios are off or the
+ * audience is unknown — and the tier.
+ */
+function ScoreCell({ post, report }: { post: ViralPost; report: ViralReport }) {
+  const tier = TIER_META[post.tier] ?? TIER_META.normal;
+  const strong = post.tier === "explose" || post.tier === "cartonne";
+  const tone = post.tier === "explose" ? "hot" : post.tier === "cartonne" ? "accent" : "neutral";
+  const variant = post.tier === "explose" ? "solid" : post.tier === "normal" ? "outline" : "soft";
+  const numberTone = post.tier === "explose" ? "text-hot-ink" : post.tier === "cartonne" ? "text-accent-ink" : "text-ink";
+  const expired = isExpiredPost(report, post);
+  const allowed = ratiosAllowedFor(report, post.platform);
+  const views = post.metrics.views;
+
+  let value = "—";
+  let unit = "";
+  if (expired) unit = "chiffres expirés";
+  else if (allowed && isNumber(post.multiplier)) {
+    value = formatMultiplier(post.multiplier);
+    unit = "son audience";
+  } else if (isNumber(views)) {
+    value = formatCompact(views);
+    unit = allowed ? `${pluralize(views, "vue", "vues")} · audience inconnue` : pluralize(views, "vue", "vues");
+  }
+
+  return (
+    <div aria-hidden className="hidden w-[6.5rem] shrink-0 flex-col items-start sm:flex">
+      <span className={cn("text-xl font-semibold leading-tight tracking-tight", expired ? "text-muted" : numberTone)}>{value}</span>
+      {unit ? <span className="text-xs leading-snug text-muted">{unit}</span> : null}
+      {!expired && (strong || allowed) ? (
+        <Badge size="sm" tone={tone} variant={variant} className="mt-1.5">
+          {!allowed && strong ? "Top vues" : tier.label}
+        </Badge>
+      ) : null}
+    </div>
+  );
+}
+
 export interface ViralPostRowProps {
   post: ViralPost;
   report: ViralReport;
@@ -151,15 +196,17 @@ export interface ViralPostRowProps {
 }
 
 /**
- * One real video of the niche: × its creator's audience (tier colour), vs
- * creators of the same size, linked title, author and audience, views,
- * velocity, shares + saves, kind / duration and date.
+ * One real video of the niche: × its creator's audience (tier colour; a big
+ * number column from `sm`, a badge on phones), vs creators of the same size,
+ * linked title, author and audience, views, velocity, shares + saves, kind /
+ * duration and date.
  */
 export function ViralPostRow({ post, report, now, rank }: ViralPostRowProps) {
   const metrics = viralMetricLabels(post, report);
   const relative = post.publishedAt ? formatRelative(post.publishedAt, now) : "";
+  const band = hasBand(post, report) ? <BandBadge post={post} report={report} size="sm" /> : null;
   return (
-    <li className="flex gap-3 py-4 first:pt-0 last:pb-0">
+    <li className="flex gap-3 py-4 first:pt-0 last:pb-0 sm:gap-4">
       {rank !== undefined ? (
         <span
           aria-hidden
@@ -168,12 +215,16 @@ export function ViralPostRow({ post, report, now, rank }: ViralPostRowProps) {
           {rank}
         </span>
       ) : null}
+      <ScoreCell post={post} report={report} />
       <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <MultiplierBadge post={post} report={report} />
-          <BandBadge post={post} report={report} size="sm" />
+        {/* Phones: the badge carries the number; from sm it is the score column (the badge stays for screen readers). */}
+        <div className="mb-1.5 flex flex-wrap items-center gap-1.5 empty:hidden sm:mb-0">
+          <span className="inline-flex sm:sr-only">
+            <MultiplierBadge post={post} report={report} />
+          </span>
+          {band ? <span className="inline-flex sm:hidden">{band}</span> : null}
         </div>
-        <p className="mt-1.5 text-sm font-medium leading-snug">
+        <p className="text-sm font-medium leading-snug">
           <PostLink post={post} className="break-words" />
         </p>
         <AuthorLine post={post} report={report} className="mt-1" />
@@ -189,6 +240,7 @@ export function ViralPostRow({ post, report, now, rank }: ViralPostRowProps) {
             </>
           ) : null}
         </p>
+        {band ? <div className="mt-1.5 hidden sm:flex">{band}</div> : null}
       </div>
     </li>
   );

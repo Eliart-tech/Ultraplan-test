@@ -57,7 +57,8 @@ export function PostLink({
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "group text-ink underline-offset-2 transition-colors duration-150 hover:text-accent-ink hover:underline",
+        // relative: keeps the sr-only hint inside a truncated (overflow-hidden) link instead of widening the page.
+        "group relative text-ink underline-offset-2 transition-colors duration-150 hover:text-accent-ink hover:underline",
         className,
       )}
     >

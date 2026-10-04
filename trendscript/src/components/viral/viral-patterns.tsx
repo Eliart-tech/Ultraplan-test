@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { pluralize } from "@/lib/client/format";
 import { cn } from "@/lib/cn";
 import type { PostReference, ViralPatterns, ViralPost, ViralReport } from "@/lib/types";
+import { viralAuthorLabel } from "@/lib/viral/labels";
 import { MultiplierBadge, viralChipMetric } from "./viral-post-items";
 import { viralPostIndex } from "./viral-utils";
 
@@ -35,7 +36,7 @@ function QuoteList({ examples, report, index }: { examples: PostReference[]; rep
             {post ? (
               <p className="mt-1.5 flex min-w-0 flex-wrap items-center gap-1.5 pl-5.5 text-xs text-muted">
                 <MultiplierBadge post={post} report={report} size="sm" />
-                <span className="min-w-0 truncate">@{post.author.handle.replace(/^@+/, "")} :</span>
+                <span className="min-w-0 truncate">{viralAuthorLabel(post)} :</span>
                 <PostLink post={post} className="min-w-0 max-w-full truncate text-muted">
                   {post.title}
                 </PostLink>
@@ -95,13 +96,13 @@ export function RecipesSection({ report, patterns }: PatternsProps) {
       }
     >
       {patterns.recipes.length > 0 ? (
-        <div className="grid gap-4 xl:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4">
           {patterns.recipes.map((recipe, rank) => {
             const quoted = new Set(recipe.examples.map((example) => example.postId));
             const others = resolvePosts(recipe.postIds, index).filter((post) => !quoted.has(post.id));
             const evidence = new Set([...recipe.postIds, ...quoted]).size;
             return (
-              <Card key={rank} as="article" aria-labelledby={`recette-${rank}`} className="flex flex-col gap-3 px-5 py-5 sm:px-6">
+              <Card key={rank} as="article" aria-labelledby={`recette-${rank}`} className="flex min-w-0 flex-col gap-3 px-5 py-5 sm:px-6">
                 <div className="flex items-start gap-3">
                   <span
                     aria-hidden
@@ -121,7 +122,7 @@ export function RecipesSection({ report, patterns }: PatternsProps) {
                   </div>
                 </div>
                 {recipe.description ? <p className="text-sm leading-relaxed text-ink/85">{recipe.description}</p> : null}
-                <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+                <div className="grid grid-cols-1 gap-2.5 md:grid-cols-2">
                   {recipe.viewsLever ? (
                     <Lever icon={<Eye />} label="Levier vues" tone="hot">
                       {recipe.viewsLever}
@@ -165,9 +166,9 @@ export function HooksSection({ report, patterns }: PatternsProps) {
       title="Hooks qui marchent"
       description="Les formules d'accroche des vidéos qui explosent, avec leurs phrases exactes. À comprendre et adapter, jamais à recopier."
     >
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         {patterns.hookPatterns.map((pattern, rank) => (
-          <Card key={rank} as="article" className="px-5 py-4 sm:px-6">
+          <Card key={rank} as="article" className="min-w-0 px-5 py-4 sm:px-6">
             <h3 className="text-[0.9375rem] font-semibold leading-snug text-ink">{pattern.pattern}</h3>
             {pattern.whyItWorks ? <p className="mt-1 text-sm leading-relaxed text-muted">{pattern.whyItWorks}</p> : null}
             <div className="mt-3">
@@ -195,7 +196,7 @@ export function FormatsSection({ report, patterns }: PatternsProps) {
       title="Formats et durées"
       description="Comment ces vidéos sont tournées et montées, et la durée qui tient l'attention dans votre niche."
     >
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         {patterns.formats.length > 0 ? (
           <Card className="px-5 py-4 sm:px-6">
             <SubHeading className="mb-3">Formats</SubHeading>
@@ -341,7 +342,7 @@ export function ViralIdeasSection({ report, patterns, onWriteIdea }: ViralIdeasS
       }
     >
       {ideas.length > 0 ? (
-        <div className={cn("grid gap-4", ideas.length > 1 && "md:grid-cols-2")}>
+        <div className={cn("grid grid-cols-1 gap-4", ideas.length > 1 && "md:grid-cols-2")}>
           {ideas.map((idea, ideaIndex) => (
             <IdeaCard
               key={ideaIndex}

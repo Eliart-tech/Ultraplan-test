@@ -19,6 +19,8 @@ import type {
   ViralReport,
   ViralTier,
 } from "@/lib/types";
+import { viralAuthorLabel } from "@/lib/viral/labels";
+import { BON_MULTIPLIER, CARTONNE_MULTIPLIER, CARTONNE_VS_BAND, EXPLOSE_MULTIPLIER, FOLLOWER_FLOOR } from "@/lib/viral/score";
 
 const isNumber = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
 
@@ -96,9 +98,13 @@ export interface TierMeta {
  * calibrated on real French data — the UI says so.
  */
 export const TIER_META: Record<ViralTier, TierMeta> = {
-  explose: { label: "Explose", verb: "explosent", rule: "au moins ×10 son audience" },
-  cartonne: { label: "Cartonne", verb: "cartonnent", rule: "au moins ×3 son audience, ou ×3 les comptes de sa taille" },
-  bon: { label: "Bon", verb: "au-dessus de leur audience", rule: "plus de vues que d'abonnés (×1)" },
+  explose: { label: "Explose", verb: "explosent", rule: `au moins ×${EXPLOSE_MULTIPLIER} son audience` },
+  cartonne: {
+    label: "Cartonne",
+    verb: "cartonnent",
+    rule: `au moins ×${CARTONNE_MULTIPLIER} son audience, ou ×${CARTONNE_VS_BAND} les comptes de sa taille`,
+  },
+  bon: { label: "Bon", verb: "au-dessus de leur audience", rule: `au moins autant de vues que d'abonnés (×${BON_MULTIPLIER})` },
   normal: { label: "Dans la norme", verb: "dans la norme", rule: "moins de vues que d'abonnés, ou audience inconnue" },
 };
 
@@ -161,7 +167,7 @@ export interface ViralFilters {
 export const DEFAULT_FILTERS: ViralFilters = { platform: "all", tier: "all", sort: "rank" };
 
 export const SORT_LABELS: Record<ViralSort, string> = {
-  rank: "Classement (niveau, puis × audience)",
+  rank: "Niveau, puis × audience",
   multiplier: "× son audience",
   views: "Vues",
   velocity: "Vues par jour",
@@ -328,8 +334,8 @@ export function selectViralReport(
 // Scatter plot: views vs the author's followers, log scales
 // ---------------------------------------------------------------------------
 
-/** Followers are floored at 1 000 in the multiplier: the plot uses the same floor. */
-export const FOLLOWER_FLOOR = 1000;
+/** Followers are floored (1 000) in the multiplier: the plot uses the same floor. */
+export { FOLLOWER_FLOOR };
 
 export interface ScatterPoint {
   postId: string;
@@ -340,7 +346,8 @@ export interface ScatterPoint {
   tier: ViralTier;
   platform: ViralPlatform;
   title: string;
-  handle: string;
+  /** "@handle" (or a YouTube channel's name). */
+  author: string;
 }
 
 /**
@@ -373,7 +380,7 @@ export function scatterPoints(report: ViralReport, posts: readonly ViralPost[]):
       tier: post.tier,
       platform: post.platform,
       title: post.title,
-      handle: post.author.handle,
+      author: viralAuthorLabel(post),
     });
   }
   return { points, excluded };
