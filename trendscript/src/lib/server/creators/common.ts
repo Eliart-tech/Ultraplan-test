@@ -89,6 +89,7 @@ export function buildCreatorData({
   now,
   maxPosts,
   warnings,
+  ratiosAllowed,
 }: {
   account: CreatorAccount;
   posts: CreatorPost[];
@@ -96,6 +97,8 @@ export function buildCreatorData({
   now: number;
   maxPosts: number;
   warnings: (string | undefined | false)[];
+  /** See CreatorData.ratiosAllowed — only set by the YouTube fetcher. */
+  ratiosAllowed?: boolean;
 }): CreatorData {
   return {
     account: compact(account),
@@ -103,6 +106,7 @@ export function buildCreatorData({
     source,
     fetchedAt: new Date(now).toISOString(),
     warnings: [...new Set(warnings.filter((w): w is string => typeof w === "string" && w.trim().length > 0))],
+    ...(ratiosAllowed === undefined ? {} : { ratiosAllowed }),
   };
 }
 

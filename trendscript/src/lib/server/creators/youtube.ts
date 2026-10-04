@@ -29,6 +29,7 @@ import { feedUrl, parseYoutubeFeed, type FeedVideo } from "../sources/youtube-rs
 import { errorMessage, extractHashtags, scrubSecrets, toCount, toIso } from "../sources/social-utils";
 import { BIO_MAX, CAPTION_MAX, buildCreatorData, noAudienceWarning, plural, type FetchCreatorOptions } from "./common";
 import { YOUTUBE_CHANNEL_ID, creatorProfileUrl } from "./handles";
+import type { Env } from "../sources/types";
 
 /** Entries in a channel's RSS feed. */
 export const RSS_MAX_VIDEOS = 15;
@@ -46,6 +47,23 @@ export const YOUTUBE_PAGE_HEADERS: Record<string, string> = {
   Accept: "text/html,application/xhtml+xml",
   Cookie: "SOCS=CAI",
 };
+
+/**
+ * YouTube API Developer Policies (III.E.4): no derived metrics such as
+ * views ÷ subscribers on other channels' data without the "derived
+ * metrics" amendment, which the operator declares with
+ * YT_DERIVED_METRICS_APPROVED=true.
+ */
+export function youtubeRatiosAllowed(env: Env): boolean {
+  return env.YT_DERIVED_METRICS_APPROVED?.trim() === "true";
+}
+
+export const YOUTUBE_RATIOS_DISABLED =
+  "YouTube : les ratios (vues ÷ abonnés) sont désactivés — les règles développeurs de YouTube les interdisent sans l'avenant « derived metrics » (YT_DERIVED_METRICS_APPROVED). Chiffres bruts uniquement.";
+
+function policyWarning(env: Env): string | undefined {
+  return youtubeRatiosAllowed(env) ? undefined : YOUTUBE_RATIOS_DISABLED;
+}
 
 function notFound(handle: string): SourceError {
   const shown = YOUTUBE_CHANNEL_ID.test(handle) ? handle : `@${handle}`;
@@ -428,7 +446,9 @@ async function fetchWithApi(handle: string, apiKey: string, options: FetchCreato
     source: YOUTUBE_API_SOURCE,
     now: options.now,
     maxPosts: options.maxPosts,
+    ratiosAllowed: youtubeRatiosAllowed(options.env),
     warnings: [
+      policyWarning(options.env),
       channel.statistics?.hiddenSubscriberCount && noAudienceWarning("Nombre d'abonnés masqué par la chaîne"),
       guessedFormat > 0 &&
         `Format Short ou vidéo longue déduit de la durée (≤ 3 min = Short) pour ${plural(guessedFormat, "vidéo")} absente(s) du flux RSS : une vidéo horizontale courte peut être comptée comme Short.`,
@@ -460,6 +480,8 @@ async function fetchKeyless(handle: string, options: FetchCreatorOptions): Promi
   const account = pageToAccount(page, handle);
   if (posts.length === 0) throw new SourceError(`Aucune vidéo publique sur la chaîne YouTube ${shownHandle(account.handle)}.`);
 
+  const policy = policyWarning(options.env);
+  if (policy) warnings.unshift(policy);
   if (account.followers === undefined) {
     warnings.push(noAudienceWarning(page.title ? "Nombre d'abonnés masqué par la chaîne" : "Nombre d'abonnés indisponible"));
   } else if (page.subscribersLabel) {
@@ -468,7 +490,15 @@ async function fetchKeyless(handle: string, options: FetchCreatorOptions): Promi
   warnings.push(
     `Sans clé YouTube, seules les ${RSS_MAX_VIDEOS} dernières vidéos sont lisibles (flux RSS public), avec vues et likes mais sans commentaires ni durées : ajoutez YOUTUBE_API_KEY (gratuite) pour en analyser jusqu'à 50 avec toutes leurs statistiques.`,
   );
-  return buildCreatorData({ account, posts, source: YOUTUBE_KEYLESS_SOURCE, now: options.now, maxPosts: options.maxPosts, warnings });
+  return buildCreatorData({
+    account,
+    posts,
+    source: YOUTUBE_KEYLESS_SOURCE,
+    now: options.now,
+    maxPosts: options.maxPosts,
+    warnings,
+    ratiosAllowed: youtubeRatiosAllowed(options.env),
+  });
 }
 
 /** Throws SourceError (French) when the channel does not exist or nothing can be read. */

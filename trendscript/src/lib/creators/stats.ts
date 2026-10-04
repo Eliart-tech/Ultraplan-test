@@ -13,6 +13,8 @@
  * - Calendar buckets use the market's time zone (`timeZoneForGeo`).
  * - Posts published less than 48 h before the analysis are still
  *   accumulating views: they are never listed among the weakest posts.
+ * - `data.ratiosAllowed === false` (YouTube API terms): no derived rates or
+ *   views ÷ subscribers multipliers; rankings on raw counts remain.
  */
 
 import type { CreatorData, CreatorPost, CreatorPostMetrics, CreatorStats, StatBucket } from "../types";
@@ -363,6 +365,10 @@ export function computeCreatorStats(data: CreatorData, { now, timeZone }: Creato
   const posts = data.posts;
   const metric = chooseRankingMetric(posts);
   const followers = data.account.followers;
+  // YouTube API terms: no derived metrics (rates, views ÷ subscribers) on
+  // other channels' data unless the amendment was accepted. Rankings on raw
+  // counts (top, outliers vs the creator's own median) remain.
+  const ratiosAllowed = data.ratiosAllowed !== false;
 
   const valued = ranked(posts, (post) => rankingValue(post, metric));
   const med = median(valued.map((entry) => entry.value));
@@ -394,12 +400,14 @@ export function computeCreatorStats(data: CreatorData, { now, timeZone }: Creato
   const medianViews = median(posts.map((post) => post.metrics.views));
   const medianLikes = median(posts.map((post) => post.metrics.likes));
   const medianComments = median(posts.map((post) => post.metrics.comments));
-  const engagement = median(posts.map((post) => engagementRate(post.metrics)));
-  const shareSave = median(posts.map((post) => shareSaveRate(post.metrics)));
+  const engagement = ratiosAllowed ? median(posts.map((post) => engagementRate(post.metrics))) : undefined;
+  const shareSave = ratiosAllowed ? median(posts.map((post) => shareSaveRate(post.metrics))) : undefined;
 
-  const audienceMultipliers = sortRanked(ranked(posts, (post) => audienceMultiplier(post, followers)))
-    .slice(0, TOP_MULTIPLIERS)
-    .map((entry) => ({ postId: entry.post.id, multiplier: entry.value }));
+  const audienceMultipliers = ratiosAllowed
+    ? sortRanked(ranked(posts, (post) => audienceMultiplier(post, followers)))
+        .slice(0, TOP_MULTIPLIERS)
+        .map((entry) => ({ postId: entry.post.id, multiplier: entry.value }))
+    : [];
 
   // Calendar (market time zone).
   const byWeekday: CreatorPost[][] = WEEKDAYS_FR.map(() => []);
@@ -449,7 +457,7 @@ export function computeCreatorStats(data: CreatorData, { now, timeZone }: Creato
     ...(medianLikes !== undefined ? { medianLikes: Math.round(medianLikes) } : {}),
     ...(medianComments !== undefined ? { medianComments: Math.round(medianComments) } : {}),
     ...(engagement !== undefined ? { engagementRate: round(engagement, 2) } : {}),
-    ...(medianViews !== undefined && isNumber(followers) && followers > 0
+    ...(ratiosAllowed && medianViews !== undefined && isNumber(followers) && followers > 0
       ? { reachRate: roundRatio(100 * medianViews, followers, 1) }
       : {}),
     outliers,
