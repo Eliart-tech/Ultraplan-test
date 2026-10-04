@@ -2,7 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { NOW, fixtureCreator, fixtureReport } from "@/lib/creators/__fixtures__/creator";
 import { computeCreatorStats } from "@/lib/creators/stats";
 import { fixtureDraft, fixtureSettings, fixtureSignals, fixtureTopic } from "@/lib/script/__fixtures__/script";
-import type { Analysis, CompetitorReport, GeneratedScript } from "@/lib/types";
+import type { Analysis, CompetitorReport, GeneratedScript, ViralReport } from "@/lib/types";
+import { fixtureViralReport } from "@/lib/viral/__fixtures__/viral";
 
 /** In-memory Storage with an optional byte quota (UTF-16 length of all values). */
 class MemoryStorage implements Storage {
@@ -426,5 +427,100 @@ describe("studio hand-off (sessionStorage)", () => {
     expect(storage.peekStudioHandoff(now + storage.HANDOFF_TTL_MS + 1)).toBeNull();
     session.setItem("trendscript:handoff:v1", JSON.stringify({ version: 1, createdAt: new Date(now).toISOString(), topic: {} }));
     expect(storage.peekStudioHandoff(now)).toBeNull();
+  });
+});
+
+describe("« Ce qui cartonne » lab reports", () => {
+  const DAY = 24 * 60 * 60_000;
+  function lab(keywords: string[], overrides: Partial<ViralReport> = {}): ViralReport {
+    const base = fixtureViralReport();
+    return { ...base, id: `lab-${keywords.join("-")}`, request: { ...base.request, keywords }, ...overrides };
+  }
+
+  it("keys reports by platforms + keywords, ignoring order, case, accents and #", () => {
+    expect(storage.viralKey(["Productivité", "#sommeil"], ["tiktok", "instagram"])).toBe("instagram+tiktok:productivite|sommeil");
+    expect(storage.viralKey(["sommeil", "productivite"], ["instagram", "tiktok"])).toBe("instagram+tiktok:productivite|sommeil");
+    expect(storage.viralReportKey(fixtureViralReport())).toBe("instagram+tiktok+youtube:productivite|sommeil");
+  });
+
+  it("saves newest first, one report per keywords + platforms, max 6", () => {
+    storage.saveViralReport(lab(["a1"]));
+    storage.saveViralReport(lab(["b1"]));
+    const again = lab(["A1"], { id: "lab-a-again" });
+    expect(storage.saveViralReport(again)).toEqual({ ok: true, evicted: 0 });
+    expect(storage.getViralReports().map((r) => r.id)).toEqual(["lab-a-again", "lab-b1"]);
+    expect(JSON.parse(local.getItem("trendscript:viral:v1")!).version).toBe(1);
+    expect(storage.findViralReport(storage.viralReportKey(again))?.id).toBe("lab-a-again");
+
+    for (let i = 0; i < 8; i++) storage.saveViralReport(lab([`k${i}`]));
+    const reports = storage.getViralReports();
+    expect(reports).toHaveLength(storage.MAX_SAVED_VIRAL);
+    expect(reports[0].id).toBe("lab-k7");
+  });
+
+  it("trims long captions, removes and clears", () => {
+    const long = lab(["long"]);
+    long.posts = long.posts.map((post, index) => (index === 0 ? { ...post, text: "x".repeat(4000) } : post));
+    storage.saveViralReport(long);
+    expect(storage.getViralReports()[0].posts[0].text).toHaveLength(storage.STORED_POST_TEXT_MAX);
+    storage.saveViralReport(lab(["autre"]));
+    storage.removeViralReport(storage.viralReportKey(long));
+    expect(storage.getViralReports().map((r) => r.id)).toEqual(["lab-autre"]);
+    storage.clearViralReports();
+    expect(local.getItem("trendscript:viral:v1")).toBeNull();
+    expect(storage.getViralReports()).toEqual([]);
+  });
+
+  it("drops malformed and duplicate entries when reading", async () => {
+    const dirty = new MemoryStorage();
+    dirty.setItem(
+      "trendscript:viral:v1",
+      JSON.stringify({
+        version: 1,
+        reports: [lab(["ok"]), { id: "broken" }, lab(["OK"], { id: "dup" }), lab(["x"], { posts: [{ id: "p" }] as never }), null],
+      }),
+    );
+    await setup(dirty);
+    expect(storage.getViralReports().map((r) => r.id)).toEqual(["lab-ok"]);
+    expect(storage.sanitizeViralReports("nope")).toEqual([]);
+  });
+
+  it("erases YouTube statistics after 30 days when ratios are not allowed, keeping the rest", async () => {
+    const createdAt = new Date(Date.parse("2026-10-04T10:00:00Z") - 40 * DAY).toISOString();
+    const old = lab(["vieux"], { createdAt });
+    const now = Date.parse("2026-10-04T10:00:00Z");
+    expect(storage.isViralRetentionExpired(old, now)).toBe(true);
+    expect(storage.isViralRetentionExpired(lab(["recent"]), now)).toBe(false);
+    const approved = lab(["ok"], { createdAt, platforms: old.platforms.map((s) => ({ ...s, ratiosAllowed: true })) });
+    expect(storage.isViralRetentionExpired(approved, now)).toBe(false);
+
+    const stripped = storage.stripViralYoutubeMetrics(old);
+    const youtube = stripped.posts.filter((post) => post.platform === "youtube");
+    expect(youtube.every((post) => Object.keys(post.metrics).length === 0 && post.author.followers === undefined)).toBe(true);
+    expect(youtube.every((post) => post.viewsPerDay === undefined && post.tier === "normal" && post.title)).toBe(true);
+    const tiktok = stripped.posts.find((post) => post.id === "tiktok:tt1")!;
+    expect(tiktok.metrics.views).toBe(900_000);
+    expect(stripped.platforms.find((s) => s.platform === "youtube")?.medianViews).toBeUndefined();
+    expect(stripped.patterns).toEqual(old.patterns);
+    expect(storage.isViralMetricsStripped(stripped)).toBe(true);
+    expect(storage.stripViralYoutubeMetrics(stripped)).toBe(stripped);
+
+    const seeded = new MemoryStorage();
+    seeded.setItem("trendscript:viral:v1", JSON.stringify({ version: 1, reports: [old] }));
+    await setup(seeded);
+    expect(storage.getViralReports()[0].posts.find((post) => post.platform === "youtube")?.metrics).toEqual({});
+    expect(storage.purgeExpiredViralReports()).toBe(1);
+    const stored = JSON.parse(seeded.getItem("trendscript:viral:v1")!).reports[0];
+    expect(stored.notes[0]).toBe(storage.VIRAL_RETENTION_NOTE);
+    expect(storage.purgeExpiredViralReports()).toBe(0);
+  });
+
+  it("hands a lab idea to the Studio with its report key", () => {
+    const now = Date.parse("2026-10-02T12:00:00Z");
+    storage.saveStudioHandoff(
+      { topic: fixtureTopic, signals: fixtureSignals, angle: fixtureTopic.angles[0], viralKey: "tiktok:sommeil" },
+      now,
+    );
+    expect(storage.peekStudioHandoff(now)?.viralKey).toBe("tiktok:sommeil");
   });
 });

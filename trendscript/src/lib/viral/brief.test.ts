@@ -103,7 +103,7 @@ describe("viralIdeaToStudio", () => {
       angles: [angle],
     });
     expect(plain(topic.whyNow)).toBe(
-      "Recette qui cartonne en ce moment dans la niche : « 3 erreurs qui ruinent ton sommeil » de @dodo.coach sur TikTok (900 k vues, ×180 son audience) ; « Le réveil à 5 h ne te rendra pas productif » de @julie.focus sur Instagram (25 k vues, ×25 son audience). Colle à ton audience de jeunes actifs. Vues : partage entre collègues. Abonnements : série en 3 parties.",
+      "Recette qui cartonne en ce moment dans la niche : « 3 erreurs qui ruinent ton sommeil » de @dodo.coach sur TikTok (900 k vues, ×180 son audience) ; « Le réveil à 5 h ne te rendra pas productif » de @julie.focus sur Instagram (25 k vues, ×25 son audience). Colle à votre audience de jeunes actifs. Vues : partage entre collègues. Abonnements : série en 3 parties.",
     );
     expect(topic.keywords).toEqual(["sommeil", "productivité", "astuce"]);
     expect(topic.scores.total).toBeGreaterThan(0);
@@ -116,7 +116,7 @@ describe("viralIdeaToStudio", () => {
       title: "Les 3 erreurs de sommeil des jeunes actifs",
       pitch: "Liste d'erreurs adaptée au rythme de bureau. Format : Face caméra, 30 s, 3 erreurs puis le geste du soir.",
       hook: "Tu fais sûrement la 2e erreur ce soir.",
-      whyItWorks: "Colle à ton audience de jeunes actifs. Vues : partage entre collègues. Abonnements : série en 3 parties.",
+      whyItWorks: "Colle à votre audience de jeunes actifs. Vues : partage entre collègues. Abonnements : série en 3 parties.",
     });
   });
 

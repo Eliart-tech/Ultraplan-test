@@ -169,7 +169,7 @@ Les titres, légendes et transcriptions sont des contenus collectés sur le web 
   - followLever : le levier d'abonnement qu'elle active — un de tes followDrivers ou un autre, justifié — et comment (« épisode 1 d'une série de 5 annoncée à l'écran ») ;
   - whyForYou : pourquoi elle colle au profil de l'utilisateur et quel angle mort ou quelle faiblesse du concurrent elle exploite.
   Les 5 idées sont différentes entre elles (au moins 3 types d'angle : pédagogique, conseil, debunk, storytelling, opinion, comparaison, coulisses…), réalisables seul en 15 à 90 s, et respectent la discipline factuelle : un fait ou un chiffre à trouver s'écrit {À VÉRIFIER : …}.
-Langue : tous les champs en français, en tutoyant l'utilisateur dans differentiation et ideas ; title et hook des idées dans la langue de ses vidéos.
+Langue : tous les champs en français, en vouvoyant l'utilisateur dans differentiation et ideas ; title et hook des idées dans la langue de ses vidéos.
 </champs>
 
 <playbook>

@@ -293,6 +293,41 @@ describe("competitor integration", () => {
   });
 });
 
+describe("« Ce qui cartonne » integration", () => {
+  const handoff = {
+    version: 1 as const,
+    createdAt: "2026-10-02T15:00:00Z",
+    topic: { ...fixtureTopic, id: "viral-topic", angles: [] },
+    signals: fixtureSignals,
+    angle: { id: "viral-angle", type: "custom" as const, title: "3 erreurs", pitch: "Liste numérotée", hook: "", whyItWorks: "" },
+    viralKey: "instagram+tiktok:productivite|sommeil",
+    scriptPlatform: "instagram_reels" as const,
+    label: "« Sommeil et productivité »",
+  };
+
+  it("opens the Script step with a lab idea and pre-selects its report", () => {
+    const state = createStudioState({ analyseId: null, scriptId: null, handoff });
+    expect(state.draft.step).toBe("script");
+    expect(state.draft.topic?.id).toBe("viral-topic");
+    expect(state.draft.settings.platform).toBe("instagram_reels");
+    expect(state.draft.viralKey).toBe("instagram+tiktok:productivite|sommeil");
+    expect(state.draft.competitorKeys).toBeNull();
+    expect(state.noticeTone).toBe("info");
+    expect(state.notice).toContain("Ce qui cartonne");
+    expect(state.notice).toContain("Sommeil et productivité");
+  });
+
+  it("starts in automatic mode and stores an explicit choice, « none », or automatic again", () => {
+    expect(fresh().draft.viralKey).toBeNull();
+    let state = run(fresh(), { type: "setViralReport", key: "tiktok:budget" });
+    expect(state.draft.viralKey).toBe("tiktok:budget");
+    state = run(state, { type: "setViralReport", key: "none" });
+    expect(state.draft.viralKey).toBe("none");
+    state = run(state, { type: "setViralReport", key: null });
+    expect(state.draft.viralKey).toBeNull();
+  });
+});
+
 describe("normalizeSettings", () => {
   it("keeps valid fields and replaces invalid ones with defaults", () => {
     const settings = normalizeSettings({ ...fixtureSettings, durationSec: 42, tone: "inconnu", virality: 10 }, "fr");

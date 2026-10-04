@@ -154,11 +154,9 @@ export function ViralProgress({ run, aiConfigured, onCancel }: ViralProgressProp
             icon={<UsersRound />}
             label="Récupération des abonnés des auteurs"
             detail={
-              enrich === "current"
-                ? run.message || "Pour mesurer de combien chaque vidéo dépasse l'audience de son créateur…"
-                : enrich === "upcoming"
-                  ? "Pour mesurer de combien chaque vidéo dépasse l'audience de son créateur."
-                  : undefined
+              enrich === "current" || enrich === "upcoming"
+                ? "Pour mesurer de combien chaque vidéo dépasse l'audience de son créateur."
+                : undefined
             }
           />
           <StepRow
@@ -171,7 +169,7 @@ export function ViralProgress({ run, aiConfigured, onCancel }: ViralProgressProp
                 : analysis === "current"
                   ? run.chars > 0
                     ? `${formatNumber(run.chars)} caractères rédigés`
-                    : run.message || "Recettes, hooks, ce qui fait s'abonner, idées pour vous…"
+                    : "Recettes, hooks, ce qui fait s'abonner, idées pour vous…"
                   : undefined
             }
           />

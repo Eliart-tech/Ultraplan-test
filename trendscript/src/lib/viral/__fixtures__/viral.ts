@@ -283,7 +283,7 @@ export const fixtureViralPatterns: ViralPatterns = {
       angle: "Liste d'erreurs adaptée au rythme de bureau.",
       hook: "Tu fais sûrement la 2e erreur ce soir.",
       format: "Face caméra, 30 s, 3 erreurs puis le geste du soir",
-      whyForYou: "Colle à ton audience de jeunes actifs. Vues : partage entre collègues. Abonnements : série en 3 parties.",
+      whyForYou: "Colle à votre audience de jeunes actifs. Vues : partage entre collègues. Abonnements : série en 3 parties.",
       inspiredBy: ["tiktok:tt1", "instagram:IG1abc"],
     },
   ],

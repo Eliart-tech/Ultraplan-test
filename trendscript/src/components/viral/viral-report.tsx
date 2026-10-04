@@ -190,6 +190,8 @@ function PlatformSummaryCard({ summary, stripped }: { summary: ViralPlatformSumm
         <p className="text-sm font-semibold text-ink">{label}</p>
         {summary.error ? (
           <p className="mt-0.5 text-danger-ink">{summary.error}</p>
+        ) : summary.count === 0 ? (
+          <p className="mt-0.5">Aucune vidéo récupérée{summary.source ? ` · ${summary.source}` : ""}.</p>
         ) : (
           <>
             <p className="mt-0.5">

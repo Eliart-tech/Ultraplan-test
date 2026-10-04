@@ -29,7 +29,7 @@ export function ViralCard({ capabilities }: { capabilities: ViralCapability[] })
             </h3>
             <p className="mt-0.5 text-sm leading-relaxed text-muted">
               Trouver les vidéos récentes d&apos;une niche, lire l&apos;audience de leurs auteurs et mesurer de combien
-              chacune la dépasse : la base des recettes et des idées de la page Ce qui cartonne.
+              chacune la dépasse : la base des recettes et des idées de la page « Ce qui cartonne ».
             </p>
             <div className="mt-2.5 flex flex-wrap gap-1.5">
               <Badge tone={available > 0 ? "success" : "neutral"} icon={available > 0 ? <CircleCheck /> : <CircleDashed />}>
@@ -76,8 +76,8 @@ export function ViralCard({ capabilities }: { capabilities: ViralCapability[] })
         <p className="flex gap-2 text-xs leading-relaxed text-muted">
           <Scale aria-hidden className="mt-px size-3.5 shrink-0 text-faint" />
           <span>
-            Aucune plateforme ne publie les abonnements gagnés par vidéo pour le compte d&apos;un autre : Ce qui cartonne mesure
-            les vues ÷ abonnés de l&apos;auteur, le meilleur signal public de ce qui fait gagner des abonnés.
+            Aucune plateforme ne publie les abonnements gagnés par vidéo pour le compte d&apos;un autre : « Ce qui cartonne »
+            mesure les vues ÷ abonnés de l&apos;auteur, le meilleur signal public de ce qui fait gagner des abonnés.
           </span>
         </p>
       </div>

@@ -5,6 +5,7 @@ import { runAnalysis } from "@/lib/server/analyze";
 import { SESSION_COOKIE, createSessionToken } from "@/lib/server/auth";
 import { runCompetitorAnalysis } from "@/lib/server/competitor";
 import { creatorCapabilities } from "@/lib/server/creators";
+import { runViralAnalysis, viralCapabilities } from "@/lib/server/viral";
 import { readSse } from "@/lib/sse";
 import type {
   AnalyzeEvent,
@@ -14,13 +15,17 @@ import type {
   GeneratedScript,
   ScriptEvent,
   ScriptRequest,
+  ViralEvent,
+  ViralReport,
 } from "@/lib/types";
+import type { ViralPlatformStatus } from "@/lib/viral/labels";
 import { POST as analyzePost } from "./analyze/route";
 import { POST as loginPost } from "./auth/login/route";
 import { POST as logoutPost } from "./auth/logout/route";
 import { POST as competitorPost } from "./competitor/route";
 import { POST as scriptPost } from "./script/route";
 import { GET as sourcesGet } from "./sources/route";
+import { POST as viralPost } from "./viral/route";
 
 vi.mock("@/lib/server/ai/client", () => ({
   getAnthropic: vi.fn(() => null),
@@ -31,6 +36,7 @@ vi.mock("@/lib/server/ai/script", () => ({ generateScript: vi.fn() }));
 vi.mock("@/lib/server/analyze", () => ({ runAnalysis: vi.fn() }));
 vi.mock("@/lib/server/competitor", () => ({ runCompetitorAnalysis: vi.fn() }));
 vi.mock("@/lib/server/creators", () => ({ creatorCapabilities: vi.fn(() => []) }));
+vi.mock("@/lib/server/viral", () => ({ viralCapabilities: vi.fn(() => []), runViralAnalysis: vi.fn() }));
 
 const PASSWORD = "un mot de passe de test";
 const SECRET = "apify_api_TRESSECRET0123456789";
@@ -119,6 +125,16 @@ const creators: CreatorPlatformStatus[] = [
   { platform: "linkedin", available: false, via: "Apify", note: "APIFY_TOKEN manquant" },
 ];
 
+const viral: ViralPlatformStatus[] = [
+  { platform: "instagram", available: false, via: "Non configuré", note: "Renseignez APIFY_TOKEN dans Réglages." },
+  { platform: "tiktok", available: true, via: "Apify (clockworks/tiktok-scraper)", note: "≈ 0,40 $ par analyse." },
+  { platform: "youtube", available: true, via: "YouTube Data API", note: "Ratios vues ÷ abonnés désactivés." },
+];
+
+const validViral = { platforms: ["tiktok", "youtube"], keywords: ["#sommeil", "productivité"], profile: validScript.profile };
+
+const fakeViralReport = { id: "viral-1", mode: "stats" } as ViralReport;
+
 beforeEach(() => {
   vi.stubEnv("APP_PASSWORD", "");
   vi.stubEnv("APIFY_TOKEN", SECRET);
@@ -127,6 +143,8 @@ beforeEach(() => {
   vi.mocked(generateScript).mockReset();
   vi.mocked(runCompetitorAnalysis).mockReset();
   vi.mocked(creatorCapabilities).mockReturnValue(creators);
+  vi.mocked(viralCapabilities).mockReturnValue(viral);
+  vi.mocked(runViralAnalysis).mockReset();
 });
 
 afterEach(() => {
@@ -141,7 +159,9 @@ describe("auth on every route", () => {
     expect((await analyzePost(post("/api/analyze", validAnalyze))).status).toBe(401);
     expect((await scriptPost(post("/api/script", validScript))).status).toBe(401);
     expect((await competitorPost(post("/api/competitor", validCompetitor))).status).toBe(401);
+    expect((await viralPost(post("/api/viral", validViral))).status).toBe(401);
     expect(runAnalysis).not.toHaveBeenCalled();
+    expect(runViralAnalysis).not.toHaveBeenCalled();
     expect(runCompetitorAnalysis).not.toHaveBeenCalled();
   });
 
@@ -197,6 +217,8 @@ describe("GET /api/sources", () => {
     expect(body.auth).toEqual({ enabled: false });
     expect(body.creators).toEqual(creators);
     expect(vi.mocked(creatorCapabilities).mock.calls[0][0]).toBe(process.env);
+    expect(body.viral).toEqual(viral);
+    expect(vi.mocked(viralCapabilities).mock.calls[0][0]).toBe(process.env);
   });
 
   it("works with a session when the gate is on", async () => {
@@ -332,5 +354,66 @@ describe("POST /api/competitor", () => {
     vi.spyOn(console, "error").mockImplementation(() => {});
     const list = await events<CompetitorEvent>(await competitorPost(post("/api/competitor", validCompetitor)));
     expect(list).toEqual([{ type: "error", message: "Compte TikTok introuvable : vérifiez le pseudo." }]);
+  });
+});
+
+describe("POST /api/viral", () => {
+  it("rejects invalid input with a French 400 before streaming", async () => {
+    const none = await viralPost(post("/api/viral", { ...validViral, keywords: [] }));
+    expect(none.status).toBe(400);
+    expect((await none.json()).error).toMatch(/au moins un mot-clé/);
+    const tooMany = await viralPost(post("/api/viral", { ...validViral, keywords: ["a1", "b2", "c3", "d4", "e5", "f6"] }));
+    expect(tooMany.status).toBe(400);
+    const platform = await viralPost(post("/api/viral", { ...validViral, platforms: ["linkedin"] }));
+    expect(platform.status).toBe(400);
+    const period = await viralPost(post("/api/viral", { ...validViral, periodDays: 14 }));
+    expect(period.status).toBe(400);
+    expect((await viralPost(post("/api/viral", "{"))).status).toBe(400);
+    expect(runViralAnalysis).not.toHaveBeenCalled();
+  });
+
+  it("rejects oversized bodies", async () => {
+    const huge = await viralPost(post("/api/viral", { ...validViral, niche: "x".repeat(60_000) }));
+    expect(huge.status).toBe(413);
+  });
+
+  it("streams the run (without Claude) with the parsed request and the schema defaults", async () => {
+    vi.mocked(runViralAnalysis).mockImplementation(async (_request, send) => {
+      send({ type: "status", step: "collect", message: "Recherche des vidéos…" });
+      send({ type: "platform_start", platform: "tiktok" });
+      return fakeViralReport;
+    });
+    const response = await viralPost(post("/api/viral", validViral));
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toMatch(/text\/event-stream/);
+    const list = await events<ViralEvent>(response);
+    expect(list.map((e) => e.type)).toEqual(["status", "platform_start", "result"]);
+    expect(list[2]).toEqual({ type: "result", report: fakeViralReport });
+    const [request, , signal] = vi.mocked(runViralAnalysis).mock.calls[0];
+    expect(request).toMatchObject({
+      platforms: ["tiktok", "youtube"],
+      keywords: ["sommeil", "productivité"],
+      niche: "",
+      periodDays: 30,
+      geo: "FR",
+      language: "fr",
+    });
+    expect(signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("sends exactly one result when the run emits it itself", async () => {
+    vi.mocked(runViralAnalysis).mockImplementation(async (_request, send) => {
+      send({ type: "result", report: fakeViralReport });
+      return fakeViralReport;
+    });
+    const list = await events<ViralEvent>(await viralPost(post("/api/viral", validViral)));
+    expect(list.map((e) => e.type)).toEqual(["result"]);
+  });
+
+  it("turns a failure into an SSE error event", async () => {
+    vi.mocked(runViralAnalysis).mockRejectedValue(new Error("Aucune vidéo récupérée pour ces mots-clés."));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const list = await events<ViralEvent>(await viralPost(post("/api/viral", validViral)));
+    expect(list).toEqual([{ type: "error", message: "Aucune vidéo récupérée pour ces mots-clés." }]);
   });
 });

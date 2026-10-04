@@ -34,7 +34,7 @@ import { collectPlatform, type CollectContext, type PlatformCollection } from ".
 import { enrichFollowers, type EnrichContext, type EnrichResult } from "./enrich";
 
 export const NO_AI_VIRAL_NOTE =
-  "Mode statistiques : ajoutez ANTHROPIC_API_KEY (voir Réglages) pour que Claude extraie les recettes gagnantes, les accroches, ce qui fait s'abonner et 5 idées de vidéos pour toi. Les vidéos et les mesures ci-dessous sont réelles.";
+  "Mode statistiques : ajoutez ANTHROPIC_API_KEY (voir Réglages) pour que Claude extraie les recettes gagnantes, les accroches, ce qui fait s'abonner et 5 idées de vidéos pour vous. Les vidéos et les mesures ci-dessous sont réelles.";
 
 /** Apify runs are capped at 120 s (+30 s for the HTTP answer). */
 const COLLECT_TIMEOUT_MS = 170_000;
@@ -147,7 +147,7 @@ export async function runViralAnalysis(
   emit({
     type: "status",
     step: "collect",
-    message: `Recherche des vidéos de ta niche sur ${platforms.map((platform) => VIRAL_PLATFORM_LABELS[platform]).join(", ")}…`,
+    message: `Recherche des vidéos de votre niche sur ${platforms.map((platform) => VIRAL_PLATFORM_LABELS[platform]).join(", ")}…`,
   });
 
   // --- Collection (parallel; each platform reports as soon as it is done) ---

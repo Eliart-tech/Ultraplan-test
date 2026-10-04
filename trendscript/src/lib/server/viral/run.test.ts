@@ -95,7 +95,7 @@ describe("runViralAnalysis", () => {
       "progress",
       "result",
     ]);
-    expect(events[0]).toEqual({ type: "status", step: "collect", message: "Recherche des vidéos de ta niche sur Instagram, TikTok, YouTube…" });
+    expect(events[0]).toEqual({ type: "status", step: "collect", message: "Recherche des vidéos de votre niche sur Instagram, TikTok, YouTube…" });
     expect(events.find((e) => e.type === "status" && e.step === "enrich")).toMatchObject({ message: "Récupération des abonnés des auteurs…" });
 
     expect(collect).toHaveBeenCalledWith("tiktok", expect.objectContaining({ keywords: ["sommeil", "productivité"], periodDays: 30, geo: "FR", language: "fr", now: NOW }));

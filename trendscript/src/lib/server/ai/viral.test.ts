@@ -251,7 +251,7 @@ describe("processPatterns", () => {
       hook: "Tu fais sûrement la 2e erreur ce soir.",
       format: "Face caméra, 30 s, 3 erreurs puis le geste du soir",
       whyForYou:
-        "Colle à ton audience de jeunes actifs. Vues : Chaque jeune actif se reconnaît et l'envoie à un collègue. Abonnements : Épisode 1 d'une série de 3 annoncée à l'écran.",
+        "Colle à votre audience de jeunes actifs. Vues : Chaque jeune actif se reconnaît et l'envoie à un collègue. Abonnements : Épisode 1 d'une série de 3 annoncée à l'écran.",
       inspiredBy: ["tiktok:tt1", "instagram:IG1abc"],
     });
   });

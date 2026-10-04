@@ -22,7 +22,7 @@ export function fixtureViralOutput(overrides: Partial<ViralOutput> = {}): ViralO
     format: "Face caméra, 30 s, 3 erreurs puis le geste du soir",
     viewsLever: "Chaque jeune actif se reconnaît et l'envoie à un collègue.",
     followLever: "Épisode 1 d'une série de 3 annoncée à l'écran.",
-    whyForYou: "Colle à ton audience de jeunes actifs.",
+    whyForYou: "Colle à votre audience de jeunes actifs.",
   });
   return {
     topics: [

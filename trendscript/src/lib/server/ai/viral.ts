@@ -254,7 +254,7 @@ Ce que disent les chiffres, et ce qu'ils ne disent pas :
   - whyForYou : pourquoi elle colle au profil de l'utilisateur.
   Les 5 idées sont originales (inspirées des mécaniques, jamais copiées), différentes entre elles (au moins 3 types d'angle : pédagogique, conseil, debunk, storytelling, opinion, comparaison, coulisses…), réalisables seul en 15 à 90 s, et respectent la discipline factuelle : un fait ou un chiffre à trouver s'écrit {À VÉRIFIER : …}.
 - summary : 3 à 5 phrases — ce qui cartonne en ce moment dans cette niche et pourquoi, avec les preuves les plus fortes, et la limite principale de l'échantillon.
-Langue : tous les champs en français, en tutoyant l'utilisateur dans recipes, avoid et ideas ; title et hook des idées dans la langue de ses vidéos.
+Langue : tous les champs en français, en vouvoyant l'utilisateur dans summary, recipes, followDrivers, avoid et ideas ; title et hook des idées dans la langue de ses vidéos.
 Si <mon_profil> est vide, dis-le dans summary et propose des idées valables pour quiconque dans cette niche.
 </champs>
 
