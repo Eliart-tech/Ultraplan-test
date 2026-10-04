@@ -5,23 +5,38 @@
  *   GET  /api/sources      getSourceStatuses() + edition availability
  *   POST /api/analyze      runAnalysis() streamed as SSE (sseResponse)
  *   POST /api/script       generateScript() streamed as SSE (sseResponse)
+ *   POST /api/competitor   runCompetitorAnalysis() streamed as SSE, with the
+ *                          edition's creator fetchers (./creators)
  *   POST /api/auth/logout  { ok: true } (no password gate in this edition)
  *
  * Bodies are validated with the real zod schemas (same JSON 400 errors as the
  * server). Google RSS feeds requested by the connectors
- * (trends.google.com/trending/rss, news.google.com/rss…) are fetched through
- * the viewer's Firecrawl connector; every other URL goes to the real fetch.
+ * (trends.google.com/trending/rss, news.google.com/rss…) and the YouTube
+ * pages read by the competitor analysis (channel tabs, RSS feed) are fetched
+ * through the viewer's Firecrawl connector; every other URL goes to the real
+ * fetch.
  */
 
 import { generateScript } from "@/lib/server/ai/script";
 import { NO_AI_NOTE, runAnalysis } from "@/lib/server/analyze";
+import { NO_AI_COMPETITOR_NOTE, runCompetitorAnalysis } from "@/lib/server/competitor";
 import { jsonError, parseJsonBody } from "@/lib/server/request";
 import { getSourceStatuses } from "@/lib/server/sources";
-import { analyzeRequestSchema, scriptRequestSchema } from "@/lib/schemas";
+import { analyzeRequestSchema, competitorRequestSchema, scriptRequestSchema } from "@/lib/schemas";
 import { sseResponse } from "@/lib/sse";
-import type { Analysis, AnalyzeEvent, ScriptEvent, ScriptRequest, SourceId, SourceStatus } from "@/lib/types";
+import type {
+  Analysis,
+  AnalyzeEvent,
+  CompetitorEvent,
+  CompetitorRequest,
+  ScriptEvent,
+  ScriptRequest,
+  SourceId,
+  SourceStatus,
+} from "@/lib/types";
 import { capabilitiesWithin, getEditionState, resolveCapabilities } from "./capabilities";
 import { createEditionConnectors } from "./connectors";
+import { editionCreatorCapabilities, editionFetchCreator } from "./creators";
 import { AI_MODEL_LABEL, EDITION_ENV, frenchDate, frenchDateTime, SERVER_ONLY_SENTENCE, STALE_AFTER_MS } from "./edition";
 import { claudeProblem, firecrawlMode } from "./edition-text";
 import { firecrawlFetchXml } from "./firecrawl";
@@ -35,15 +50,26 @@ const API_ORIGIN = "https://trendscript.edition";
 const NEWS_FEEDS =
   "articles à la une + 1 flux par mot-clé de niche (8 au maximum) à chaque analyse, et 1 flux de titres récents sur le sujet à chaque script (même sans recherche web) ; 1 crédit Firecrawl par flux, résultats gardés 10 min";
 
-/** Feeds the server connectors fetch directly, routed through Firecrawl here. */
+/** Feeds and pages the server code fetches directly, routed through Firecrawl here. */
 const FIRECRAWL_FEEDS = [
   /^https:\/\/trends\.google\.com\/trending\/rss(?:\?|$)/,
   /^https:\/\/news\.google\.com\/rss(?:\/search)?(?:\?|$)/,
+  // Competitor analysis, YouTube without a key: channel home / "Vidéos" / "Shorts" tabs, RSS feed.
+  /^https:\/\/www\.youtube\.com\/(?:@[^/?#]+|channel\/UC[\w-]{22})(?:\/(?:videos|shorts))?$/,
+  /^https:\/\/www\.youtube\.com\/feeds\/videos\.xml\?channel_id=UC[\w-]{22}$/,
 ];
+
+/** Same as the server's Accept-Language header for YouTube pages. */
+const YOUTUBE_LOCATION = { country: "FR", languages: ["fr-FR"] };
 
 /** Replaces the server's "add ANTHROPIC_API_KEY" note: what applies in this view. */
 function noClaudeNote(): string {
   return `Mode sans IA : ${claudeProblem()}. En attendant, les sujets ci-dessous sont regroupés automatiquement à partir des mêmes données réelles, sans angles proposés.`;
+}
+
+/** Replaces the server's "add ANTHROPIC_API_KEY" note of the competitor analysis. */
+function noClaudeCompetitorNote(): string {
+  return `Mode statistiques : ${claudeProblem()}. Les publications et les statistiques ci-dessous sont réelles ; l'analyse du positionnement, des hooks, de ce qui fait venir les abonnés et les 5 idées pour vous démarquer sont écrites par Claude avec votre compte claude.ai.`;
 }
 
 function scriptUnavailableMessage(): string {
@@ -233,6 +259,7 @@ export function installFakeServer(snapshot: Snapshot): void {
         sources: getSourceStatuses(EDITION_ENV).map(editionStatus),
         ai: { configured: state.claude === "available", model: AI_MODEL_LABEL },
         auth: { enabled: false },
+        creators: editionCreatorCapabilities(),
       },
       { headers: { "Cache-Control": "no-store" } },
     );
@@ -322,6 +349,25 @@ export function installFakeServer(snapshot: Snapshot): void {
     });
   }
 
+  async function competitor(request: Request): Promise<Response> {
+    const body = await parseJsonBody(request, competitorRequestSchema, 50_000);
+    if (!body.ok) return body.response;
+    const client = await usableClient();
+    return stream<CompetitorEvent>(request, async (send, signal) => {
+      const relay = (event: CompetitorEvent) => {
+        if (event.type === "result" && !client) {
+          const note = noClaudeCompetitorNote();
+          event = { ...event, report: { ...event.report, notes: event.report.notes.map((line) => (line === NO_AI_COMPETITOR_NOTE ? note : line)) } };
+        }
+        send(event);
+      };
+      await runCompetitorAnalysis(body.data as CompetitorRequest, relay, signal, EDITION_ENV, {
+        fetch: editionFetchCreator,
+        client,
+      });
+    });
+  }
+
   async function handleApi(path: string, input: RequestInfo | URL, init: RequestInit | undefined): Promise<Response> {
     const source = input instanceof Request ? input : undefined;
     const method = (init?.method ?? source?.method ?? "GET").toUpperCase();
@@ -341,6 +387,8 @@ export function installFakeServer(snapshot: Snapshot): void {
         return method === "POST" ? analyze(request) : jsonError("Méthode non autorisée.", 405);
       case "/api/script":
         return method === "POST" ? script(request) : jsonError("Méthode non autorisée.", 405);
+      case "/api/competitor":
+        return method === "POST" ? competitor(request) : jsonError("Méthode non autorisée.", 405);
       case "/api/auth/logout":
         return Response.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
       case "/api/auth/login":
@@ -357,7 +405,9 @@ export function installFakeServer(snapshot: Snapshot): void {
   async function firecrawlFeed(url: string, signal: AbortSignal | undefined): Promise<Response> {
     if (signal?.aborted) throw abortError();
     try {
-      const document = await firecrawlFetchXml(url, signal);
+      // YouTube pages as a French viewer sees them: French labels, and the creator's own titles rather than their translations.
+      const location = url.startsWith("https://www.youtube.com/") ? YOUTUBE_LOCATION : undefined;
+      const document = await firecrawlFetchXml(url, signal, location);
       return new Response(document.body, {
         status: document.status,
         headers: { "Content-Type": document.contentType },

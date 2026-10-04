@@ -269,9 +269,16 @@ export function readSearch(result: McpCallResult): SearchResult[] {
 // Public API
 // ---------------------------------------------------------------------------
 
-/** Fetches a public feed through `firecrawl_scrape` (raw XML, Firecrawl cache ≤ 10 min). */
-export function firecrawlFetchXml(url: string, signal?: AbortSignal): Promise<FetchedDocument> {
-  return cachedCall("firecrawl_scrape", { url, formats: ["rawHtml"], maxAge: SCRAPE_MAX_AGE_MS }, signal, readScrape);
+/** Where Firecrawl's browser is (YouTube localises labels and creator-translated titles by viewer). */
+export interface ScrapeLocation {
+  country: string;
+  languages: string[];
+}
+
+/** Fetches a public feed or page through `firecrawl_scrape` (raw document, Firecrawl cache ≤ 10 min). */
+export function firecrawlFetchXml(url: string, signal?: AbortSignal, location?: ScrapeLocation): Promise<FetchedDocument> {
+  const input = { url, formats: ["rawHtml"], maxAge: SCRAPE_MAX_AGE_MS, ...(location ? { location } : {}) };
+  return cachedCall("firecrawl_scrape", input, signal, readScrape);
 }
 
 /** Web search through `firecrawl_search`. */

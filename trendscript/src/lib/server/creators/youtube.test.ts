@@ -236,6 +236,7 @@ describe("fetchYoutubeCreator", () => {
       expect(data.posts.every((post) => post.publishedAt === undefined)).toBe(true);
       expect(data.warnings.join(" ")).toMatch(/Flux RSS de YouTube indisponible \(erreur 404\)/);
       expect(data.warnings.join(" ")).not.toMatch(/15 dernières vidéos/);
+      expect(data.source).toBe("YouTube · page publique de la chaîne (onglets Vidéos et Shorts)");
     } finally {
       vi.useRealTimers();
     }

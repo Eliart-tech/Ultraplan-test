@@ -70,18 +70,24 @@ export function ScriptUnavailableText() {
 }
 
 /** Hint under "Générer le script": duration, and the Firecrawl credits a script spends. */
-export function ScriptTimingHint({ research }: { research: boolean }) {
+export function ScriptTimingHint({ research, review }: { research: boolean; review: boolean }) {
   const state = useEditionState();
   const firecrawl = firecrawlMode(state).mode !== "off";
+  const reviewPart = review ? ", relecture critique comprise (+30 s à 1 min)." : ".";
   if (research) {
     return (
       <>
-        Recherche web + écriture : 1 à 3 min.
+        Recherche web + écriture : 1 à 3 min{reviewPart}
         {firecrawl ? " Jusqu'à 6 crédits Firecrawl (5 recherches + 1 flux d'actualités)." : null}
       </>
     );
   }
-  return <>Écriture : 30 s à 1 min 30.{firecrawl ? " 1 crédit Firecrawl (titres de presse récents)." : null}</>;
+  return (
+    <>
+      Écriture : 30 s à 1 min 30{reviewPart}
+      {firecrawl ? " 1 crédit Firecrawl (titres de presse récents)." : null}
+    </>
+  );
 }
 
 // ---------------------------------------------------------------------------

@@ -35,6 +35,7 @@ import type { Env } from "../sources/types";
 export const RSS_MAX_VIDEOS = 15;
 export const YOUTUBE_API_SOURCE = "YouTube Data API (officielle)";
 export const YOUTUBE_KEYLESS_SOURCE = "YouTube · page publique de la chaîne + flux RSS officiel";
+export const YOUTUBE_TABS_SOURCE = "YouTube · page publique de la chaîne (onglets Vidéos et Shorts)";
 
 /**
  * Headers for the public channel page: French labels (parsed below) and the
@@ -691,7 +692,7 @@ async function fetchKeyless(handle: string, options: FetchCreatorOptions): Promi
   return buildCreatorData({
     account,
     posts,
-    source: YOUTUBE_KEYLESS_SOURCE,
+    source: fromTabs ? YOUTUBE_TABS_SOURCE : YOUTUBE_KEYLESS_SOURCE,
     now: options.now,
     maxPosts: options.maxPosts,
     warnings,

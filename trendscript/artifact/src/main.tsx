@@ -1,12 +1,13 @@
 /**
  * Entry of the TrendScript HTML edition: the app's real React UI (header,
- * Studio, Historique, Réglages) on top of an in-page "server", rendered in
- * place of Next's root layout. Routes are hash routes (#studio,
- * #historique, #reglages).
+ * Studio, Concurrents, Historique, Réglages) on top of an in-page "server",
+ * rendered in place of Next's root layout. Routes are hash routes (#studio,
+ * #concurrents, #historique, #reglages).
  */
 
 import { Component, Suspense, useEffect, useRef, type ErrorInfo, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
+import CompetitorsPage from "@/app/concurrents/page";
 import ErrorPage from "@/app/error";
 import HistoryPage from "@/app/historique/page";
 import NotFound from "@/app/not-found";
@@ -30,6 +31,7 @@ installRouter();
 
 const TITLES: Record<string, string> = {
   "/": "Studio · TrendScript",
+  "/concurrents": "Concurrents · TrendScript",
   "/historique": "Historique · TrendScript",
   "/reglages": "Réglages · TrendScript",
 };
@@ -59,6 +61,8 @@ function Page({ path }: { path: string }) {
   switch (path) {
     case "/":
       return <StudioPage />;
+    case "/concurrents":
+      return <CompetitorsPage />;
     case "/historique":
       return <HistoryPage />;
     case "/reglages":

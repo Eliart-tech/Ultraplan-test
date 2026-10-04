@@ -338,8 +338,8 @@ const EDITION_PATCHES = [
   },
   {
     file: file("components", "studio", "script-settings.tsx"),
-    find: '{settings.research ? "Recherche web + écriture : 1 à 3 min." : "Écriture : 30 s à 1 min 30."}',
-    replace: "<EditionUi.ScriptTimingHint research={settings.research} />",
+    find: '{settings.research ? "Recherche web + écriture : 1 à 3 min" : "Écriture : 30 s à 1 min 30"}\n          {settings.review ? ", relecture critique comprise (+30 s à 1 min)." : "."}',
+    replace: "<EditionUi.ScriptTimingHint research={settings.research} review={settings.review} />",
     why: "Script : crédits Firecrawl d'une génération",
   },
   // Historique
