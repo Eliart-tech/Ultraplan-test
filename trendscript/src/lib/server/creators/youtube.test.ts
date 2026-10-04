@@ -7,12 +7,15 @@ import {
   YOUTUBE_RATIOS_DISABLED,
   buildYoutubeChannelUrl,
   buildYoutubePlaylistItemsUrl,
+  clockToSeconds,
   feedRetryDelay,
   feedVideosToCreatorPosts,
   fetchYoutubeCreator,
   parseCountLabel,
   parseYoutubeChannelPage,
+  parseYoutubeTab,
   playlistVideoIds,
+  tabVideosToCreatorPosts,
   youtubeChannelToAccount,
   youtubeVideosToCreatorPosts,
   type YoutubeChannelsResponse,
@@ -22,6 +25,8 @@ import {
 const NOW = Date.parse("2026-10-04T08:00:00Z");
 const PAGE = fixture("youtube-channel-page.squeezie.html");
 const RSS = fixture("youtube-rss.squeezie.xml");
+const VIDEOS_TAB = fixture("youtube-videos-tab.squeezie.html");
+const SHORTS_TAB = fixture("youtube-shorts-tab.squeezie.html");
 const CHANNELS = fixtureJson<{ response: YoutubeChannelsResponse }>("youtube-api.channels.json").response;
 const NO_CHANNEL = fixtureJson<{ response: YoutubeChannelsResponse }>("youtube-api.channels.empty.json").response;
 const PLAYLIST = fixtureJson<{ response: YoutubePlaylistItemsResponse }>("youtube-api.playlist-items.json").response;
@@ -204,6 +209,55 @@ describe("fetchYoutubeCreator", () => {
     expect(feedRetryDelay(10)).toBe(1000);
   });
 
+  it("keyless: falls back to the channel's Vidéos and Shorts tabs when the RSS feed keeps failing", async () => {
+    vi.useFakeTimers();
+    try {
+      const fetchMock = routeFetch([
+        [/^https:\/\/www\.youtube\.com\/@Squeezie\/videos$/, () => text(VIDEOS_TAB)],
+        [/^https:\/\/www\.youtube\.com\/@Squeezie\/shorts$/, () => text(SHORTS_TAB)],
+        [/^https:\/\/www\.youtube\.com\/@Squeezie$/, () => text(PAGE)],
+        [/feeds\/videos\.xml/, () => text("Error 404 (Not Found)!!1", 404)],
+      ]);
+      const pending = fetchYoutubeCreator("Squeezie", options({}, 6));
+      await vi.runAllTimersAsync();
+      const data = await pending;
+      expect(calledUrls(fetchMock).filter((url) => url.includes("/feeds/")).length).toBeGreaterThan(3);
+      expect(data.account.followers).toBe(20_200_000);
+      expect(data.posts.map((post) => [post.kind, post.metrics.views])).toEqual([
+        ["video", 16_000_000],
+        ["video", 11_000_000],
+        ["video", 3_500_000],
+        ["short_video", 869_000],
+        ["short_video", 425_000],
+        ["short_video", 522_000],
+      ]);
+      expect(data.posts[0]).toMatchObject({ url: "https://www.youtube.com/watch?v=lbLj5Yb6SAE", durationSec: 4330 });
+      expect(data.posts[3].url).toBe("https://www.youtube.com/shorts/2QcaDwpvl7s");
+      expect(data.posts.every((post) => post.publishedAt === undefined)).toBe(true);
+      expect(data.warnings.join(" ")).toMatch(/Flux RSS de YouTube indisponible \(erreur 404 répétée\)/);
+      expect(data.warnings.join(" ")).not.toMatch(/15 dernières vidéos/);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("keyless: a French error when neither the feed nor the tabs can be read", async () => {
+    vi.useFakeTimers();
+    try {
+      routeFetch([
+        [/^https:\/\/www\.youtube\.com\/@Squeezie\/(videos|shorts)$/, () => text("busy", 503)],
+        [/^https:\/\/www\.youtube\.com\/@Squeezie$/, () => text(PAGE)],
+        [/feeds\/videos\.xml/, () => text("Error", 500)],
+      ]);
+      const pending = fetchYoutubeCreator("Squeezie", options());
+      const assertion = expect(pending).rejects.toThrow(/flux RSS de la chaîne YouTube ne répond pas \(erreur 500 répétée\) et ses onglets/);
+      await vi.runAllTimersAsync();
+      await assertion;
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("keyless: an unknown handle is a French 'not found' error", async () => {
     routeFetch([[/youtube\.com\/@/, () => text("Not found", 404)]]);
     await expect(fetchYoutubeCreator("inconnu-xyz", options())).rejects.toThrow(
@@ -251,5 +305,53 @@ describe("fetchYoutubeCreator", () => {
     expect(data.source).toMatch(/page publique/);
     expect(data.warnings[0]).toBe("API YouTube indisponible (Clé YouTube invalide : vérifiez YOUTUBE_API_KEY.) : données publiques utilisées à la place.");
     expect(data.warnings.join(" ")).not.toContain("AIzaBAD");
+  });
+});
+
+describe("channel tabs (RSS fallback)", () => {
+  it("reads long videos with rounded views, duration and age as displayed", () => {
+    const videos = parseYoutubeTab(VIDEOS_TAB, "videos");
+    expect(videos).toHaveLength(4);
+    expect(videos[0]).toEqual({
+      videoId: "lbLj5Yb6SAE",
+      title: "QUI SUBIRA LA PIRE ÉPREUVE (ft Maxime Biaggi, Gotaga & Billy)",
+      isShort: false,
+      views: 16_000_000,
+      durationSec: 4330,
+      ageLabel: "il y a 1 mois",
+    });
+  });
+
+  it("reads Shorts with their rounded views", () => {
+    const shorts = parseYoutubeTab(SHORTS_TAB, "shorts");
+    expect(shorts.map((video) => [video.videoId, video.views])).toEqual([
+      ["2QcaDwpvl7s", 869_000],
+      [shorts[1].videoId, 425_000],
+      [shorts[2].videoId, 522_000],
+      [shorts[3].videoId, 2_700_000],
+    ]);
+    expect(shorts.every((video) => video.isShort && video.durationSec === undefined)).toBe(true);
+  });
+
+  it("returns nothing for a page that is not a channel tab", () => {
+    expect(parseYoutubeTab("<html></html>", "videos")).toEqual([]);
+    expect(parseYoutubeTab(PAGE, "shorts").length).toBeGreaterThanOrEqual(0);
+  });
+
+  it("parses clock durations", () => {
+    expect(clockToSeconds("1:12:10")).toBe(4330);
+    expect(clockToSeconds("48:09")).toBe(2889);
+    expect(clockToSeconds("0:59")).toBe(59);
+    expect(clockToSeconds("EN DIRECT")).toBeUndefined();
+  });
+
+  it("shares the posts between long videos and Shorts, filling from the other tab", () => {
+    const long = parseYoutubeTab(VIDEOS_TAB, "videos");
+    const shorts = parseYoutubeTab(SHORTS_TAB, "shorts");
+    expect(tabVideosToCreatorPosts(long, shorts, 4).map((post) => post.kind)).toEqual(["video", "video", "short_video", "short_video"]);
+    expect(tabVideosToCreatorPosts(long, shorts, 8)).toHaveLength(8);
+    expect(tabVideosToCreatorPosts(long, [], 8)).toHaveLength(4);
+    expect(tabVideosToCreatorPosts([], shorts, 3).map((post) => post.kind)).toEqual(["short_video", "short_video", "short_video"]);
+    expect(tabVideosToCreatorPosts(long.slice(0, 1), shorts, 4).map((post) => post.kind)).toEqual(["video", "short_video", "short_video", "short_video"]);
   });
 });

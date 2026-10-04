@@ -228,6 +228,116 @@ export function pageToAccount(page: YoutubeChannelPage, handle: string): Creator
 }
 
 // ---------------------------------------------------------------------------
+// Channel "Vidéos" and "Shorts" tabs (pure parsing) — the fallback when the
+// RSS feed keeps failing: views rounded as displayed ("16 M"), durations of
+// long videos, but no exact date, likes or comments.
+// ---------------------------------------------------------------------------
+
+export type YoutubeTab = "videos" | "shorts";
+
+export interface YoutubeTabVideo {
+  videoId: string;
+  title: string;
+  isShort: boolean;
+  /** Rounded as displayed ("16 M" → 16 000 000). */
+  views?: number;
+  durationSec?: number;
+  /** As displayed, long videos only ("il y a 1 mois"). */
+  ageLabel?: string;
+}
+
+function collect(value: unknown, key: string, out: unknown[] = []): unknown[] {
+  if (Array.isArray(value)) {
+    for (const item of value) collect(item, key, out);
+  } else if (value && typeof value === "object") {
+    for (const [name, child] of Object.entries(value)) {
+      if (name === key) out.push(child);
+      collect(child, key, out);
+    }
+  }
+  return out;
+}
+
+/** "1:12:10" → 4330, "48:09" → 2889. */
+export function clockToSeconds(label: string | undefined): number | undefined {
+  const match = label?.trim().match(/^(?:(\d+):)?(\d{1,2}):(\d{2})$/);
+  if (!match) return undefined;
+  return Number(match[1] ?? 0) * 3600 + Number(match[2]) * 60 + Number(match[3]);
+}
+
+const YOUTUBE_VIDEO_ID = /^[\w-]{11}$/;
+const VIEWS_WORD = /\b(vues?|views?)\b/i;
+const AGE_WORDS = /\b(il y a|ago|diffus|streamed|premiered|premi[eè]re)\b/i;
+
+/** Pure: a channel tab page → its videos in display order (newest first). */
+export function parseYoutubeTab(html: string, tab: YoutubeTab): YoutubeTabVideo[] {
+  const data = initialData(html);
+  const videos: YoutubeTabVideo[] = [];
+  const seen = new Set<string>();
+  const add = (video: YoutubeTabVideo) => {
+    if (!YOUTUBE_VIDEO_ID.test(video.videoId) || seen.has(video.videoId) || !video.title.trim()) return;
+    seen.add(video.videoId);
+    videos.push(video);
+  };
+
+  if (tab === "videos") {
+    for (const lockup of collect(data, "lockupViewModel")) {
+      const item = record(lockup);
+      if (item?.contentType !== "LOCKUP_CONTENT_TYPE_VIDEO") continue;
+      const meta = record(dig(item, ["metadata", "lockupMetadataViewModel"]));
+      const title = text(dig(meta, ["title", "content"]));
+      const videoId = text(item.contentId);
+      if (!title || !videoId) continue;
+      let views: number | undefined;
+      let ageLabel: string | undefined;
+      for (const row of list(dig(meta, ["metadata", "contentMetadataViewModel", "metadataRows"]))) {
+        for (const part of list(record(row)?.metadataParts)) {
+          const label = (text(record(part)?.accessibilityLabel) ?? text(dig(part, ["text", "content"])))?.replace(/[  ]/g, " ");
+          if (!label) continue;
+          if (VIEWS_WORD.test(label) && views === undefined) views = parseCountLabel(label);
+          else if (AGE_WORDS.test(label) && !ageLabel) ageLabel = label;
+        }
+      }
+      // A live or scheduled stream has no view count yet: not a published video.
+      if (views === undefined) continue;
+      const badges = collect(item.contentImage, "thumbnailBadgeViewModel").map((badge) => text(record(badge)?.text));
+      const durationSec = badges.map(clockToSeconds).find((seconds) => seconds !== undefined);
+      add({ videoId, title, isShort: false, views, durationSec, ageLabel });
+    }
+  } else {
+    for (const lockup of collect(data, "shortsLockupViewModel")) {
+      const item = record(lockup);
+      const videoId =
+        text(dig(item, ["onTap", "innertubeCommand", "reelWatchEndpoint", "videoId"])) ??
+        text(item?.entityId)?.replace(/^shorts-shelf-item-/, "");
+      const title = text(dig(item, ["overlayMetadata", "primaryText", "content"]));
+      const viewsLabel = text(dig(item, ["overlayMetadata", "secondaryText", "content"]));
+      if (!videoId || !title) continue;
+      add({ videoId, title, isShort: true, views: viewsLabel && VIEWS_WORD.test(viewsLabel) ? parseCountLabel(viewsLabel) : undefined });
+    }
+  }
+  return videos;
+}
+
+/**
+ * Pure: tab videos → posts. Long videos and Shorts alternate in halves of
+ * `max` (each tab is newest first, but the two cannot be interleaved by date).
+ */
+export function tabVideosToCreatorPosts(long: YoutubeTabVideo[], shorts: YoutubeTabVideo[], max: number): CreatorPost[] {
+  const longCount = Math.min(long.length, Math.max(Math.ceil(max / 2), max - shorts.length));
+  const picked = [...long.slice(0, longCount), ...shorts.slice(0, Math.max(0, max - longCount))];
+  return picked.map((video) => ({
+    id: video.videoId,
+    url: video.isShort ? `https://www.youtube.com/shorts/${video.videoId}` : `https://www.youtube.com/watch?v=${video.videoId}`,
+    title: video.title,
+    kind: video.isShort ? ("short_video" as const) : ("video" as const),
+    durationSec: video.durationSec,
+    metrics: { views: video.views },
+    hashtags: extractHashtags(video.title),
+  }));
+}
+
+// ---------------------------------------------------------------------------
 // YouTube Data API (pure builders and mappers)
 // ---------------------------------------------------------------------------
 
@@ -438,6 +548,25 @@ async function loadChannelPage(handle: string, signal: AbortSignal): Promise<You
   return page;
 }
 
+/** Feed budget when the channel tabs can take over (the API path keeps its own 3 s). */
+export const KEYLESS_FEED_BUDGET_MS = 10_000;
+
+/** The channel's "Vidéos" and "Shorts" tabs; one may be missing (a channel without Shorts). */
+async function loadTabs(page: YoutubeChannelPage, signal: AbortSignal): Promise<{ long: YoutubeTabVideo[]; shorts: YoutubeTabVideo[] }> {
+  const base = creatorProfileUrl("youtube", page.handle ?? page.channelId);
+  const read = async (tab: YoutubeTab) => {
+    const response = await fetchWithTimeout(`${base}/${tab}`, { signal, timeoutMs: 20_000, headers: YOUTUBE_PAGE_HEADERS });
+    if (!response.ok) throw new SourceError(`Onglet YouTube « ${tab} » : erreur ${response.status}`, response.status);
+    return parseYoutubeTab(await response.text(), tab);
+  };
+  const [long, shorts] = await Promise.allSettled([read("videos"), read("shorts")]);
+  if (long.status === "rejected" && shorts.status === "rejected") throw long.reason;
+  return {
+    long: long.status === "fulfilled" ? long.value : [],
+    shorts: shorts.status === "fulfilled" ? shorts.value : [],
+  };
+}
+
 async function fetchWithApi(handle: string, apiKey: string, options: FetchCreatorOptions): Promise<CreatorData> {
   const { signal } = options;
   const channels = await googleGet<YoutubeChannelsResponse>(buildYoutubeChannelUrl(handle, apiKey), "YouTube (chaîne)", signal);
@@ -500,19 +629,32 @@ async function fetchKeyless(handle: string, options: FetchCreatorOptions): Promi
     warnings.push(`Page de la chaîne indisponible (${errorMessage(error)}) : nom, bio et abonnés manquants.`);
   }
 
-  let videos: FeedVideo[];
+  let posts: CreatorPost[];
+  let fromTabs = false;
   try {
-    videos = await loadFeed(page.channelId, signal);
-  } catch (error) {
-    if (signal.aborted) throw error;
-    const status = error instanceof SourceError ? error.status : undefined;
-    throw new SourceError(
-      `Le flux RSS de la chaîne YouTube ne répond pas${status ? ` (erreur ${status} répétée)` : ` (${errorMessage(error)})`} : réessayez dans quelques minutes, ou ajoutez YOUTUBE_API_KEY (gratuite) pour passer par l'API officielle.`,
-      undefined,
-      true,
+    posts = feedVideosToCreatorPosts(await loadFeed(page.channelId, signal, KEYLESS_FEED_BUDGET_MS));
+  } catch (feedError) {
+    if (signal.aborted) throw feedError;
+    const status = feedError instanceof SourceError ? feedError.status : undefined;
+    const failure = status ? `erreur ${status} répétée` : errorMessage(feedError);
+    // The feed has bursts of 404/500 for whole channels: read the channel's own tabs instead.
+    const tabs = await loadTabs(page, signal).catch((error: unknown) => {
+      if (signal.aborted) throw error;
+      return undefined;
+    });
+    if (!tabs || tabs.long.length + tabs.shorts.length === 0) {
+      throw new SourceError(
+        `Le flux RSS de la chaîne YouTube ne répond pas (${failure}) et ses onglets « Vidéos » et « Shorts » sont illisibles : réessayez dans quelques minutes, ou ajoutez YOUTUBE_API_KEY (gratuite) pour passer par l'API officielle.`,
+        undefined,
+        true,
+      );
+    }
+    posts = tabVideosToCreatorPosts(tabs.long, tabs.shorts, options.maxPosts);
+    fromTabs = true;
+    warnings.push(
+      `Flux RSS de YouTube indisponible (${failure}) : vidéos lues sur les onglets « Vidéos » et « Shorts » de la chaîne, avec les vues arrondies telles qu'affichées (« 16 M ») et la durée des vidéos longues, mais sans date exacte de publication, likes ni commentaires.`,
     );
   }
-  const posts = feedVideosToCreatorPosts(videos);
   const account = pageToAccount(page, handle);
   if (posts.length === 0) throw new SourceError(`Aucune vidéo publique sur la chaîne YouTube ${shownHandle(account.handle)}.`);
 
@@ -523,9 +665,11 @@ async function fetchKeyless(handle: string, options: FetchCreatorOptions): Promi
   } else if (page.subscribersLabel) {
     warnings.push(`Nombre d'abonnés arrondi tel qu'affiché par YouTube (« ${page.subscribersLabel} »).`);
   }
-  warnings.push(
-    `Sans clé YouTube, seules les ${RSS_MAX_VIDEOS} dernières vidéos sont lisibles (flux RSS public), avec vues et likes mais sans commentaires ni durées : ajoutez YOUTUBE_API_KEY (gratuite) pour en analyser jusqu'à 50 avec toutes leurs statistiques.`,
-  );
+  if (!fromTabs) {
+    warnings.push(
+      `Sans clé YouTube, seules les ${RSS_MAX_VIDEOS} dernières vidéos sont lisibles (flux RSS public), avec vues et likes mais sans commentaires ni durées : ajoutez YOUTUBE_API_KEY (gratuite) pour en analyser jusqu'à 50 avec toutes leurs statistiques.`,
+    );
+  }
   return buildCreatorData({
     account,
     posts,
