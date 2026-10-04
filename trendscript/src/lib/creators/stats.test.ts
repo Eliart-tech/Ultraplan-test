@@ -368,10 +368,10 @@ describe("computeCreatorStats — edge cases", () => {
     expect(stats.shareSaveRate).toBeUndefined();
     expect(stats.reachRate).toBeUndefined();
     expect(stats.audienceMultipliers).toBeUndefined();
-    // Rankings on raw counts remain.
+    // Orderings of raw counts remain; "×N its median" outliers are a derived metric.
     expect(stats.medianViews).toBe(57_500);
     expect(stats.topPostIds).toEqual(["t10", "t5", "t2", "t9", "t3"]);
-    expect(stats.outliers.map((o) => o.postId)).toEqual(["t10", "t5", "t2"]);
+    expect(stats.outliers).toEqual([]);
     expect(computeCreatorStats({ ...fixtureCreator, ratiosAllowed: true }, PARIS)).toEqual(computeCreatorStats(fixtureCreator, PARIS));
   });
 

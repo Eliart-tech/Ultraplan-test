@@ -255,7 +255,7 @@ interface PostContext {
 
 /** User-message rule when the data's terms forbid derived metrics. */
 export const RAW_COUNTS_ONLY = `<restriction_donnees>
-Les conditions d'utilisation de la source (API YouTube) interdisent les métriques dérivées sur les chaînes des autres : aucun ratio, taux, multiplicateur ni pourcentage calculé à partir de ses vues, likes, commentaires ou abonnés. Raisonne uniquement sur les chiffres bruts fournis (vues, likes, commentaires) et sur le classement des publications (meilleures, plus faibles, nettement au-dessus de sa médiane) ; n'écris aucun « ×N », aucun taux d'engagement, aucune portée en %. Pour les abonnés, appuie-toi sur les raisons de revenir, présentées comme des hypothèses.
+Les conditions d'utilisation de la source (API YouTube) interdisent les métriques dérivées sur les chaînes des autres : aucun ratio, taux, multiplicateur ni pourcentage calculé à partir de ses vues, likes, commentaires ou abonnés. Raisonne uniquement sur les chiffres bruts fournis (vues, likes, commentaires) et sur le classement des publications (les plus vues, les plus faibles) ; n'écris aucun « ×N », aucun taux d'engagement, aucune portée en %. Pour les abonnés, appuie-toi sur les raisons de revenir, présentées comme des hypothèses.
 </restriction_donnees>`;
 
 function refList(ids: string[], context: PostContext): string {
@@ -386,11 +386,7 @@ function statsSection(context: PostContext): string {
         : "Publications à ×2 ou plus sa médiane : aucune (ou moins de 5 publications mesurées)",
     );
   } else {
-    lines.push(
-      stats.outliers.length
-        ? `Publications nettement au-dessus de sa médiane (au moins le double) : ${refList(stats.outliers.map((o) => o.postId), context)}`
-        : "Publications nettement au-dessus de sa médiane : aucune (ou moins de 5 publications mesurées)",
-    );
+    lines.push(`Publications les plus vues (classement des chiffres bruts) : ${refList(stats.topPostIds, context)}`);
   }
   if (allowed && stats.audienceMultipliers?.length) {
     lines.push(

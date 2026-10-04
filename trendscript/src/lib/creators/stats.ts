@@ -365,9 +365,9 @@ export function computeCreatorStats(data: CreatorData, { now, timeZone }: Creato
   const posts = data.posts;
   const metric = chooseRankingMetric(posts);
   const followers = data.account.followers;
-  // YouTube API terms: no derived metrics (rates, views ÷ subscribers) on
-  // other channels' data unless the amendment was accepted. Rankings on raw
-  // counts (top, outliers vs the creator's own median) remain.
+  // YouTube API terms: no derived metrics (rates, views ÷ subscribers, "×N its
+  // median") on other channels' data unless the amendment was accepted. Only
+  // orderings of raw counts (top / weakest posts) remain.
   const ratiosAllowed = data.ratiosAllowed !== false;
 
   const valued = ranked(posts, (post) => rankingValue(post, metric));
@@ -375,7 +375,7 @@ export function computeCreatorStats(data: CreatorData, { now, timeZone }: Creato
 
   // Outliers: at least 2× the creator's own median, with enough posts to trust it.
   const outliers: CreatorStats["outliers"] = [];
-  if (valued.length >= MIN_POSTS_FOR_OUTLIERS && med !== undefined && med > 0) {
+  if (ratiosAllowed && valued.length >= MIN_POSTS_FOR_OUTLIERS && med !== undefined && med > 0) {
     for (const entry of sortRanked(valued)) {
       const ratio = roundRatio(entry.value, med, 1);
       if (ratio >= OUTLIER_RATIO) outliers.push({ postId: entry.post.id, ratio });

@@ -103,15 +103,21 @@ export function toCompetitorBrief(report: CompetitorReport): CompetitorBrief {
   }
 
   // "stats" mode: only deterministic, real material.
+  // Without ratios (YouTube API terms) there are no "×N its median" outliers:
+  // fall back to the raw ordering of its most viewed posts.
+  const standouts =
+    data.ratiosAllowed === false
+      ? stats.topPostIds.map((postId) => ({ postId, ratio: undefined as number | undefined }))
+      : stats.outliers.map(({ postId, ratio }) => ({ postId, ratio: ratio as number | undefined }));
   const hookPatterns = list(
-    stats.outliers
-      .map((outlier) => ({ outlier, post: byId.get(outlier.postId) }))
-      .filter((entry): entry is { outlier: (typeof stats.outliers)[number]; post: CreatorPost } => Boolean(entry.post?.title.trim()))
+    standouts
+      .map((standout) => ({ standout, post: byId.get(standout.postId) }))
+      .filter((entry): entry is { standout: (typeof standouts)[number]; post: CreatorPost } => Boolean(entry.post?.title.trim()))
       .slice(0, STATS_HOOKS)
-      .map(({ outlier, post }) =>
-        data.ratiosAllowed === false
+      .map(({ standout, post }) =>
+        standout.ratio === undefined
           ? `Accroche d'une de ses publications les plus vues : « ${clip(post.title, 200)} »`
-          : `Accroche d'une publication à ${formatRatio(outlier.ratio)} sa médiane : « ${clip(post.title, 200)} »`,
+          : `Accroche d'une publication à ${formatRatio(standout.ratio)} sa médiane : « ${clip(post.title, 200)} »`,
       ),
     300,
   );

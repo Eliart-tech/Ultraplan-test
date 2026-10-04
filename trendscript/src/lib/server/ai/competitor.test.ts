@@ -137,7 +137,7 @@ describe("competitor prompt — user message", () => {
     };
     const restricted = user(youtube);
     expect(restricted).toContain(plain(RAW_COUNTS_ONLY));
-    expect(restricted).toContain("- Publications nettement au-dessus de sa médiane (au moins le double) : [p10], [p5], [p2]");
+    expect(restricted).toContain("- Publications les plus vues (classement des chiffres bruts) : [p10], [p5], [p2], [p9], [p3]");
     expect(restricted.replace(plain(RAW_COUNTS_ONLY), "")).not.toContain("×");
     expect(restricted).not.toContain("Taux d'engagement");
     expect(restricted).not.toContain("Portée médiane");
