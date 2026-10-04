@@ -552,7 +552,7 @@ async function buildHtml() {
   const [css, js] = await Promise.all([compileCss(), bundleJs()]);
 
   const html = `<title>TrendScript</title>
-<meta name="description" content="TrendScript — des tendances réelles (Google Trends, Google Actualités, Wikipédia, YouTube) au script de vidéo courte prêt à tourner. Édition HTML.">
+<meta name="description" content="TrendScript — des tendances réelles (Google Trends, Google Actualités, Wikipédia, YouTube) au script de vidéo courte prêt à tourner, avec l'analyse de concurrents YouTube et LinkedIn. Édition HTML.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="${FONT_HREF}">

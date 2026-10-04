@@ -9,7 +9,14 @@ TrendScript est un outil personnel pour créateur de contenu francophone. En qua
 3. **Angle** — Claude propose trois angles différents par sujet (dont au moins un à valeur durable), ou vous écrivez le vôtre.
 4. **Script** — Claude écrit un script complet : trois accroches au choix, découpage seconde par seconde (voix off, texte écran, visuel, montage), texte prompteur, légende, hashtags, appel à l'action, auto-évaluation et **liste des faits à vérifier**. Deux curseurs règlent la **viralité** (emballage : accroche, rythme, émotion, CTA) et la **pédagogie** (fond : densité, structure, preuves) ; la viralité ne modifie jamais les faits.
 
-Tout reste dans votre navigateur (profil, historique) ; le serveur ne stocke rien d'autre qu'un cache mémoire de quelques minutes à quelques heures.
+Deux modules nourrissent le script pour qu'il soit calibré sur votre niche et différenciant :
+
+- **Ce qui cartonne** (`/ce-qui-cartonne`) — les vidéos récentes de votre niche sur Instagram, TikTok et YouTube, classées par **vues ÷ abonnés de leur auteur** (« ×10 son audience » = poussée bien au-delà de ses abonnés, là où se gagnent les nouveaux abonnés), comparées aux comptes de même taille. Claude en tire des **recettes** (sujet × accroche × format × structure), chacune avec un levier de vues et un levier d'abonnement, puis 5 idées de vidéos pour vous. Le Studio peut bâtir le script sur la recette la plus adaptée, sans jamais copier un titre ou une accroche.
+- **Concurrents** (`/concurrents`) — un créateur à partir de son pseudo : ses publications réelles, ce qui surperforme sa médiane, ce qui fait s'abonner, ses angles morts et 5 idées pour vous en démarquer. Jusqu'à 3 concurrents peuvent être joints à un script.
+
+Aucune plateforme ne publie le nombre d'abonnés gagnés par une vidéo d'un autre compte : le multiplicateur d'audience est le meilleur signal public, et les leviers d'abonnement sont présentés comme des hypothèses, jamais comme des mesures. Les seuils des paliers (« explose » à ×10, « cartonne » à ×3) sont des valeurs de départ, à recalibrer sur quelques semaines de données réelles.
+
+Tout reste dans votre navigateur (profil, historique, analyses) ; le serveur ne stocke rien d'autre qu'un cache mémoire de quelques minutes à quelques heures.
 
 ---
 
@@ -39,6 +46,22 @@ Autres limites, en toute transparence :
 - **Claude n'utilise que les signaux fournis** pour former les sujets : il ne doit ni inventer de tendance ni compléter avec ses connaissances. Les sujets sans preuve sont écartés automatiquement.
 - **Scripts** : tout chiffre doit venir des preuves ou de la recherche web ; sinon il apparaît dans « Faits à vérifier » avec une confiance « faible » ou sous la forme `{À VÉRIFIER : …}`. Relisez toujours cette liste avant de tourner.
 - Les sujets sensibles (drames, politique, justice, santé…) sont signalés ; les réglages du script sont alors bridés (viralité plafonnée, ton journalistique, séquence « ce qu'on sait / ce qu'on ignore »).
+- **YouTube et les ratios** : les règles développeurs de YouTube interdisent les métriques dérivées (vues ÷ abonnés, taux d'engagement) sur les chaînes des autres sans l'avenant « derived metrics ». Tant que `YT_DERIVED_METRICS_APPROVED=true` n'est pas renseigné, Concurrents et Ce qui cartonne n'affichent pour YouTube que les chiffres bruts, les classements et les vues par jour, et les statistiques YouTube enregistrées dans le navigateur sont effacées après 30 jours.
+- **YouTube sans clé** : l'analyse d'une chaîne lit sa page publique et son flux RSS officiel (15 dernières vidéos). Ce flux renvoie par moments des erreurs 404 en série (constaté en octobre 2026) : l'application bascule alors sur les onglets « Vidéos » et « Shorts » de la chaîne — vues arrondies telles qu'affichées, sans date exacte, likes ni commentaires — et le signale dans le rapport.
+
+### Ce que coûtent les modules
+
+| Module | Plateforme | Accès | Coût indicatif |
+| --- | --- | --- | --- |
+| Ce qui cartonne | Instagram | `APIFY_TOKEN` (+ API Meta facultative pour les abonnés) | ≈ 0,30 $ par analyse (≈ 100 reels + abonnés des auteurs des 15 plus vus), cache 6 h |
+| Ce qui cartonne | TikTok | `APIFY_TOKEN` | ≈ 0,40 $ par analyse au maximum (≈ 60 vidéos, abonnés inclus), cache 6 h |
+| Ce qui cartonne | YouTube | `YOUTUBE_API_KEY` | gratuit : 1 recherche (100 unités) + 2 unités par analyse |
+| Concurrents | YouTube | sans clé, ou `YOUTUBE_API_KEY` (50 vidéos, 3 unités) | gratuit |
+| Concurrents | Instagram | `APIFY_TOKEN` ou API Meta (comptes Créateur/Entreprise) | ≈ 0,08 $ pour 30 reels (Apify) |
+| Concurrents | TikTok | `APIFY_TOKEN` | ≈ 0,11 $ pour 30 vidéos |
+| Concurrents | LinkedIn | `APIFY_TOKEN` (engagement) ou `FIRECRAWL_API_KEY` (sans compteurs) | ≈ 0,06 $ pour 30 publications (Apify) |
+
+Les montants Apify suivent l'offre gratuite (5 $ de crédit par mois) et sont plafonnés par `APIFY_MAX_CHARGE_USD`.
 
 ---
 
@@ -195,6 +218,7 @@ Tous les chiffres affichés sont calculés dans le code à partir des métriques
 
 ## Feuille de route
 
+- **Mes performances** : brancher votre propre compte (YouTube Analytics `subscribersGained` par vidéo, TikTok Business API) pour mesurer les abonnés réellement gagnés par vos vidéos et recalibrer les seuils de « Ce qui cartonne ».
 - **Multi-utilisateur** : comptes, base de données, historique synchronisé (aujourd'hui : un seul mot de passe, données dans le navigateur).
 - **Relevés planifiés** : instantanés réguliers des tendances pour mesurer une vraie accélération dans le temps.
 - **Sons tendance Instagram** via l'API officielle `/ig_audio` (Meta, juin 2026).
