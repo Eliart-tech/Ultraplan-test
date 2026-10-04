@@ -29,12 +29,15 @@ import {
 } from "react";
 import { errorMessage, isAbortError, streamAnalyze, streamScript } from "@/lib/client/api";
 import {
+  clearStudioHandoff,
   getHistory,
   loadStudioDraft,
+  peekStudioHandoff,
   saveAnalysisToHistory,
   saveScriptToHistory,
   saveStudioDraft,
   trimAnalysis,
+  type PendingStudioHandoff,
   type SavedScript,
   type SaveResult,
 } from "@/lib/client/storage";
@@ -121,6 +124,12 @@ export interface StudioDraft {
   angle: Angle | null;
   settings: ScriptSettings;
   result: ScriptResultState | null;
+  /**
+   * "Se différencier de": keys (`competitorKey`) of the saved competitors
+   * sent with script requests (max 3). null/absent = automatic (the saved
+   * competitors of the script's platform).
+   */
+  competitorKeys?: string[] | null;
 }
 
 export type RunStatus = "idle" | "running" | "error" | "cancelled";
@@ -147,6 +156,8 @@ export interface ScriptRun {
   instruction: string | null;
   /** Whether a web research phase is expected. */
   research: boolean;
+  /** Whether a critical review pass is expected (settings.review, not when refining). */
+  review: boolean;
   phase: ScriptPhase | null;
   message: string;
   chars: number;
@@ -166,8 +177,10 @@ export interface StudioState {
   scriptRun: ScriptRun;
   /** Outcome of the last automatic history save. */
   saveNotice: SaveNotice | null;
-  /** One-off message (history entry not found…). */
+  /** One-off message (history entry not found, idea imported…). */
   notice: string | null;
+  /** Tone of `notice` (default "warning"). */
+  noticeTone?: "info" | "warning";
   /** Last message for the screen-reader live region of the Studio. */
   announcement: string;
 }
@@ -194,6 +207,7 @@ function initialDraft(): StudioDraft {
     angle: null,
     settings: defaultScriptSettings("fr"),
     result: null,
+    competitorKeys: null,
   };
 }
 
@@ -204,6 +218,7 @@ const IDLE_SCRIPT: ScriptRun = {
   kind: "generate",
   instruction: null,
   research: false,
+  review: false,
   phase: null,
   message: "",
   chars: 0,
@@ -349,7 +364,14 @@ function normalizeDraft(value: unknown): StudioDraft | null {
     angle: topic && isAngleLike(value.angle) ? value.angle : null,
     settings,
     result: topic ? normalizeResult(value.result, settings) : null,
+    competitorKeys: normalizeCompetitorKeys(value.competitorKeys),
   });
+}
+
+/** Explicit "Se différencier de" selection (max 3 keys), or null for the automatic one. */
+function normalizeCompetitorKeys(value: unknown): string[] | null {
+  if (!Array.isArray(value)) return null;
+  return Array.from(new Set(value.filter(isString))).slice(0, MAX_COMPETITORS);
 }
 
 // ---------------------------------------------------------------------------
@@ -380,7 +402,15 @@ function clampStep(draft: StudioDraft): StudioDraft {
 export interface StudioEntry {
   analyseId: string | null;
   scriptId: string | null;
+  /**
+   * Idea handed over by "Écrire ce script" on /concurrents (sessionStorage,
+   * read by the provider). Ignored when a history link is followed.
+   */
+  handoff?: PendingStudioHandoff | null;
 }
+
+/** Max competitors a script request can carry (API schema limit). */
+export const MAX_COMPETITORS = 3;
 
 export function formFromRequest(request: AnalyzeRequest): RadarForm {
   return normalizeForm({ ...request, sources: request.sources });
@@ -427,14 +457,40 @@ function draftFromSavedScript(draft: StudioDraft, saved: SavedScript, analyses: 
   };
 }
 
+/** Opens the Script step with a competitor idea (real topic + evidence + custom angle). */
+function draftFromHandoff(draft: StudioDraft, handoff: PendingStudioHandoff): StudioDraft {
+  const { topic, angle } = handoff;
+  const known = topic.angles.some((item) => item.id === angle.id);
+  const competitorKeys = handoff.competitorKey
+    ? [handoff.competitorKey, ...(draft.competitorKeys ?? []).filter((key) => key !== handoff.competitorKey)].slice(
+        0,
+        MAX_COMPETITORS,
+      )
+    : (draft.competitorKeys ?? null);
+  return {
+    ...draft,
+    step: "script",
+    topic,
+    evidence: Array.isArray(handoff.signals) ? handoff.signals : [],
+    geo: draft.geo ?? draft.form.geo,
+    angleChoice: known ? angle.id : "custom",
+    customAngle: known ? draft.customAngle : { title: angle.title, pitch: angle.pitch },
+    angle,
+    settings: handoff.scriptPlatform ? { ...draft.settings, platform: handoff.scriptPlatform } : draft.settings,
+    result: null,
+    competitorKeys,
+  };
+}
+
 /**
  * Initial state: the sessionStorage draft (or defaults), overridden by the
- * history entry named in the URL. Reads browser storage — call it on the
+ * history entry named in the URL, or by a competitor idea hand-off. Reads browser storage — call it on the
  * client only (reducer initializer of a subtree mounted after hydration).
  */
 export function createStudioState(entry: StudioEntry): StudioState {
   let draft = normalizeDraft(loadStudioDraft<unknown>()) ?? initialDraft();
   let notice: string | null = null;
+  let noticeTone: StudioState["noticeTone"] = "warning";
 
   if (entry.scriptId || entry.analyseId) {
     const history = getHistory();
@@ -450,6 +506,10 @@ export function createStudioState(entry: StudioEntry): StudioState {
       if (analysis && isAnalysisLike(analysis)) draft = draftFromAnalysis(draft, analysis);
       else notice = "Cette analyse n'est plus dans l'historique de ce navigateur : voici votre session en cours.";
     }
+  } else if (entry.handoff && isTopicLike(entry.handoff.topic) && isAngleLike(entry.handoff.angle)) {
+    draft = draftFromHandoff(draft, entry.handoff);
+    noticeTone = "info";
+    notice = `Idée importée${entry.handoff.label ? ` depuis l'analyse de ${entry.handoff.label}` : ""} : ses publications servent de preuves et ce concurrent est sélectionné dans « Se différencier de ». Ajustez les réglages puis générez le script.`;
   }
 
   return {
@@ -458,7 +518,8 @@ export function createStudioState(entry: StudioEntry): StudioState {
     scriptRun: IDLE_SCRIPT,
     saveNotice: null,
     notice,
-    announcement: "",
+    noticeTone,
+    announcement: notice && noticeTone === "info" ? notice : "",
   };
 }
 
@@ -488,13 +549,14 @@ export type StudioAction =
   | { type: "updateCustomAngle"; patch: Partial<CustomAngleDraft> }
   | { type: "commitAngle"; angle: Angle }
   | { type: "updateSettings"; patch: Partial<ScriptSettings> }
-  | { type: "scriptStart"; kind: ScriptRun["kind"]; instruction: string | null; research: boolean }
+  | { type: "scriptStart"; kind: ScriptRun["kind"]; instruction: string | null; research: boolean; review?: boolean }
   | { type: "scriptEvent"; event: ScriptEvent }
   | { type: "scriptDone"; script: GeneratedScript; settings: ScriptSettings; topicId: string; angleId: string; saved: SaveResult }
   | { type: "scriptFailed"; message: string }
   | { type: "scriptCancelled" }
   | { type: "scriptReset" }
   | { type: "selectHook"; index: number }
+  | { type: "setCompetitors"; keys: string[] | null }
   | { type: "dismissNotice" };
 
 function sourceLabel(id: SourceId): string {
@@ -672,6 +734,7 @@ export function studioReducer(state: StudioState, action: StudioAction): StudioS
           kind: action.kind,
           instruction: action.instruction,
           research: action.research,
+          review: Boolean(action.review) && action.kind !== "refine",
         },
         announcement: action.kind === "refine" ? "Affinage du script lancé." : "Génération du script lancée.",
       };
@@ -726,6 +789,11 @@ export function studioReducer(state: StudioState, action: StudioAction): StudioS
         announcement: `Accroche ${action.index + 1} utilisée dans le script.`,
       };
     }
+
+    case "setCompetitors":
+      return patchDraft(state, {
+        competitorKeys: action.keys === null ? null : Array.from(new Set(action.keys)).slice(0, MAX_COMPETITORS),
+      });
 
     case "dismissNotice":
       return { ...state, notice: null };
@@ -791,7 +859,12 @@ export interface StudioProviderProps {
 }
 
 export function StudioProvider({ entry, children }: StudioProviderProps) {
-  const [state, dispatch] = useReducer(studioReducer, entry, createStudioState);
+  // A competitor idea waiting in sessionStorage (peeked, not consumed: React
+  // may run initializers twice; it is cleared once applied, below).
+  const [initialEntry] = useState<StudioEntry>(() =>
+    entry.analyseId || entry.scriptId || entry.handoff !== undefined ? entry : { ...entry, handoff: peekStudioHandoff() },
+  );
+  const [state, dispatch] = useReducer(studioReducer, initialEntry, createStudioState);
   // Whether we came from a history link — read once, the URL is cleaned below.
   const [fromHistoryLink] = useState(() => Boolean(entry.analyseId || entry.scriptId));
   const analysisController = useRef<AbortController | null>(null);
@@ -818,6 +891,14 @@ export function StudioProvider({ entry, children }: StudioProviderProps) {
       scriptController.current?.abort();
     };
   }, []);
+
+  // The idea hand-off was applied to the draft: consume it, so a refresh
+  // restores the session instead of importing the idea again.
+  useEffect(() => {
+    if (!initialEntry.handoff) return;
+    clearStudioHandoff();
+    persistDraft(latestDraft.current);
+  }, [initialEntry]);
 
   // `/?script=…` was consumed into the draft: drop it from the URL so a
   // refresh restores the session instead of reloading the history entry.
@@ -869,6 +950,7 @@ export function StudioProvider({ entry, children }: StudioProviderProps) {
       kind: job.kind,
       instruction: request.refine?.instruction ?? null,
       research: request.settings.research,
+      review: request.settings.review && !request.refine,
     });
     try {
       const streamed = await streamScript(

@@ -1,0 +1,71 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Real Firecrawl /v2/search response (web) for the query site:linkedin.com/posts \"romainfargeot\" with tbs=qdr:y, location=France, captured on 2026-10-04. Includes posts by other members that mention him (must be dropped).",
+  "response": {
+    "success": true,
+    "data": {
+      "web": [
+        {
+          "url": "https://www.linkedin.com/posts/alexandre-jean-banque-influenceur_romain-fargeot-activity-7511901748186238978-wV2z",
+          "title": "Alexandre JEAN - Romain Fargeot - LinkedIn",
+          "description": "1 day ago · Romain Fargeot. ... Vidéo de Romain Fargeot https://www.instagram.com/romain.financemc?stkn=MTl6OXRseXB1ZGRp · Like · Reply. 1 Reaction.",
+          "position": 1
+        },
+        {
+          "url": "https://fr.linkedin.com/posts/romainfargeot_jai-un-prospect-%C3%A0-4-500-mois-qui-est-plus-activity-7478406417951993856-4HXi",
+          "title": "Post de Romain Fargeot - LinkedIn",
+          "description": "Post de Romain Fargeot ... Je t'aide à bâtir un portefeuille d'investissement à 7 chiffres à long-terme | +10 Millions € investis par mes clients. ... J'apporte aux ...",
+          "position": 2
+        },
+        {
+          "url": "https://fr.linkedin.com/posts/romainfargeot_on-tient-notre-champion-de-la-semaine-activity-7500787098082500608-dg29",
+          "title": "C'est quand même fascinant. On nous explique d'un côté que ... - LinkedIn",
+          "description": "Post de Romain Fargeot. Voir le profil de Romain Fargeot. Romain Fargeot. Je t'aide à bâtir un portefeuille d'investissement à 7 chiffres à long-terme | +10 ...",
+          "position": 3
+        },
+        {
+          "url": "https://fr.linkedin.com/posts/romainfargeot_tu-passes-une-heure-%C3%A0-%C3%A9conomiser-30-activity-7488465994231857152-fE_j",
+          "title": "Post de Romain Fargeot - LinkedIn",
+          "description": "Post de Romain Fargeot ... Je t'aide à bâtir un portefeuille d'investissement à 7 chiffres à long-terme | +10 Millions € investis par mes clients. 1 mois.",
+          "position": 4
+        },
+        {
+          "url": "https://fr.linkedin.com/posts/romainfargeot_3-mois-sur-linkedin-et-si-on-faisait-le-activity-7387008670749863936-09Ra",
+          "title": "3 mois sur LinkedIn. Et si on faisait le bilan ? Les chiffres ↓ D'abord : • 42 ...",
+          "description": "Post de Romain Fargeot ... Je t'aide à bâtir un portefeuille d'investissement à 7 chiffres à long-terme | +10 Millions € investis par mes clients. ... 3 mois sur ...",
+          "position": 5
+        },
+        {
+          "url": "https://fr.linkedin.com/posts/romainfargeot_les-20-erreurs-les-plus-communes-des-investisseurs-activity-7500092854417948672-Asbn",
+          "title": "Post de Romain Fargeot - LinkedIn",
+          "description": "Voir le profil de Romain Fargeot. Romain Fargeot. Je t'aide à bâtir un portefeuille d'investissement à 7 chiffres à long-terme | +10 Millions € investis ...",
+          "position": 6
+        },
+        {
+          "url": "https://fr.linkedin.com/posts/romainfargeot_lucie-ma-dit-je-d%C3%A9teste-les-cgp-qui-activity-7508397329566330881-3y3S",
+          "title": "Post de Romain Fargeot - LinkedIn",
+          "description": "Voir le profil de Romain Fargeot · Romain Fargeot. Je t'aide à bâtir un portefeuille d'investissement à 7 chiffres à long-terme | +10 Millions € investis ...",
+          "position": 7
+        },
+        {
+          "url": "https://fr.linkedin.com/posts/romainfargeot_alphabet-vient-de-d%C3%A9voiler-son-portefeuille-activity-7492814587428286464-Sx4C",
+          "title": "Post de Romain Fargeot - LinkedIn",
+          "description": "Post de Romain Fargeot ... Alphabet vient de dévoiler son portefeuille complet au T2 2026. 99 milliards de dollars (et trois thèses d'investissement assez claires) ...",
+          "position": 8
+        },
+        {
+          "url": "https://fr.linkedin.com/posts/romainfargeot_de-plus-en-plus-de-fran%C3%A7ais-ouvrent-leur-activity-7511658849477640192-H9d2",
+          "title": "Post de Romain Fargeot - LinkedIn",
+          "description": "2 days ago · Post de Romain Fargeot ... 1 h. ... « De plus en plus de Français ouvrent leur assurance-vie au Luxembourg. » Et ils ont de bonnes raisons de le faire. Les Échos ...",
+          "position": 9
+        },
+        {
+          "url": "https://www.linkedin.com/posts/mounirlaggoune_most-people-believe-they-are-bad-with-money-activity-7497903115086782464-Uie8",
+          "title": "Mounir Laggoune's Post - LinkedIn",
+          "description": "Romain Fargeot. Je t'aide à bâtir un portefeuille d'investissement à 7 chiffres à long-terme | +10 Millions € investis par mes clients. 2w. Report this ...",
+          "position": 10
+        }
+      ]
+    },
+    "creditsUsed": 2
+  }
+}

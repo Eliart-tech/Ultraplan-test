@@ -102,7 +102,7 @@ const UNIT_MS: Record<string, number> = {
 };
 
 /** Splits "4 days ago · text" into an approximate date and the text. */
-function splitAge(description: string, now: number): { text: string; publishedAt?: string } {
+export function splitAge(description: string, now: number): { text: string; publishedAt?: string } {
   const match = description.match(AGE_PREFIX);
   if (!match) return { text: description.trim() };
   const count = Number(match[1] ?? match[3]);
@@ -115,7 +115,7 @@ function splitAge(description: string, now: number): { text: string; publishedAt
 }
 
 /** "Post de Romain Fargeot - LinkedIn" / "Titre | Jézabel Couppey …" → author and real title. */
-function readTitle(title: string): { author?: string; headline?: string } {
+export function readTitle(title: string): { author?: string; headline?: string } {
   const clean = title.replace(/\s*[-–|]\s*LinkedIn\s*$/i, "").trim();
   const postOf = clean.match(/^(?:Post|Publication) de\s+(.+)$/i) ?? clean.match(/^(.+?)'s Post$/i);
   if (postOf) return { author: postOf[1].trim() };

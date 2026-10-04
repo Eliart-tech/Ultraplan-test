@@ -1,0 +1,19 @@
+{
+  "_fixture": "TEST FIXTURE ONLY. Error items exactly as documented in clockworks/tiktok-scraper's README ('Error items' section).",
+  "private": [
+    {
+      "url": "https://www.tiktok.com/@someuser",
+      "input": "someuser",
+      "error": "Profile is private",
+      "errorCode": "PROFILE_PRIVATE"
+    }
+  ],
+  "notFound": [
+    {
+      "url": "https://www.tiktok.com/@missinguser",
+      "input": "missinguser",
+      "error": "Profile not found",
+      "errorCode": "NOT_FOUND"
+    }
+  ]
+}

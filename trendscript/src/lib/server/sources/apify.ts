@@ -38,6 +38,8 @@ export interface ApifyErrorRow {
   errorDescription?: string;
   /** What the row was about (hashtag, query, URL…) when the actor says so. */
   input?: string;
+  /** Machine-readable code when the actor gives one (`errorCode`, e.g. TikTok's "PROFILE_PRIVATE"). */
+  code?: string;
 }
 
 export interface ApifyRunResult<T> {
@@ -190,6 +192,7 @@ export function splitApifyItems<T>(rows: unknown[]): ApifyRunResult<T> {
         errorDescription:
           typeof record.errorDescription === "string" ? scrubSecrets(record.errorDescription).slice(0, 200) : undefined,
         input,
+        ...(typeof record.errorCode === "string" && record.errorCode ? { code: record.errorCode.slice(0, 60) } : {}),
       });
       continue;
     }

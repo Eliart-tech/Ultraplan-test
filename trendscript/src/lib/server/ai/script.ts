@@ -2,7 +2,10 @@
  * Script generation pipeline (Prompt B):
  *   guardrails → research (optional web search) + free enrichment (Google
  *   News headlines, SerpApi related searches when configured) → structured
- *   writing call streamed as progress → code checks → GeneratedScript.
+ *   writing call streamed as progress → optional critical review pass
+ *   (settings.review: a second call where Claude rereads the draft as a
+ *   demanding editor, with the code checks, and returns an improved draft)
+ *   → code checks → GeneratedScript.
  *
  * Enrichment failures never block the script: they become warnings. Links
  * Claude cites that were not in the material it was given are removed — the
@@ -12,9 +15,9 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { applyGuardrails } from "../../script/guardrails";
-import { checkScript } from "../../script/checks";
+import { checkCompetitorOverlap, checkScript } from "../../script/checks";
 import { countWords, estimateDuration, wordBudget } from "../../script/metrics";
-import { buildScriptPrompt, type Headline, knownUrls } from "../../script/prompt";
+import { buildReviewUser, buildScriptPrompt, type Headline, knownUrls, REVIEW_INSTRUCTIONS } from "../../script/prompt";
 import type {
   GeneratedScript,
   RelatedLink,
@@ -75,9 +78,18 @@ export const scriptOutputSchema = z.object({
   risks: z.array(z.string()),
   checklist: z
     .array(z.object({ criterion: z.string(), passed: z.boolean(), comment: z.string() }))
-    .describe(`Les ${RUBRIC_CRITERIA.length} critères de la grille qualité, dans l'ordre`),
+    .describe(`Les ${RUBRIC_CRITERIA.length} critères de la grille qualité, dans l'ordre (plus le critère de différenciation s'il est demandé)`),
 });
 export type ScriptOutput = z.infer<typeof scriptOutputSchema>;
+
+/** Review pass: what changed first (the editor's plan), then the full final draft. */
+export const reviewOutputSchema = z.object({
+  changes: z
+    .array(z.string())
+    .describe("2 à 6 changements « quoi → pourquoi », du plus important au moins important"),
+  ...scriptOutputSchema.shape,
+});
+export type ReviewOutput = z.infer<typeof reviewOutputSchema>;
 
 // ---------------------------------------------------------------------------
 // Post-processing (pure)
@@ -367,39 +379,136 @@ async function run(
     onProgress: (chars) => send({ type: "progress", chars }),
   });
 
+  const known = knownUrls(guarded, { brief: enrichment.brief, headlines: enrichment.headlines });
+  let { draft, removedLinks } = sanitizeDraft(result.data, known);
+  let writtenBy = result.model;
+  const modelWarnings = result.fellBack
+    ? [`Le modèle principal a décliné la demande : script rédigé par ${result.model} (repli automatique).`]
+    : [];
+  let reviewNotes: string[] | undefined;
+
+  // Refinement is a targeted edit asked by the creator: no second opinion.
+  if (settings.review && !request.refine) {
+    const review = await reviewDraft({ client, model, prompt, draft, known, request: guarded, budget, signal, send });
+    if (review.ok) {
+      ({ draft, removedLinks } = review);
+      writtenBy = review.model;
+      reviewNotes = review.notes;
+      if (review.fellBack) {
+        modelWarnings.push(`Le modèle principal a décliné la relecture : relecture faite par ${review.model} (repli automatique).`);
+      }
+    } else {
+      modelWarnings.push(review.warning);
+    }
+  }
+
   send({ type: "status", step: "finalizing", message: "Vérification du script…" });
-  const { draft, removedLinks } = sanitizeDraft(
-    result.data,
-    knownUrls(guarded, { brief: enrichment.brief, headlines: enrichment.headlines }),
-  );
   const wordCount = countWords(draft.fullScript);
   const warnings = [
     ...notices,
     ...enrichment.warnings,
-    ...(result.fellBack
-      ? [`Le modèle principal a décliné la demande : script rédigé par ${result.model} (repli automatique).`]
-      : []),
+    ...modelWarnings,
     ...(removedLinks > 0
       ? [
           `${removedLinks} lien(s) cité(s) par Claude ne figurai(en)t pas dans les sources fournies : retiré(s), affirmations concernées passées en confiance faible.`,
         ]
       : []),
     ...checkScript(draft, settings, budget),
+    ...checkCompetitorOverlap(draft, guarded.competitors),
   ];
 
   const script: GeneratedScript = {
     ...draft,
     id: crypto.randomUUID(),
     createdAt: new Date(now).toISOString(),
-    model: result.model,
+    model: writtenBy,
     wordCount,
     wordBudget: budget,
     estimatedDurationSec: estimateDuration(wordCount, settings.pace),
     warnings: [...new Set(warnings)],
     ...(enrichment.brief ? { research: enrichment.brief } : {}),
+    ...(reviewNotes ? { reviewNotes } : {}),
   };
   send({ type: "result", script });
   return script;
+}
+
+// ---------------------------------------------------------------------------
+// Critical review pass
+// ---------------------------------------------------------------------------
+
+const MAX_REVIEW_NOTES = 8;
+
+/** Shown when the editor kept the draft as it was. */
+export const REVIEW_NO_CHANGE = "Relecture critique : aucune modification nécessaire, le premier jet tenait déjà la grille.";
+
+type ReviewResult =
+  | { ok: true; draft: ScriptDraft; removedLinks: number; model: string; fellBack: boolean; notes: string[] }
+  | { ok: false; warning: string };
+
+/**
+ * Second structured call: Claude rereads the draft as a demanding editor,
+ * with the same brief and evidence plus the code checks of the draft, and
+ * returns the full improved draft and what it changed. Any failure (other
+ * than a cancellation) keeps the first draft, with a warning.
+ */
+async function reviewDraft({
+  client,
+  model,
+  prompt,
+  draft,
+  known,
+  request,
+  budget,
+  signal,
+  send,
+}: {
+  client: Anthropic;
+  model: string;
+  prompt: ReturnType<typeof buildScriptPrompt>;
+  draft: ScriptDraft;
+  known: Set<string>;
+  request: ScriptRequest;
+  budget: number;
+  signal: AbortSignal;
+  send: (event: ScriptEvent) => void;
+}): Promise<ReviewResult> {
+  send({ type: "status", step: "review", message: "Relecture critique…" });
+  const controls = [...checkScript(draft, request.settings, budget), ...checkCompetitorOverlap(draft, request.competitors)];
+  try {
+    const result = await callStructured({
+      client,
+      model,
+      // The writing call's blocks first, unchanged: the cached prefix is reused.
+      system: [prompt.systemStable, prompt.systemSettings, REVIEW_INSTRUCTIONS],
+      user: buildReviewUser(prompt.user, draft, controls),
+      schema: reviewOutputSchema,
+      effort: "high",
+      maxTokens: MAX_TOKENS,
+      signal,
+      task: "la relecture critique du script",
+      tooLongHint: "désactivez la relecture critique ou choisissez une durée plus courte, puis relancez.",
+      onProgress: (chars) => send({ type: "progress", chars }),
+    });
+    const { changes, ...output } = result.data;
+    const { draft: reviewed, removedLinks } = sanitizeDraft(output, known);
+    const notes = changes
+      .map((change) => clip(change.replace(/\s+/g, " "), 500))
+      .filter(Boolean)
+      .slice(0, MAX_REVIEW_NOTES);
+    return {
+      ok: true,
+      draft: reviewed,
+      removedLinks,
+      model: result.model,
+      fellBack: result.fellBack,
+      notes: notes.length ? notes : [REVIEW_NO_CHANGE],
+    };
+  } catch (error) {
+    if (signal.aborted) throw new AiError("Génération annulée.");
+    console.warn("[script] relecture critique", error);
+    return { ok: false, warning: `Relecture critique indisponible (${describeAiError(error)}) : première version conservée.` };
+  }
 }
 
 export async function generateScript(

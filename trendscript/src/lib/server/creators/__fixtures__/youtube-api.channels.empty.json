@@ -1,0 +1,11 @@
+{
+  "_fixture": "TEST FIXTURE ONLY. channels.list answer for an unknown handle: 200 with no `items` (documented behaviour of list methods with no match).",
+  "response": {
+    "kind": "youtube#channelListResponse",
+    "etag": "fixture",
+    "pageInfo": {
+      "totalResults": 0,
+      "resultsPerPage": 5
+    }
+  }
+}

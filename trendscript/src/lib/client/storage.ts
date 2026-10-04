@@ -2,8 +2,12 @@
  * Browser persistence. Everything stays in this browser:
  * - `trendscript:profile:v1` (localStorage) — the creator profile;
  * - `trendscript:history:v1` (localStorage) — up to 50 scripts + 10 analyses;
+ * - `trendscript:competitors:v1` (localStorage) — up to 12 competitor reports,
+ *   one per platform + handle (a re-analysis replaces the previous one);
  * - `trendscript:studio:v1` (sessionStorage) — the Studio draft, so a refresh
- *   doesn't lose the current analysis.
+ *   doesn't lose the current analysis;
+ * - `trendscript:handoff:v1` (sessionStorage) — a one-shot hand-off to the
+ *   Studio ("Écrire ce script" from a competitor idea), read once.
  *
  * Every access is wrapped in try/catch (private mode, disabled storage,
  * quota). React reads go through `useSyncExternalStore` with a server
@@ -12,24 +16,35 @@
  */
 
 import { useSyncExternalStore } from "react";
-import type {
-  Analysis,
-  Angle,
-  CreatorProfile,
-  GeneratedScript,
-  ScriptSettings,
-  Signal,
-  Topic,
+import {
+  CREATOR_PLATFORMS,
+  type Analysis,
+  type Angle,
+  type CompetitorReport,
+  type CreatorPlatform,
+  type CreatorProfile,
+  type GeneratedScript,
+  type ScriptPlatform,
+  type ScriptSettings,
+  type Signal,
+  type Topic,
 } from "../types";
 
 export const STORAGE_KEYS = {
   profile: "trendscript:profile:v1",
   history: "trendscript:history:v1",
+  competitors: "trendscript:competitors:v1",
   studio: "trendscript:studio:v1",
+  handoff: "trendscript:handoff:v1",
 } as const;
 
 export const MAX_SAVED_SCRIPTS = 50;
 export const MAX_SAVED_ANALYSES = 10;
+export const MAX_SAVED_COMPETITORS = 12;
+/** Captions / transcripts are cut to this length in storage (the report keeps its meaning, the quota breathes). */
+export const STORED_POST_TEXT_MAX = 1000;
+/** A Studio hand-off older than this is ignored (the user moved on). */
+export const HANDOFF_TTL_MS = 30 * 60_000;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -77,6 +92,7 @@ export const EMPTY_PROFILE: CreatorProfile = Object.freeze({
 }) as CreatorProfile;
 
 const EMPTY_HISTORY: HistoryData = Object.freeze({ scripts: [], analyses: [] }) as unknown as HistoryData;
+const EMPTY_COMPETITORS: CompetitorReport[] = Object.freeze([]) as unknown as CompetitorReport[];
 
 // ---------------------------------------------------------------------------
 // Low-level access
@@ -401,4 +417,208 @@ export function saveStudioDraft(data: unknown): boolean {
 
 export function clearStudioDraft(): void {
   removeKey("session", STORAGE_KEYS.studio);
+}
+
+// ---------------------------------------------------------------------------
+// Competitor reports (localStorage)
+// ---------------------------------------------------------------------------
+
+/** "tiktok:squeezie" — one saved report per platform + handle (case-insensitive, without "@"). */
+export function competitorKey(platform: CreatorPlatform, handle: string): string {
+  return `${platform}:${handle.trim().replace(/^@+/, "").toLowerCase()}`;
+}
+
+/** Key of a report's account (see `competitorKey`). */
+export function reportKey(report: CompetitorReport): string {
+  return competitorKey(report.data.account.platform, report.data.account.handle);
+}
+
+function isCompetitorReport(value: unknown): value is CompetitorReport {
+  if (!isRecord(value) || typeof value.id !== "string" || typeof value.createdAt !== "string") return false;
+  if (value.mode !== "ai" && value.mode !== "stats") return false;
+  const { data, stats } = value;
+  if (!isRecord(data) || !isRecord(data.account) || !Array.isArray(data.posts) || !Array.isArray(data.warnings)) return false;
+  const { account } = data;
+  if (typeof account.handle !== "string" || !account.handle) return false;
+  if (!(CREATOR_PLATFORMS as readonly unknown[]).includes(account.platform)) return false;
+  if (!data.posts.every((post) => isRecord(post) && typeof post.id === "string" && isRecord(post.metrics))) return false;
+  return (
+    isRecord(stats) &&
+    typeof stats.postCount === "number" &&
+    Array.isArray(stats.outliers) &&
+    Array.isArray(stats.weekdays) &&
+    Array.isArray(stats.hours) &&
+    Array.isArray(stats.durations) &&
+    Array.isArray(stats.hashtags) &&
+    Array.isArray(value.notes) &&
+    (value.insights === undefined || isRecord(value.insights))
+  );
+}
+
+/**
+ * Valid reports, newest first, one per platform + handle (the first — newest —
+ * wins), capped at MAX_SAVED_COMPETITORS. Accepts the stored envelope
+ * `{ version, reports }` or a bare array.
+ */
+export function sanitizeCompetitors(value: unknown): CompetitorReport[] {
+  const list = Array.isArray(value) ? value : isRecord(value) && Array.isArray(value.reports) ? value.reports : null;
+  if (!list) return EMPTY_COMPETITORS;
+  const seen = new Set<string>();
+  const reports: CompetitorReport[] = [];
+  for (const entry of list) {
+    if (!isCompetitorReport(entry)) continue;
+    const key = reportKey(entry);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    reports.push(entry);
+    if (reports.length >= MAX_SAVED_COMPETITORS) break;
+  }
+  return reports.length > 0 ? reports : EMPTY_COMPETITORS;
+}
+
+/** Report with long captions / transcripts shortened for storage. */
+export function trimCompetitorReport(report: CompetitorReport): CompetitorReport {
+  const cut = (text: string | undefined) =>
+    text && text.length > STORED_POST_TEXT_MAX ? `${text.slice(0, STORED_POST_TEXT_MAX - 1)}…` : text;
+  return {
+    ...report,
+    data: {
+      ...report.data,
+      posts: report.data.posts.map((post) => {
+        const next = { ...post };
+        if (post.text !== undefined) next.text = cut(post.text);
+        if (post.transcript !== undefined) next.transcript = cut(post.transcript);
+        return next;
+      }),
+    },
+  };
+}
+
+const competitorsStore = createStore(STORAGE_KEYS.competitors, () =>
+  sanitizeCompetitors(readJson("local", STORAGE_KEYS.competitors)),
+);
+
+/** Saved competitor reports, newest first. */
+export function getCompetitors(): CompetitorReport[] {
+  return competitorsStore.get();
+}
+
+/** The saved report of an account (`competitorKey`), if any. */
+export function findCompetitor(key: string): CompetitorReport | undefined {
+  return getCompetitors().find((report) => reportKey(report) === key);
+}
+
+/** Writes the list; when the quota is exceeded, drops the oldest reports until it fits (the first one is kept). */
+function writeCompetitors(reports: CompetitorReport[]): SaveResult {
+  const list = [...reports];
+  let evicted = 0;
+  for (;;) {
+    if (writeJson("local", STORAGE_KEYS.competitors, { version: 1, reports: list })) {
+      competitorsStore.invalidate();
+      return { ok: true, evicted };
+    }
+    if (!getStorage("local") || list.length <= 1) break;
+    list.pop();
+    evicted++;
+  }
+  competitorsStore.invalidate();
+  return { ok: false, evicted };
+}
+
+/**
+ * Saves a report at the top of the list, replacing the previous report of the
+ * same platform + handle. Captions are trimmed (`trimCompetitorReport`).
+ */
+export function saveCompetitorReport(report: CompetitorReport): SaveResult {
+  const key = reportKey(report);
+  const current = sanitizeCompetitors(readJson("local", STORAGE_KEYS.competitors));
+  const reports = [trimCompetitorReport(report), ...current.filter((item) => reportKey(item) !== key)].slice(
+    0,
+    MAX_SAVED_COMPETITORS,
+  );
+  return writeCompetitors(reports);
+}
+
+/** Removes the saved report of an account (`competitorKey`). */
+export function removeCompetitorReport(key: string): SaveResult {
+  const current = sanitizeCompetitors(readJson("local", STORAGE_KEYS.competitors));
+  return writeCompetitors(current.filter((item) => reportKey(item) !== key));
+}
+
+/** Deletes every saved competitor report. */
+export function clearCompetitors(): void {
+  removeKey("local", STORAGE_KEYS.competitors);
+  competitorsStore.invalidate();
+}
+
+/**
+ * Saved competitor reports, live (updates after saves, deletions and from
+ * other tabs). `hydrated` is false during the server render and hydration.
+ */
+export function useCompetitors(): { reports: CompetitorReport[]; hydrated: boolean } {
+  const reports = useSyncExternalStore(competitorsStore.subscribe, competitorsStore.get, () => EMPTY_COMPETITORS);
+  const hydrated = useHydrated();
+  return { reports, hydrated };
+}
+
+// ---------------------------------------------------------------------------
+// Studio hand-off (sessionStorage, read once by the Studio)
+// ---------------------------------------------------------------------------
+
+/** What "Écrire ce script" hands to the Studio: a real topic, its evidence and an angle. */
+export interface PendingStudioHandoff {
+  version: 1;
+  /** ISO 8601 — hand-offs older than HANDOFF_TTL_MS are ignored. */
+  createdAt: string;
+  topic: Topic;
+  signals: Signal[];
+  angle: Angle;
+  /** Competitor the idea comes from (`competitorKey`), pre-selected in "Se différencier de". */
+  competitorKey?: string;
+  /** Script platform to preselect (the competitor's platform). */
+  scriptPlatform?: ScriptPlatform;
+  /** "@handle" shown in the Studio notice. */
+  label?: string;
+}
+
+function isHandoff(value: unknown): value is PendingStudioHandoff {
+  return (
+    isRecord(value) &&
+    value.version === 1 &&
+    typeof value.createdAt === "string" &&
+    isRecord(value.topic) &&
+    typeof value.topic.id === "string" &&
+    typeof value.topic.title === "string" &&
+    Array.isArray(value.topic.signalIds) &&
+    Array.isArray(value.signals) &&
+    isRecord(value.angle) &&
+    typeof value.angle.id === "string" &&
+    typeof value.angle.title === "string"
+  );
+}
+
+/** Stores the hand-off for the next Studio mount; false when sessionStorage refused it. */
+export function saveStudioHandoff(
+  handoff: Omit<PendingStudioHandoff, "version" | "createdAt">,
+  now: number = Date.now(),
+): boolean {
+  const envelope: PendingStudioHandoff = { version: 1, createdAt: new Date(now).toISOString(), ...handoff };
+  return writeJson("session", STORAGE_KEYS.handoff, envelope);
+}
+
+/**
+ * The pending hand-off, without consuming it (React may call initializers
+ * twice): null when absent, malformed or older than HANDOFF_TTL_MS. Clear it
+ * with `clearStudioHandoff` once applied.
+ */
+export function peekStudioHandoff(now: number = Date.now()): PendingStudioHandoff | null {
+  const value = readJson("session", STORAGE_KEYS.handoff);
+  if (!isHandoff(value)) return null;
+  const age = now - Date.parse(value.createdAt);
+  if (!Number.isFinite(age) || age > HANDOFF_TTL_MS || age < -60_000) return null;
+  return value;
+}
+
+export function clearStudioHandoff(): void {
+  removeKey("session", STORAGE_KEYS.handoff);
 }

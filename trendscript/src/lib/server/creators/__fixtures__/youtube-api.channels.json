@@ -1,0 +1,48 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Shape of GET /youtube/v3/channels?part=snippet,statistics,contentDetails&forHandle=@Squeezie per the YouTube Data API channels resource reference (counters are JSON strings, subscriberCount rounded to 3 significant figures). Channel id, title, description and handle are real (public page, 2026-10-04); counters made up to match the page's rounded labels.",
+  "response": {
+    "kind": "youtube#channelListResponse",
+    "etag": "fixture",
+    "pageInfo": {
+      "totalResults": 1,
+      "resultsPerPage": 5
+    },
+    "items": [
+      {
+        "kind": "youtube#channel",
+        "etag": "fixture",
+        "id": "UCWeg2Pkate69NFdBeuRFTAw",
+        "snippet": {
+          "title": "SQUEEZIE",
+          "description": "clique sur une vidéo nan??",
+          "customUrl": "@squeezie",
+          "publishedAt": "2011-01-09T01:56:21Z",
+          "thumbnails": {
+            "default": {
+              "url": "https://yt3.ggpht.com/fixture=s88-c-k-c0x00ffffff-no-rj",
+              "width": 88,
+              "height": 88
+            }
+          },
+          "localized": {
+            "title": "SQUEEZIE",
+            "description": "clique sur une vidéo nan??"
+          },
+          "country": "FR"
+        },
+        "contentDetails": {
+          "relatedPlaylists": {
+            "likes": "",
+            "uploads": "UUWeg2Pkate69NFdBeuRFTAw"
+          }
+        },
+        "statistics": {
+          "viewCount": "6312345678",
+          "subscriberCount": "20200000",
+          "hiddenSubscriberCount": false,
+          "videoCount": "1834"
+        }
+      }
+    ]
+  }
+}

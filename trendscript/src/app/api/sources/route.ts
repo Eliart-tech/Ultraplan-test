@@ -1,5 +1,6 @@
 import { aiModel, getAnthropic } from "@/lib/server/ai/client";
 import { isAuthEnabled, requireAuth } from "@/lib/server/auth";
+import { creatorCapabilities } from "@/lib/server/creators";
 import { getSourceStatuses } from "@/lib/server/sources";
 
 /**
@@ -18,6 +19,8 @@ export async function GET(request: Request) {
       sources: getSourceStatuses(process.env),
       ai: { configured: getAnthropic() !== null, model: aiModel() },
       auth: { enabled: isAuthEnabled() },
+      // Competitor analysis: which platforms can be read, through what.
+      creators: creatorCapabilities(process.env),
     },
     { headers: { "Cache-Control": "no-store" } },
   );

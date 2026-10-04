@@ -1,0 +1,25 @@
+{
+  "_fixture": "TEST FIXTURE ONLY. Row shaped like apify/instagram-profile-scraper's README sample (build 0.0.621): username/fullName/biography/counters of the README's NASA example, relatedProfiles and latestPosts trimmed.",
+  "items": [
+    {
+      "inputUrl": "https://www.instagram.com/nasa",
+      "id": "528817151",
+      "username": "nasa",
+      "url": "https://www.instagram.com/nasa",
+      "fullName": "NASA",
+      "biography": "🚀 🌎  Exploring the universe and our home planet. Verification: nasa.gov/socialmedia",
+      "followersCount": 96323377,
+      "followsCount": 80,
+      "postsCount": 4519,
+      "highlightReelCount": 7,
+      "igtvVideoCount": 171,
+      "isBusinessAccount": true,
+      "joinedRecently": false,
+      "hasChannel": false,
+      "businessCategoryName": "Government Agencies",
+      "private": false,
+      "verified": true,
+      "externalUrl": "https://www.nasa.gov/"
+    }
+  ]
+}

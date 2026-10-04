@@ -502,6 +502,14 @@ export interface CreatorData {
   fetchedAt: string;
   /** French notices (partial data, missing metrics, limits). */
   warnings: string[];
+  /**
+   * False when the source's terms forbid derived metrics on this data
+   * (YouTube Data API: no views ÷ subscribers ratio for other channels unless
+   * the developer accepted the 2026 "derived metrics" amendment —
+   * YT_DERIVED_METRICS_APPROVED=true). Stats then omit reachRate and
+   * audienceMultipliers. Undefined = allowed.
+   */
+  ratiosAllowed?: boolean;
 }
 
 export interface StatBucket {
@@ -641,6 +649,11 @@ export interface CompetitorBrief {
   /** Recent titles / first lines of the competitor (max 15). */
   recentTitles: string[];
   medianViews?: number;
+  /**
+   * What most plausibly makes viewers subscribe to the competitor (from
+   * CompetitorInsights.followDrivers; hypotheses from public signals, max 10).
+   */
+  followDrivers?: string[];
 }
 
 /** Which platforms the server can analyse, and through what. */

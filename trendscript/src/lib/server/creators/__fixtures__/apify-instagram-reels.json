@@ -1,0 +1,136 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Rows shaped like apify/instagram-reel-scraper's README sample output (build 0.0.583, 2026-10-02): captions, counters, music and dates are the README's; the README mixes several owners, here all rows are attributed to one profile, the second reel has hidden likes (-1) and a licensed track, the third no videoPlayCount (plays unavailable). latestComments and CDN URLs trimmed.",
+  "items": [
+    {
+      "inputUrl": "https://www.instagram.com/lyssamariexo",
+      "type": "Video",
+      "mentions": [
+        "dysonusa",
+        "sephora"
+      ],
+      "commentsCount": 24,
+      "firstComment": "Yes to scalp care!! 👏🏼👏🏼👏🏼",
+      "dimensionsHeight": 1918,
+      "dimensionsWidth": 1080,
+      "images": [],
+      "alt": null,
+      "childPosts": [],
+      "ownerFullName": "alyssa marie",
+      "ownerUsername": "lyssamariexo",
+      "ownerId": "186358627",
+      "productType": "clips",
+      "isCommentsDisabled": false,
+      "id": "3889868956217334394",
+      "shortCode": "DX7lzTOJ1p6",
+      "caption": "this is your sign to stop neglecting your scalp 🤭 #ad\n\nthere are so many reasons why I have been loving the new @dysonusa Amino™ Leave-in Scalp Bubble Treatment. it’s fun, it’s innovative, it’s effective & it’s available now at @sephora on my sephora storefront!\n\n#sephorasquad #sephora",
+      "hashtags": [
+        "ad",
+        "sephorasquad",
+        "sephora"
+      ],
+      "url": "https://www.instagram.com/p/DX7lzTOJ1p6/",
+      "likesCount": 286,
+      "videoViewCount": 4073,
+      "videoPlayCount": 10977,
+      "timestamp": "2026-05-04T21:05:19.000Z",
+      "videoDuration": 51.151,
+      "paidPartnership": true,
+      "musicInfo": {
+        "artist_name": "lyssamariexo",
+        "song_name": "Original audio",
+        "uses_original_audio": true,
+        "should_mute_audio": false,
+        "should_mute_audio_reason": "",
+        "audio_id": "27294574066813295"
+      }
+    },
+    {
+      "inputUrl": "https://www.instagram.com/lyssamariexo",
+      "type": "Video",
+      "mentions": [
+        "dysonusa",
+        "sephora"
+      ],
+      "commentsCount": 21,
+      "firstComment": "Yes to scalp care!! 👏🏼👏🏼👏🏼",
+      "dimensionsHeight": 1918,
+      "dimensionsWidth": 1080,
+      "images": [],
+      "alt": null,
+      "childPosts": [],
+      "ownerFullName": "alyssa marie",
+      "ownerUsername": "lyssamariexo",
+      "ownerId": "186358627",
+      "productType": "clips",
+      "isCommentsDisabled": false,
+      "id": "3878214465754444469",
+      "shortCode": "DXSL4JKEzK1",
+      "caption": "The @sephora savings event is finally here!! #SephoraPartner Use code: SPRINGSALE for $ off! Shop now on my Sephora storefront #SephoraSavingsEvent #MySephoraStorefrontSSE #Sephora",
+      "hashtags": [
+        "SephoraPartner",
+        "SephoraSavingsEvent",
+        "MySephoraStorefrontSSE",
+        "Sephora"
+      ],
+      "url": "https://www.instagram.com/p/DXSL4JKEzK1/",
+      "likesCount": -1,
+      "videoViewCount": 70261,
+      "videoPlayCount": 355615,
+      "timestamp": "2026-04-18T19:15:54.000Z",
+      "videoDuration": 110.4,
+      "paidPartnership": true,
+      "musicInfo": {
+        "artist_name": "Sabrina Carpenter",
+        "song_name": "Espresso",
+        "uses_original_audio": false,
+        "should_mute_audio": false,
+        "should_mute_audio_reason": "",
+        "audio_id": "26044033101940829"
+      }
+    },
+    {
+      "inputUrl": "https://www.instagram.com/lyssamariexo",
+      "type": "Video",
+      "mentions": [
+        "dysonusa",
+        "sephora"
+      ],
+      "commentsCount": 8,
+      "firstComment": "Yes to scalp care!! 👏🏼👏🏼👏🏼",
+      "dimensionsHeight": 1918,
+      "dimensionsWidth": 1080,
+      "images": [],
+      "alt": null,
+      "childPosts": [],
+      "ownerFullName": "alyssa marie",
+      "ownerUsername": "lyssamariexo",
+      "ownerId": "186358627",
+      "productType": "clips",
+      "isCommentsDisabled": false,
+      "id": "3871698938516930111",
+      "shortCode": "DW7Cavjjv4_",
+      "caption": "#SephoraPartner My Mother’s Day confession. Shop @sephora ❤️💆🏽‍♀️ #sephoramothersday \n\n#k18results #momcontent",
+      "hashtags": [
+        "SephoraPartner",
+        "sephoramothersday",
+        "k18results",
+        "momcontent"
+      ],
+      "url": "https://www.instagram.com/p/DW7Cavjjv4_/",
+      "likesCount": 1530,
+      "videoViewCount": 45600,
+      "videoPlayCount": null,
+      "timestamp": "2026-04-09T15:02:11.000Z",
+      "videoDuration": 61.1,
+      "paidPartnership": true,
+      "musicInfo": {
+        "artist_name": "lyssamariexo",
+        "song_name": "Original audio",
+        "uses_original_audio": true,
+        "should_mute_audio": false,
+        "should_mute_audio_reason": "",
+        "audio_id": "26571315792554339"
+      }
+    }
+  ]
+}

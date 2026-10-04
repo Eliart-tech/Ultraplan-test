@@ -197,6 +197,7 @@ const competitorBriefSchema = z.object({
   gaps: z.array(shortText(300)).max(10),
   recentTitles: z.array(shortText(300)).max(15),
   medianViews: z.number().optional(),
+  followDrivers: z.array(shortText(300)).max(10).optional(),
 });
 
 export const scriptRequestSchema = z.object({

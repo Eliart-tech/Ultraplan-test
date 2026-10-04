@@ -1,0 +1,56 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Shape of GET /{ig-user-id}?fields=business_discovery.username(x){username,biography,followers_count,media_count,media.limit(n){id,caption,media_type,media_product_type,like_count,comments_count,view_count,permalink,shortcode,timestamp}} per Meta's Business Discovery and IG Media references (267788 / 1205 / 5837 / 50 / 7757 are the doc's sample values; captions, shortcodes and dates made up). Covers: reel, carousel (no view_count), reel with hidden likes (like_count omitted), story-less feed.",
+  "response": {
+    "business_discovery": {
+      "username": "hugodecrypte",
+      "biography": "L'actu expliquée simplement 🗞️",
+      "followers_count": 267788,
+      "media_count": 1205,
+      "media": {
+        "data": [
+          {
+            "id": "17858843269216389",
+            "caption": "Ce qu'il faut retenir du budget 2027 en 60 secondes 👇\n#actu #budget",
+            "media_type": "VIDEO",
+            "media_product_type": "REELS",
+            "like_count": 5837,
+            "comments_count": 50,
+            "view_count": 7757,
+            "permalink": "https://www.instagram.com/reel/DPtest0001/",
+            "shortcode": "DPtest0001",
+            "timestamp": "2026-09-30T18:00:00+0000"
+          },
+          {
+            "id": "17894036119131554",
+            "caption": "Les chiffres clés de la semaine (swipe ➡️)",
+            "media_type": "CAROUSEL_ALBUM",
+            "media_product_type": "FEED",
+            "like_count": 2997,
+            "comments_count": 11,
+            "permalink": "https://www.instagram.com/p/DPtest0002/",
+            "shortcode": "DPtest0002",
+            "timestamp": "2026-10-01T08:00:00+0000"
+          },
+          {
+            "id": "17894449363137701",
+            "caption": "Pourquoi tout le monde parle de cette loi ?",
+            "media_type": "VIDEO",
+            "media_product_type": "REELS",
+            "comments_count": 28,
+            "view_count": 41200,
+            "permalink": "https://www.instagram.com/reel/DPtest0003/",
+            "shortcode": "DPtest0003",
+            "timestamp": "2026-09-28T12:30:00+0000"
+          }
+        ],
+        "paging": {
+          "cursors": {
+            "after": "QVFIUmxtfixture"
+          }
+        }
+      },
+      "id": "17841401441775531"
+    },
+    "id": "17841405309211844"
+  }
+}

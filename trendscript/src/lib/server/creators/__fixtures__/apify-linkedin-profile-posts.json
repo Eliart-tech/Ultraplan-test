@@ -1,0 +1,114 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Rows shaped like harvestapi/linkedin-profile-posts' README sample (build 0.0.85): the first row is the README's (Bill Gates, document post, avatar/document URLs trimmed); the second is made up in the same shape; the third is a repost by another author that the mapper must drop.",
+  "items": [
+    {
+      "type": "post",
+      "id": "7329207003942125568",
+      "linkedinUrl": "https://www.linkedin.com/posts/williamhgates_how-better-data-helped-us-cut-child-mortality-activity-7329207003942125568-_gfJ",
+      "content": "The leading causes of childhood death reveal a stark truth: Many could be prevented, and children in poor countries die from them far more often than those in wealthy ones. We have the tools to save lives—and by helping them reach the right children at the right time, the world has cut child mortality in half.",
+      "author": {
+        "universalName": null,
+        "publicIdentifier": "williamhgates",
+        "type": "profile",
+        "name": "Bill Gates",
+        "linkedinUrl": "https://www.linkedin.com/in/williamhgates?miniProfileUrn=urn%3Ali%3Afsd_profile%3AACoAAA8BYqEBCGLg_vT_ca6mMEqkpp9nVffJ3hc",
+        "info": "Chair, Gates Foundation and Founder, Breakthrough Energy",
+        "website": "https://www.linkedin.com/newsletters/gates-notes-6651495472181637121/",
+        "websiteLabel": "View my newsletter"
+      },
+      "postedAt": {
+        "timestamp": 1747419119821,
+        "date": "2025-05-16T18:11:59.821Z",
+        "postedAgoShort": "6d",
+        "postedAgoText": "6 days ago • Visible to anyone on or off LinkedIn"
+      },
+      "postImages": [],
+      "document": {
+        "title": " How better data helped us cut child mortality in half",
+        "totalPageCount": 2
+      },
+      "socialContent": {
+        "hideCommentsCount": false,
+        "hideReactionsCount": false,
+        "hideSocialActivityCounts": false,
+        "hideViewsCount": false,
+        "showSocialDetail": true
+      },
+      "engagement": {
+        "likes": 2916,
+        "comments": 328,
+        "shares": 153,
+        "reactions": [
+          {
+            "type": "LIKE",
+            "count": 2477
+          },
+          {
+            "type": "APPRECIATION",
+            "count": 178
+          },
+          {
+            "type": "EMPATHY",
+            "count": 158
+          },
+          {
+            "type": "PRAISE",
+            "count": 55
+          },
+          {
+            "type": "INTEREST",
+            "count": 45
+          },
+          {
+            "type": "ENTERTAINMENT",
+            "count": 3
+          }
+        ]
+      }
+    },
+    {
+      "type": "post",
+      "id": "7331012345678901234",
+      "linkedinUrl": "https://www.linkedin.com/posts/williamhgates_malaria-activity-7331012345678901234-AbCd",
+      "content": "Why I'm optimistic about ending malaria.\n\nNew tools are arriving faster than ever. #malaria #globalhealth",
+      "author": {
+        "universalName": null,
+        "publicIdentifier": "williamhgates",
+        "type": "profile",
+        "name": "Bill Gates",
+        "info": "Chair, Gates Foundation and Founder, Breakthrough Energy"
+      },
+      "postedAt": {
+        "timestamp": 1748001600000,
+        "date": "2025-05-23T12:00:00.000Z"
+      },
+      "engagement": {
+        "likes": 5120,
+        "comments": 410,
+        "shares": 260
+      }
+    },
+    {
+      "type": "post",
+      "id": "7330988768578920448",
+      "linkedinUrl": "https://www.linkedin.com/posts/nickbennett05_hiring-activity-7330988768578920448-Je01",
+      "content": "I’m #hiring. Are you passionate about the intersection of physical and virtual worlds?",
+      "author": {
+        "universalName": null,
+        "publicIdentifier": "nickbennett05",
+        "type": "profile",
+        "name": "Nick Bennett",
+        "info": "UX Leadership at Amazon"
+      },
+      "postedAt": {
+        "timestamp": 1747843925614,
+        "date": "2025-05-21T16:12:05.614Z"
+      },
+      "engagement": {
+        "likes": 13,
+        "comments": 1,
+        "shares": 9
+      }
+    }
+  ]
+}

@@ -3,11 +3,22 @@ import { getAnthropic } from "@/lib/server/ai/client";
 import { generateScript } from "@/lib/server/ai/script";
 import { runAnalysis } from "@/lib/server/analyze";
 import { SESSION_COOKIE, createSessionToken } from "@/lib/server/auth";
+import { runCompetitorAnalysis } from "@/lib/server/competitor";
+import { creatorCapabilities } from "@/lib/server/creators";
 import { readSse } from "@/lib/sse";
-import type { AnalyzeEvent, GeneratedScript, ScriptEvent, ScriptRequest } from "@/lib/types";
+import type {
+  AnalyzeEvent,
+  CompetitorEvent,
+  CompetitorReport,
+  CreatorPlatformStatus,
+  GeneratedScript,
+  ScriptEvent,
+  ScriptRequest,
+} from "@/lib/types";
 import { POST as analyzePost } from "./analyze/route";
 import { POST as loginPost } from "./auth/login/route";
 import { POST as logoutPost } from "./auth/logout/route";
+import { POST as competitorPost } from "./competitor/route";
 import { POST as scriptPost } from "./script/route";
 import { GET as sourcesGet } from "./sources/route";
 
@@ -18,6 +29,8 @@ vi.mock("@/lib/server/ai/client", () => ({
 }));
 vi.mock("@/lib/server/ai/script", () => ({ generateScript: vi.fn() }));
 vi.mock("@/lib/server/analyze", () => ({ runAnalysis: vi.fn() }));
+vi.mock("@/lib/server/competitor", () => ({ runCompetitorAnalysis: vi.fn() }));
+vi.mock("@/lib/server/creators", () => ({ creatorCapabilities: vi.fn(() => []) }));
 
 const PASSWORD = "un mot de passe de test";
 const SECRET = "apify_api_TRESSECRET0123456789";
@@ -89,12 +102,31 @@ const validScript: ScriptRequest = {
 
 const fakeScript = { id: "script-1", title: "Script" } as GeneratedScript;
 
+const validCompetitor = {
+  platform: "youtube",
+  handle: "https://www.youtube.com/@Squeezie",
+  focus: "ses hooks",
+  maxPosts: 20,
+  profile: validScript.profile,
+};
+
+const fakeReport = { id: "report-1", mode: "stats" } as CompetitorReport;
+
+const creators: CreatorPlatformStatus[] = [
+  { platform: "instagram", available: false, via: "Apify", note: "APIFY_TOKEN manquant" },
+  { platform: "tiktok", available: false, via: "Apify", note: "APIFY_TOKEN manquant" },
+  { platform: "youtube", available: true, via: "flux RSS public (15 dernières vidéos)", note: "" },
+  { platform: "linkedin", available: false, via: "Apify", note: "APIFY_TOKEN manquant" },
+];
+
 beforeEach(() => {
   vi.stubEnv("APP_PASSWORD", "");
   vi.stubEnv("APIFY_TOKEN", SECRET);
   vi.mocked(getAnthropic).mockReturnValue(null);
   vi.mocked(runAnalysis).mockReset();
   vi.mocked(generateScript).mockReset();
+  vi.mocked(runCompetitorAnalysis).mockReset();
+  vi.mocked(creatorCapabilities).mockReturnValue(creators);
 });
 
 afterEach(() => {
@@ -108,7 +140,9 @@ describe("auth on every route", () => {
     expect((await sourcesGet(new Request("http://localhost/api/sources"))).status).toBe(401);
     expect((await analyzePost(post("/api/analyze", validAnalyze))).status).toBe(401);
     expect((await scriptPost(post("/api/script", validScript))).status).toBe(401);
+    expect((await competitorPost(post("/api/competitor", validCompetitor))).status).toBe(401);
     expect(runAnalysis).not.toHaveBeenCalled();
+    expect(runCompetitorAnalysis).not.toHaveBeenCalled();
   });
 
   it("logs in with the right password and sets a hardened cookie", async () => {
@@ -161,6 +195,8 @@ describe("GET /api/sources", () => {
     expect(body.sources.find((s: { id: string }) => s.id === "youtube").configured).toBe(Boolean(process.env.YOUTUBE_API_KEY));
     expect(body.ai).toEqual({ configured: false, model: "claude-test-model" });
     expect(body.auth).toEqual({ enabled: false });
+    expect(body.creators).toEqual(creators);
+    expect(vi.mocked(creatorCapabilities).mock.calls[0][0]).toBe(process.env);
   });
 
   it("works with a session when the gate is on", async () => {
@@ -244,5 +280,57 @@ describe("POST /api/script", () => {
     });
     list = await events<ScriptEvent>(await scriptPost(post("/api/script", validScript)));
     expect(list.map((e) => e.type)).toEqual(["result"]);
+  });
+});
+
+describe("POST /api/competitor", () => {
+  it("rejects invalid input with a French 400 before streaming", async () => {
+    const bad = await competitorPost(post("/api/competitor", { ...validCompetitor, handle: "x" }));
+    expect(bad.status).toBe(400);
+    expect((await bad.json()).error).toMatch(/pseudo du créateur/);
+    const platform = await competitorPost(post("/api/competitor", { ...validCompetitor, platform: "snapchat" }));
+    expect(platform.status).toBe(400);
+    const posts = await competitorPost(post("/api/competitor", { ...validCompetitor, maxPosts: 80 }));
+    expect(posts.status).toBe(400);
+    expect((await competitorPost(post("/api/competitor", "{"))).status).toBe(400);
+    expect(runCompetitorAnalysis).not.toHaveBeenCalled();
+  });
+
+  it("rejects oversized bodies", async () => {
+    const huge = await competitorPost(post("/api/competitor", { ...validCompetitor, focus: "x".repeat(60_000) }));
+    expect(huge.status).toBe(413);
+  });
+
+  it("works without Claude (stats mode) and applies the schema defaults", async () => {
+    vi.mocked(runCompetitorAnalysis).mockImplementation(async (_request, send) => {
+      send({ type: "status", step: "fetch", message: "Récupération des publications…" });
+      send({ type: "status", step: "stats", message: "Calcul des statistiques…" });
+      return fakeReport;
+    });
+    const response = await competitorPost(post("/api/competitor", validCompetitor));
+    expect(response.status).toBe(200);
+    expect(response.headers.get("content-type")).toMatch(/text\/event-stream/);
+    const list = await events<CompetitorEvent>(response);
+    expect(list.map((e) => e.type)).toEqual(["status", "status", "result"]);
+    expect(list[2]).toEqual({ type: "result", report: fakeReport });
+    const [request, , signal] = vi.mocked(runCompetitorAnalysis).mock.calls[0];
+    expect(request).toMatchObject({ platform: "youtube", maxPosts: 20, language: "fr", geo: "FR", focus: "ses hooks" });
+    expect(signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("sends exactly one result when the analysis emits it itself", async () => {
+    vi.mocked(runCompetitorAnalysis).mockImplementation(async (_request, send) => {
+      send({ type: "result", report: fakeReport });
+      return fakeReport;
+    });
+    const list = await events<CompetitorEvent>(await competitorPost(post("/api/competitor", validCompetitor)));
+    expect(list.map((e) => e.type)).toEqual(["result"]);
+  });
+
+  it("turns a failure (unknown handle, missing key…) into an SSE error event", async () => {
+    vi.mocked(runCompetitorAnalysis).mockRejectedValue(new Error("Compte TikTok introuvable : vérifiez le pseudo."));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    const list = await events<CompetitorEvent>(await competitorPost(post("/api/competitor", validCompetitor)));
+    expect(list).toEqual([{ type: "error", message: "Compte TikTok introuvable : vérifiez le pseudo." }]);
   });
 });

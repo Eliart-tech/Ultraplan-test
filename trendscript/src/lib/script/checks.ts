@@ -6,8 +6,8 @@
  * client-safe: the UI re-runs them after the user swaps the hook.
  */
 
-import { stripAccents } from "../analysis/text";
-import type { ScriptDraft, ScriptSettings } from "../types";
+import { containment, jaccard, stripAccents, tokenSet } from "../analysis/text";
+import type { CompetitorBrief, ScriptDraft, ScriptSettings } from "../types";
 import { budgetRange, countWords } from "./metrics";
 
 const MAX_HOOK_SCREEN_WORDS = 7;
@@ -201,5 +201,54 @@ export function checkScript(draft: ScriptDraft, settings: ScriptSettings, budget
   checkCompliance(draft, settings, warnings);
   checkFacts(draft, warnings);
   checkPedagogyFit(settings, warnings);
+  return warnings;
+}
+
+// ---------------------------------------------------------------------------
+// Differentiation from saved competitors
+// ---------------------------------------------------------------------------
+
+const MIN_OVERLAP_TOKENS = 3;
+const MAX_JACCARD = 0.7;
+const MAX_CONTAINMENT = 0.85;
+
+/** Near-identical wording: most significant words shared, in either direction. */
+function tooClose(ours: Set<string>, theirs: Set<string>): boolean {
+  if (ours.size < MIN_OVERLAP_TOKENS || theirs.size < MIN_OVERLAP_TOKENS) return false;
+  return jaccard(ours, theirs) >= MAX_JACCARD || (theirs.size >= 4 && containment(theirs, ours) >= MAX_CONTAINMENT);
+}
+
+/** Text between French quotes (hook pattern examples: "Formule — ex. « … »"). */
+function quotedExamples(value: string): string[] {
+  return [...value.matchAll(/«\s*([^»]+?)\s*»/g)].map((match) => match[1]);
+}
+
+/**
+ * Warns when the title or a spoken hook reuses a competitor's recent title or
+ * hook almost word for word (the script prompt forbids it; code checks it).
+ */
+export function checkCompetitorOverlap(draft: ScriptDraft, competitors: readonly CompetitorBrief[] | undefined): string[] {
+  if (!competitors?.length) return [];
+  const theirs = competitors.flatMap((competitor) => {
+    const name = competitor.platform === "linkedin" ? competitor.handle : `@${competitor.handle.replace(/^@+/, "")}`;
+    return [...competitor.recentTitles, ...competitor.hookPatterns.flatMap(quotedExamples)]
+      .filter((text) => text.trim())
+      .map((text) => ({ name, text: text.trim(), tokens: tokenSet(text) }));
+  });
+  const candidates = [
+    { label: "Titre", text: draft.title },
+    ...draft.hooks.map((hook, index) => ({ label: `Accroche ${index + 1}`, text: hook.spoken })),
+  ];
+  const warnings: string[] = [];
+  for (const candidate of candidates) {
+    const tokens = tokenSet(candidate.text);
+    const match = theirs.find((item) => tooClose(tokens, item.tokens));
+    if (match) {
+      const excerpt = match.text.length > 90 ? `${match.text.slice(0, 89)}…` : match.text;
+      warnings.push(
+        `${candidate.label} très proche d'une publication de ${match.name} (« ${excerpt} ») : reformulez pour vous démarquer.`,
+      );
+    }
+  }
   return warnings;
 }

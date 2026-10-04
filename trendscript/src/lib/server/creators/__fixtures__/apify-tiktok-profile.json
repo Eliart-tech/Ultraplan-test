@@ -1,0 +1,133 @@
+{
+  "_fixture": "TEST FIXTURE ONLY - never imported by app code. Rows shaped like clockworks/tiktok-scraper's README 'Scraped TikTok profiles' sample (build 0.0.612): the first row is the README's (a slideshow: duration 0), the second reuses the README search sample's counters with a made-up caption; expiring CDN URLs trimmed.",
+  "items": [
+    {
+      "id": "7535448384170331414",
+      "text": "",
+      "textLanguage": "un",
+      "createTime": 1754483302,
+      "createTimeISO": "2025-08-06T12:28:22.000Z",
+      "isAd": false,
+      "authorMeta": {
+        "id": "7002169437214213125",
+        "name": "shaiie_foeva",
+        "profileUrl": "https://www.tiktok.com/@shaiie_foeva",
+        "nickName": "Shaiie_Foeva",
+        "verified": false,
+        "signature": "SHOP THE E-BOOK OUT NOW",
+        "bioLink": "https://fkrtrz-v0.myshopify.com/collections/all",
+        "commerceUserInfo": {
+          "commerceUser": false
+        },
+        "privateAccount": false,
+        "roomId": "",
+        "ttSeller": false,
+        "following": 0,
+        "friends": 0,
+        "fans": 2200000,
+        "heart": 126000000,
+        "video": 1036,
+        "digg": 143
+      },
+      "musicMeta": {
+        "musicName": "original sound - Shaiie_Foeva",
+        "musicOriginal": false,
+        "coverMediumUrl": "",
+        "originalCoverMediumUrl": "",
+        "musicId": "0"
+      },
+      "webVideoUrl": "https://www.tiktok.com/@shaiie_foeva/video/7535448384170331414",
+      "mediaUrls": [],
+      "videoMeta": {
+        "height": 0,
+        "width": 0,
+        "duration": 0
+      },
+      "diggCount": 3951,
+      "shareCount": 38,
+      "playCount": 348100,
+      "collectCount": 105,
+      "commentCount": 111,
+      "mentions": [],
+      "detailedMentions": [],
+      "hashtags": [],
+      "effectStickers": [],
+      "isSlideshow": true,
+      "isPinned": false,
+      "isSponsored": false,
+      "input": "shaiie_foeva",
+      "fromProfileSection": "videos"
+    },
+    {
+      "id": "7536011122233344455",
+      "text": "3 habitudes qui ont changé ma peau ✨ #skincare #routine",
+      "textLanguage": "fr",
+      "createTime": 1754600000,
+      "createTimeISO": "2025-08-07T20:53:20.000Z",
+      "isAd": false,
+      "authorMeta": {
+        "id": "7002169437214213125",
+        "name": "shaiie_foeva",
+        "profileUrl": "https://www.tiktok.com/@shaiie_foeva",
+        "nickName": "Shaiie_Foeva",
+        "verified": false,
+        "signature": "SHOP THE E-BOOK OUT NOW",
+        "bioLink": "https://fkrtrz-v0.myshopify.com/collections/all",
+        "commerceUserInfo": {
+          "commerceUser": false
+        },
+        "privateAccount": false,
+        "roomId": "",
+        "ttSeller": false,
+        "following": 0,
+        "friends": 0,
+        "fans": 2200000,
+        "heart": 126000000,
+        "video": 1036,
+        "digg": 143
+      },
+      "musicMeta": {
+        "musicName": "Espresso",
+        "musicAuthor": "Sabrina Carpenter",
+        "musicOriginal": false,
+        "musicId": "7300000000000000000"
+      },
+      "webVideoUrl": "https://www.tiktok.com/@shaiie_foeva/video/7536011122233344455",
+      "mediaUrls": [],
+      "videoMeta": {
+        "height": 1024,
+        "width": 576,
+        "duration": 15,
+        "definition": "540p",
+        "format": "mp4"
+      },
+      "diggCount": 23400,
+      "shareCount": 145,
+      "playCount": 145900,
+      "collectCount": 1637,
+      "commentCount": 46,
+      "mentions": [],
+      "detailedMentions": [],
+      "hashtags": [
+        {
+          "id": "4982299",
+          "name": "skincare",
+          "title": "",
+          "cover": ""
+        },
+        {
+          "id": "1",
+          "name": "Routine",
+          "title": "",
+          "cover": ""
+        }
+      ],
+      "effectStickers": [],
+      "isSlideshow": false,
+      "isPinned": false,
+      "isSponsored": false,
+      "input": "shaiie_foeva",
+      "fromProfileSection": "videos"
+    }
+  ]
+}

@@ -10,6 +10,10 @@ import type {
   Analysis,
   AnalyzeEvent,
   AnalyzeRequest,
+  CompetitorEvent,
+  CompetitorReport,
+  CompetitorRequest,
+  CreatorPlatformStatus,
   GeneratedScript,
   ScriptEvent,
   ScriptRequest,
@@ -182,11 +186,35 @@ export async function streamScript(
   );
 }
 
+/**
+ * POST /api/competitor — streams `status` (fetch → stats → analysis), `data`
+ * (real posts + statistics, before Claude's analysis) and `progress` events
+ * to `onEvent`, and resolves with the CompetitorReport. Works without Claude
+ * (report in "stats" mode). Rejects with ApiError, or an AbortError when
+ * `signal` aborts.
+ */
+export async function streamCompetitor(
+  body: CompetitorRequest,
+  onEvent: (event: CompetitorEvent) => void,
+  signal?: AbortSignal,
+): Promise<CompetitorReport> {
+  const response = await postJson("/api/competitor", body, signal);
+  return consumeStream<CompetitorEvent, CompetitorReport>(
+    response,
+    onEvent,
+    (event) => (event.type === "result" ? event.report : undefined),
+    "l'analyse du créateur",
+    signal,
+  );
+}
+
 /** GET /api/sources payload. */
 export interface ServerStatus {
   sources: SourceStatus[];
   ai: { configured: boolean; model: string };
   auth: { enabled: boolean };
+  /** Platforms the competitor analysis can read (absent on older servers). */
+  creators?: CreatorPlatformStatus[];
 }
 
 /** GET /api/sources — configured sources, Claude status, auth gate. */

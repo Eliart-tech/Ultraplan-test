@@ -1,0 +1,112 @@
+{
+  "_fixture": "TEST FIXTURE ONLY. Shape of GET /youtube/v3/videos?part=snippet,statistics,contentDetails per the videos resource reference (counters as strings, ISO 8601 durations, commentCount absent when comments are off). Titles of the two real Shorts come from the RSS fixture; other values made up. Covers: upcoming premiere (dropped), long video, Shorts flagged by RSS, a 45 s video absent from RSS (format guessed), comments disabled.",
+  "response": {
+    "kind": "youtube#videoListResponse",
+    "items": [
+      {
+        "id": "UPCOMING001",
+        "snippet": {
+          "publishedAt": "2026-10-03T10:00:00Z",
+          "channelId": "UCWeg2Pkate69NFdBeuRFTAw",
+          "title": "Première à venir",
+          "description": "",
+          "channelTitle": "SQUEEZIE",
+          "liveBroadcastContent": "upcoming"
+        },
+        "contentDetails": {
+          "duration": "P0D"
+        },
+        "statistics": {
+          "viewCount": "0",
+          "likeCount": "0"
+        }
+      },
+      {
+        "id": "LONGVIDEO01",
+        "snippet": {
+          "publishedAt": "2026-09-20T17:00:00Z",
+          "channelId": "UCWeg2Pkate69NFdBeuRFTAw",
+          "title": "QUI EST L'IMPOSTEUR ? (ft. invités)",
+          "description": "Merci d'avoir regardé !\n#imposteur #squeezie",
+          "channelTitle": "SQUEEZIE",
+          "tags": [
+            "squeezie"
+          ],
+          "liveBroadcastContent": "none",
+          "defaultAudioLanguage": "fr"
+        },
+        "contentDetails": {
+          "duration": "PT42M17S",
+          "dimension": "2d",
+          "definition": "hd",
+          "caption": "false"
+        },
+        "statistics": {
+          "viewCount": "3120456",
+          "likeCount": "154000",
+          "favoriteCount": "0",
+          "commentCount": "5321"
+        }
+      },
+      {
+        "id": "2QcaDwpvl7s",
+        "snippet": {
+          "publishedAt": "2026-09-04T20:27:43Z",
+          "channelId": "UCWeg2Pkate69NFdBeuRFTAw",
+          "title": "Essayez de ne pas rire | Séquence inédite (Partie 3/3)",
+          "description": "",
+          "channelTitle": "SQUEEZIE",
+          "liveBroadcastContent": "none"
+        },
+        "contentDetails": {
+          "duration": "PT2M41S"
+        },
+        "statistics": {
+          "viewCount": "869069",
+          "likeCount": "37928",
+          "favoriteCount": "0",
+          "commentCount": "412"
+        }
+      },
+      {
+        "id": "EdNjkLG9UbE",
+        "snippet": {
+          "publishedAt": "2026-09-04T20:24:28Z",
+          "channelId": "UCWeg2Pkate69NFdBeuRFTAw",
+          "title": "Essayez de ne pas rire | Séquence inédite (Partie 2/3)",
+          "description": "",
+          "channelTitle": "SQUEEZIE",
+          "liveBroadcastContent": "none"
+        },
+        "contentDetails": {
+          "duration": "PT3M"
+        },
+        "statistics": {
+          "viewCount": "425751",
+          "likeCount": "19781",
+          "favoriteCount": "0"
+        }
+      },
+      {
+        "id": "SHORTGUESS1",
+        "snippet": {
+          "publishedAt": "2026-08-01T10:00:00Z",
+          "channelId": "UCWeg2Pkate69NFdBeuRFTAw",
+          "title": "Le moment le plus gênant 😭",
+          "description": "#shorts",
+          "channelTitle": "SQUEEZIE",
+          "liveBroadcastContent": "none"
+        },
+        "contentDetails": {
+          "duration": "PT45S"
+        },
+        "statistics": {
+          "viewCount": "1500000",
+          "likeCount": "80000",
+          "favoriteCount": "0",
+          "commentCount": "900"
+        }
+      }
+    ]
+  }
+}

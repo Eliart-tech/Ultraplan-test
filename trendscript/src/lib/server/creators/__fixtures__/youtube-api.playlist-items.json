@@ -1,0 +1,58 @@
+{
+  "_fixture": "TEST FIXTURE ONLY. Shape of GET /youtube/v3/playlistItems?part=contentDetails&playlistId=UU… (uploads playlist, newest first). Video ids 1-3 are real Squeezie Shorts from the RSS fixture; LONGVIDEO01 and UPCOMING001 are made up.",
+  "response": {
+    "kind": "youtube#playlistItemListResponse",
+    "etag": "fixture",
+    "items": [
+      {
+        "kind": "youtube#playlistItem",
+        "etag": "e1",
+        "id": "p1",
+        "contentDetails": {
+          "videoId": "UPCOMING001",
+          "videoPublishedAt": "2026-10-05T18:00:00Z"
+        }
+      },
+      {
+        "kind": "youtube#playlistItem",
+        "etag": "e2",
+        "id": "p2",
+        "contentDetails": {
+          "videoId": "LONGVIDEO01",
+          "videoPublishedAt": "2026-09-20T17:00:00Z"
+        }
+      },
+      {
+        "kind": "youtube#playlistItem",
+        "etag": "e3",
+        "id": "p3",
+        "contentDetails": {
+          "videoId": "2QcaDwpvl7s",
+          "videoPublishedAt": "2026-09-04T20:27:43Z"
+        }
+      },
+      {
+        "kind": "youtube#playlistItem",
+        "etag": "e4",
+        "id": "p4",
+        "contentDetails": {
+          "videoId": "EdNjkLG9UbE",
+          "videoPublishedAt": "2026-09-04T20:24:28Z"
+        }
+      },
+      {
+        "kind": "youtube#playlistItem",
+        "etag": "e5",
+        "id": "p5",
+        "contentDetails": {
+          "videoId": "SHORTGUESS1",
+          "videoPublishedAt": "2026-08-01T10:00:00Z"
+        }
+      }
+    ],
+    "pageInfo": {
+      "totalResults": 1834,
+      "resultsPerPage": 35
+    }
+  }
+}
