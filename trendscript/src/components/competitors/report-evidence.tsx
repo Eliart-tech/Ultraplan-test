@@ -651,7 +651,10 @@ export function StatsOnlyAlert({ report, aiConfigured }: { report: CompetitorRep
       {aiConfigured === false
         ? "Claude n'est pas configuré sur ce serveur (ANTHROPIC_API_KEY) : voici les publications et les statistiques réelles, sans interprétation, angles morts ni idées de vidéos."
         : "Claude n'a pas pu analyser ce compte : voici les publications et les statistiques réelles, sans interprétation. Ré-analyse pour obtenir l'analyse complète."}
-      {report.notes.length > 0 ? <span className="mt-1 block text-xs">{report.notes[0]}</span> : null}
+      {/* The server's reason (Claude error, timeout…); redundant when Claude simply isn't configured. */}
+      {aiConfigured !== false && report.notes.length > 0 ? (
+        <span className="mt-1 block text-xs">{report.notes[0]}</span>
+      ) : null}
     </Alert>
   );
 }
