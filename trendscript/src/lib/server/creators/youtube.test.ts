@@ -167,7 +167,7 @@ describe("YouTube Data API requests and mapping", () => {
 describe("fetchYoutubeCreator", () => {
   it("keyless: public page + RSS, newest first, capped, with honest warnings", async () => {
     const fetchMock = routeFetch([
-      [/^https:\/\/www\.youtube\.com\/@Squeezie$/, () => text(PAGE)],
+      [/^https:\/\/www\.youtube\.com\/@Squeezie(\/videos)?$/, () => text(PAGE)],
       [/feeds\/videos\.xml\?channel_id=UCWeg2Pkate69NFdBeuRFTAw$/, () => text(RSS, 200, "application/atom+xml")],
     ]);
     const data = await fetchYoutubeCreator("Squeezie", options({}, 10));
@@ -199,7 +199,7 @@ describe("fetchYoutubeCreator", () => {
   it("keyless: retries the flaky RSS feed (404/500 bursts) before giving up", async () => {
     let feedCalls = 0;
     routeFetch([
-      [/^https:\/\/www\.youtube\.com\/@Squeezie$/, () => text(PAGE)],
+      [/^https:\/\/www\.youtube\.com\/@Squeezie(\/videos)?$/, () => text(PAGE)],
       [/feeds\/videos\.xml/, () => (++feedCalls < 3 ? text("Error 404 (Not Found)!!1", feedCalls === 1 ? 404 : 500) : text(RSS, 200, "application/atom+xml"))],
     ]);
     const data = await fetchYoutubeCreator("Squeezie", options());
@@ -215,7 +215,7 @@ describe("fetchYoutubeCreator", () => {
       const fetchMock = routeFetch([
         [/^https:\/\/www\.youtube\.com\/@Squeezie\/videos$/, () => text(VIDEOS_TAB)],
         [/^https:\/\/www\.youtube\.com\/@Squeezie\/shorts$/, () => text(SHORTS_TAB)],
-        [/^https:\/\/www\.youtube\.com\/@Squeezie$/, () => text(PAGE)],
+        [/^https:\/\/www\.youtube\.com\/@Squeezie(\/videos)?$/, () => text(PAGE)],
         [/feeds\/videos\.xml/, () => text("Error 404 (Not Found)!!1", 404)],
       ]);
       const pending = fetchYoutubeCreator("Squeezie", options({}, 6));
@@ -234,7 +234,7 @@ describe("fetchYoutubeCreator", () => {
       expect(data.posts[0]).toMatchObject({ url: "https://www.youtube.com/watch?v=lbLj5Yb6SAE", durationSec: 4330 });
       expect(data.posts[3].url).toBe("https://www.youtube.com/shorts/2QcaDwpvl7s");
       expect(data.posts.every((post) => post.publishedAt === undefined)).toBe(true);
-      expect(data.warnings.join(" ")).toMatch(/Flux RSS de YouTube indisponible \(erreur 404 répétée\)/);
+      expect(data.warnings.join(" ")).toMatch(/Flux RSS de YouTube indisponible \(erreur 404\)/);
       expect(data.warnings.join(" ")).not.toMatch(/15 dernières vidéos/);
     } finally {
       vi.useRealTimers();
@@ -245,17 +245,41 @@ describe("fetchYoutubeCreator", () => {
     vi.useFakeTimers();
     try {
       routeFetch([
-        [/^https:\/\/www\.youtube\.com\/@Squeezie\/(videos|shorts)$/, () => text("busy", 503)],
-        [/^https:\/\/www\.youtube\.com\/@Squeezie$/, () => text(PAGE)],
+        [/^https:\/\/www\.youtube\.com\/@Squeezie\/shorts$/, () => text("busy", 503)],
+        [/^https:\/\/www\.youtube\.com\/@Squeezie(\/videos)?$/, () => text(PAGE)],
         [/feeds\/videos\.xml/, () => text("Error", 500)],
       ]);
       const pending = fetchYoutubeCreator("Squeezie", options());
-      const assertion = expect(pending).rejects.toThrow(/flux RSS de la chaîne YouTube ne répond pas \(erreur 500 répétée\) et ses onglets/);
+      const assertion = expect(pending).rejects.toThrow(/flux RSS de la chaîne YouTube ne répond pas \(erreur 500\) et ses onglets/);
       await vi.runAllTimersAsync();
       await assertion;
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it("keyless: reads the home page when the channel has no Vidéos tab", async () => {
+    const fetchMock = routeFetch([
+      [/^https:\/\/www\.youtube\.com\/@Squeezie\/videos$/, () => text("Not found", 404)],
+      [/^https:\/\/www\.youtube\.com\/@Squeezie$/, () => text(PAGE)],
+      [/feeds\/videos\.xml/, () => text(RSS, 200, "application/atom+xml")],
+    ]);
+    const data = await fetchYoutubeCreator("Squeezie", options());
+    expect(calledUrls(fetchMock).slice(0, 2)).toEqual(["https://www.youtube.com/@Squeezie/videos", "https://www.youtube.com/@Squeezie"]);
+    expect(data.account.followers).toBe(20_200_000);
+    expect(data.posts).toHaveLength(15);
+  });
+
+  it("keyless: one feed attempt when the caller sets a zero budget (HTML edition)", async () => {
+    let feedCalls = 0;
+    routeFetch([
+      [/^https:\/\/www\.youtube\.com\/@Squeezie\/videos$/, () => text(VIDEOS_TAB)],
+      [/^https:\/\/www\.youtube\.com\/@Squeezie\/shorts$/, () => text(SHORTS_TAB)],
+      [/feeds\/videos\.xml/, () => (feedCalls++, text("Error", 404))],
+    ]);
+    const data = await fetchYoutubeCreator("Squeezie", { ...options(), youtubeFeedBudgetMs: 0 });
+    expect(feedCalls).toBe(1);
+    expect(data.posts).toHaveLength(8);
   });
 
   it("keyless: an unknown handle is a French 'not found' error", async () => {
@@ -298,7 +322,7 @@ describe("fetchYoutubeCreator", () => {
   it("with an invalid key: falls back to the public page and says why", async () => {
     routeFetch([
       [/\/youtube\/v3\/channels\?/, () => json(fixtureJson<{ response: unknown }>("../../sources/__fixtures__/youtube-error.key-invalid.json").response, 400)],
-      [/^https:\/\/www\.youtube\.com\/@Squeezie$/, () => text(PAGE)],
+      [/^https:\/\/www\.youtube\.com\/@Squeezie(\/videos)?$/, () => text(PAGE)],
       [/feeds\/videos\.xml/, () => text(RSS, 200, "application/atom+xml")],
     ]);
     const data = await fetchYoutubeCreator("Squeezie", options({ YOUTUBE_API_KEY: "AIzaBAD" }));
@@ -333,9 +357,15 @@ describe("channel tabs (RSS fallback)", () => {
     expect(shorts.every((video) => video.isShort && video.durationSec === undefined)).toBe(true);
   });
 
-  it("returns nothing for a page that is not a channel tab", () => {
+  it("returns nothing for another tab or a page that is not a channel tab", () => {
     expect(parseYoutubeTab("<html></html>", "videos")).toEqual([]);
-    expect(parseYoutubeTab(PAGE, "shorts").length).toBeGreaterThanOrEqual(0);
+    expect(parseYoutubeTab(PAGE, "videos")).toEqual([]);
+    expect(parseYoutubeTab(VIDEOS_TAB, "shorts")).toEqual([]);
+    expect(parseYoutubeTab(SHORTS_TAB, "videos")).toEqual([]);
+  });
+
+  it("the Vidéos tab doubles as the channel page", () => {
+    expect(parseYoutubeChannelPage(VIDEOS_TAB)).toMatchObject({ channelId: "UCWeg2Pkate69NFdBeuRFTAw", handle: "Squeezie", subscribers: 20_200_000 });
   });
 
   it("parses clock durations", () => {

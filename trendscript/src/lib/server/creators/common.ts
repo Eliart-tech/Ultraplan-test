@@ -22,6 +22,11 @@ export interface FetchCreatorOptions {
   language: string;
   /** Posts wanted (1–50). */
   maxPosts: number;
+  /**
+   * Retry budget of the YouTube RSS feed without a key (default 10 s). The
+   * HTML edition pays one Firecrawl credit per attempt and passes 0 (one try).
+   */
+  youtubeFeedBudgetMs?: number;
 }
 
 /** Captions are kept up to this length (whitespace collapsed). */

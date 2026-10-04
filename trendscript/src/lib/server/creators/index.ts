@@ -49,7 +49,7 @@ export function creatorCapabilities(env: Env): CreatorPlatformStatus[] {
           platform: "youtube",
           available: true,
           via: "Page publique + flux RSS officiel (15 dernières vidéos)",
-          note: `Gratuit et sans clé : vues et likes des 15 dernières vidéos, abonnés arrondis tels qu'affichés, mais ni commentaires ni durées. Ajoutez YOUTUBE_API_KEY (gratuite) pour analyser jusqu'à 50 vidéos avec toutes leurs statistiques.${youtubeRatios}`,
+          note: `Gratuit et sans clé : vues et likes des 15 dernières vidéos, abonnés arrondis tels qu'affichés, mais ni commentaires ni durées (si le flux RSS de YouTube est en panne : vidéos et Shorts lus sur les onglets de la chaîne, vues arrondies, sans dates). Ajoutez YOUTUBE_API_KEY (gratuite) pour analyser jusqu'à 50 vidéos avec toutes leurs statistiques.${youtubeRatios}`,
         },
     instagram: meta
       ? {

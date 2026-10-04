@@ -269,9 +269,20 @@ const YOUTUBE_VIDEO_ID = /^[\w-]{11}$/;
 const VIEWS_WORD = /\b(vues?|views?)\b/i;
 const AGE_WORDS = /\b(il y a|ago|diffus|streamed|premiered|premi[eè]re)\b/i;
 
+/** The content of the page's selected tab when it is `tab` (a channel without that tab serves its home page). */
+function selectedTabContent(data: unknown, tab: YoutubeTab): unknown {
+  for (const entry of list(dig(data, ["contents", "twoColumnBrowseResultsRenderer", "tabs"]))) {
+    const renderer = record(record(entry)?.tabRenderer);
+    if (renderer?.selected !== true) continue;
+    const url = text(dig(renderer, ["endpoint", "commandMetadata", "webCommandMetadata", "url"]));
+    return url?.replace(/[?#].*$/, "").endsWith(`/${tab}`) ? renderer.content : undefined;
+  }
+  return undefined;
+}
+
 /** Pure: a channel tab page → its videos in display order (newest first). */
 export function parseYoutubeTab(html: string, tab: YoutubeTab): YoutubeTabVideo[] {
-  const data = initialData(html);
+  const data = selectedTabContent(initialData(html), tab);
   const videos: YoutubeTabVideo[] = [];
   const seen = new Set<string>();
   const add = (video: YoutubeTabVideo) => {
@@ -523,9 +534,21 @@ async function loadFeed(channelId: string, signal: AbortSignal, budgetMs = FEED_
   }
 }
 
-async function loadChannelPage(handle: string, signal: AbortSignal): Promise<YoutubeChannelPage> {
-  const url = creatorProfileUrl("youtube", handle);
-  const response = await fetchWithTimeout(url, { signal, timeoutMs: 20_000, headers: YOUTUBE_PAGE_HEADERS });
+interface ChannelPageRead {
+  page: YoutubeChannelPage;
+  /** Latest long videos listed on the page (empty when it is not the "Vidéos" tab). */
+  long: YoutubeTabVideo[];
+}
+
+/**
+ * The channel's "Vidéos" tab: the same header as the home page at about a
+ * third of its weight, plus the latest long videos (the RSS fallback). A
+ * channel without that tab is read from its home page.
+ */
+async function loadChannelPage(handle: string, signal: AbortSignal): Promise<ChannelPageRead> {
+  const home = creatorProfileUrl("youtube", handle);
+  let response = await fetchWithTimeout(`${home}/videos`, { signal, timeoutMs: 20_000, headers: YOUTUBE_PAGE_HEADERS });
+  if (response.status === 404) response = await fetchWithTimeout(home, { signal, timeoutMs: 20_000, headers: YOUTUBE_PAGE_HEADERS });
   if (response.status === 404) throw notFound(handle);
   if (!response.ok) {
     throw new SourceError(
@@ -539,32 +562,26 @@ async function loadChannelPage(handle: string, signal: AbortSignal): Promise<You
       "YouTube demande d'accepter les cookies avant d'afficher la chaîne depuis ce serveur : ajoutez YOUTUBE_API_KEY (gratuite) pour passer par l'API officielle.",
     );
   }
-  const page = parseYoutubeChannelPage(await response.text());
+  const html = await response.text();
+  const page = parseYoutubeChannelPage(html);
   if (!page) {
     throw new SourceError(
       `Page YouTube de ${shownHandle(handle)} illisible (structure inattendue) : ajoutez YOUTUBE_API_KEY (gratuite) pour passer par l'API officielle.`,
     );
   }
-  return page;
+  return { page, long: parseYoutubeTab(html, "videos") };
 }
 
 /** Feed budget when the channel tabs can take over (the API path keeps its own 3 s). */
 export const KEYLESS_FEED_BUDGET_MS = 10_000;
 
-/** The channel's "Vidéos" and "Shorts" tabs; one may be missing (a channel without Shorts). */
-async function loadTabs(page: YoutubeChannelPage, signal: AbortSignal): Promise<{ long: YoutubeTabVideo[]; shorts: YoutubeTabVideo[] }> {
-  const base = creatorProfileUrl("youtube", page.handle ?? page.channelId);
-  const read = async (tab: YoutubeTab) => {
-    const response = await fetchWithTimeout(`${base}/${tab}`, { signal, timeoutMs: 20_000, headers: YOUTUBE_PAGE_HEADERS });
-    if (!response.ok) throw new SourceError(`Onglet YouTube « ${tab} » : erreur ${response.status}`, response.status);
-    return parseYoutubeTab(await response.text(), tab);
-  };
-  const [long, shorts] = await Promise.allSettled([read("videos"), read("shorts")]);
-  if (long.status === "rejected" && shorts.status === "rejected") throw long.reason;
-  return {
-    long: long.status === "fulfilled" ? long.value : [],
-    shorts: shorts.status === "fulfilled" ? shorts.value : [],
-  };
+/** The channel's "Shorts" tab (empty for a channel without Shorts). */
+async function loadShorts(page: YoutubeChannelPage, signal: AbortSignal): Promise<YoutubeTabVideo[]> {
+  const url = `${creatorProfileUrl("youtube", page.handle ?? page.channelId)}/shorts`;
+  const response = await fetchWithTimeout(url, { signal, timeoutMs: 20_000, headers: YOUTUBE_PAGE_HEADERS });
+  if (response.status === 404) return [];
+  if (!response.ok) throw new SourceError(`onglet « Shorts » : erreur ${response.status}`, response.status);
+  return parseYoutubeTab(await response.text(), "shorts");
 }
 
 async function fetchWithApi(handle: string, apiKey: string, options: FetchCreatorOptions): Promise<CreatorData> {
@@ -620,8 +637,9 @@ async function fetchKeyless(handle: string, options: FetchCreatorOptions): Promi
   const { signal } = options;
   const warnings: string[] = [];
   let page: YoutubeChannelPage;
+  let long: YoutubeTabVideo[] = [];
   try {
-    page = await loadChannelPage(handle, signal);
+    ({ page, long } = await loadChannelPage(handle, signal));
   } catch (error) {
     // A channel id is enough for the feed: only the account details are lost.
     if (!YOUTUBE_CHANNEL_ID.test(handle) || (error instanceof SourceError && error.status === 404) || signal.aborted) throw error;
@@ -632,24 +650,24 @@ async function fetchKeyless(handle: string, options: FetchCreatorOptions): Promi
   let posts: CreatorPost[];
   let fromTabs = false;
   try {
-    posts = feedVideosToCreatorPosts(await loadFeed(page.channelId, signal, KEYLESS_FEED_BUDGET_MS));
+    posts = feedVideosToCreatorPosts(await loadFeed(page.channelId, signal, options.youtubeFeedBudgetMs ?? KEYLESS_FEED_BUDGET_MS));
   } catch (feedError) {
     if (signal.aborted) throw feedError;
     const status = feedError instanceof SourceError ? feedError.status : undefined;
-    const failure = status ? `erreur ${status} répétée` : errorMessage(feedError);
+    const failure = status ? `erreur ${status}` : errorMessage(feedError);
     // The feed has bursts of 404/500 for whole channels: read the channel's own tabs instead.
-    const tabs = await loadTabs(page, signal).catch((error: unknown) => {
+    const shorts = await loadShorts(page, signal).catch((error: unknown) => {
       if (signal.aborted) throw error;
-      return undefined;
+      return [] as YoutubeTabVideo[];
     });
-    if (!tabs || tabs.long.length + tabs.shorts.length === 0) {
+    if (long.length + shorts.length === 0) {
       throw new SourceError(
         `Le flux RSS de la chaîne YouTube ne répond pas (${failure}) et ses onglets « Vidéos » et « Shorts » sont illisibles : réessayez dans quelques minutes, ou ajoutez YOUTUBE_API_KEY (gratuite) pour passer par l'API officielle.`,
         undefined,
         true,
       );
     }
-    posts = tabVideosToCreatorPosts(tabs.long, tabs.shorts, options.maxPosts);
+    posts = tabVideosToCreatorPosts(long, shorts, options.maxPosts);
     fromTabs = true;
     warnings.push(
       `Flux RSS de YouTube indisponible (${failure}) : vidéos lues sur les onglets « Vidéos » et « Shorts » de la chaîne, avec les vues arrondies telles qu'affichées (« 16 M ») et la durée des vidéos longues, mais sans date exacte de publication, likes ni commentaires.`,

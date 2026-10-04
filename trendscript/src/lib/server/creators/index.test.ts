@@ -67,7 +67,7 @@ describe("fetchCreator", () => {
 
   it("normalises the handle, caps the post count and caches 6 h per platform + handle + count", async () => {
     const fetchMock = routeFetch([
-      [/youtube\.com\/@Squeezie$/, () => text(fixture("youtube-channel-page.squeezie.html"))],
+      [/youtube\.com\/@Squeezie\/videos$/, () => text(fixture("youtube-channel-page.squeezie.html"))],
       [/feeds\/videos\.xml/, () => text(fixture("youtube-rss.squeezie.xml"), 200, "application/atom+xml")],
     ]);
     const first = await fetchCreator("youtube", "https://www.youtube.com/@Squeezie", options({}, 500));
